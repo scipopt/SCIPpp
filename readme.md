@@ -69,7 +69,8 @@ auto vec = model.addVars("x_", 42);
 const auto& [x0, x1] = model.addVars<2>("x_");
 ```
 
-When adding multiple variables simultaneously to the model, they all have a coefficient of zero in the objective function by default.
+When adding multiple variables simultaneously to the model, they all have a coefficient of zero in the objective
+function by default.
 This can be changed to one by `scippp::COEFF_ONE`:
 ```cpp
 const auto& [x1, x2] = model.addVars<2>("x_", COEFF_ONE);
@@ -141,20 +142,21 @@ SCIP* scip = model.scip();
 
 ```bash
 conan install .
-cmake --build --target ScipPP
+cmake --build . --target ScipPP
 ```
 
 ## Test
 
 ```bash
 conan install .
-cmake --build --target testScipPP
-./testScipPP
+cmake --build . --target testScipPP
+./test/testScipPP
 ```
 
 ## Utils
 
-Use `gen_constexpr_parameters` to transform all SCIP parameters into constexpr `scippp::params::Param<T>` objects which can be added to the `parameters.hpp` header.
+Use `gen_constexpr_parameters` to transform all SCIP parameters into constexpr `scippp::params::Param<T>` objects which
+can be added to the `parameters.hpp` header.
 
 ## Maintainer
 
