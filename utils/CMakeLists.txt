@@ -1,0 +1,2 @@
+add_executable(gen_constexpr_parameters gen_constexpr_parameters.cpp)
+target_link_libraries(gen_constexpr_parameters PUBLIC scip::scip)

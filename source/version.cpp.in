@@ -1,0 +1,12 @@
+#include "scippp/version.hpp"
+
+namespace scippp {
+
+static constexpr std::string_view VERSION = "@scippp_version@";
+
+std::string_view getVersion()
+{
+    return VERSION;
+}
+
+}
