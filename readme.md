@@ -140,17 +140,26 @@ SCIP* scip = model.scip();
 
 ## Build
 
+We use [Conan](https://conan.io/center/) as package manager.
+That is not required! As long as `find_package(scip CONFIG REQUIRED)` (and `find_package(Boost CONFIG REQUIRED)` for
+the tests) work(s), any kind of dependency management system can be used.
+
+### Build & Install
+
 ```bash
-conan install .
-cmake --build . --target ScipPP
+conan install -of . .
+cmake --preset conan-release .
+cmake --build build/Release --target ScipPP
+cmake --install build/Release
 ```
 
-## Test
+### Test
 
 ```bash
-conan install .
-cmake --build . --target testScipPP
-./test/testScipPP
+conan install -of . .
+cmake --preset conan-release -DBUILD_TESTS=ON .
+cmake --build build/Release --target testScipPP
+./build/Release/test/testScipPP
 ```
 
 ## Utils
