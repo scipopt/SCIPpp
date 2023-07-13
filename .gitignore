@@ -1,0 +1,6 @@
+# Doxygen output
+html
+
+# CLion build folders
+cmake-build-debug
+cmake-build-release
