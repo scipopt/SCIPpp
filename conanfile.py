@@ -12,8 +12,11 @@ class ScipPlusPlus(ConanFile):
 
     def set_version(self):
         git = Git(self, folder=self.recipe_folder)
-        self._full_version = git.run("describe --tags --dirty=-d").strip()
-        self.version = self._full_version.split('-')[0]
+        try:
+            self._full_version = git.run("describe --tags --dirty=-d").strip()
+            self.version = self._full_version.split('-')[0]
+        except:
+            self.version = "0.0.0"
 
     def layout(self):
         cmake_layout(self)
