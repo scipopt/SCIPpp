@@ -7,15 +7,30 @@ on:
     branches: [ "main" ]
 
 jobs:
-  test_release:
-    strategy:
-      matrix:
-        os: [ ubuntu-latest, macos-11, windows-2019 ]
-    runs-on: ${{ matrix.os }}
+  test_release_win:
+    runs-on: windows-2019
     steps:
       - uses: actions/checkout@v3
       - uses: turtlebrowser/get-conan@main
       - uses: ilammy/msvc-dev-cmd@v1
+      - name: Run Conan Install
+        run: |
+          conan profile detect
+          conan install -of . .
+      - name: Run CMake
+        run: cmake --preset conan-default -DBUILD_TESTS=ON .
+      - name: Compile
+        run: cmake --build build/Release --target testScipPP
+      - name: Run Tests
+        run: ./build/Release/test/testScipPP
+  test_release_inx:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-11 ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: turtlebrowser/get-conan@main
       - name: Run Conan Install
         run: |
           conan profile detect
