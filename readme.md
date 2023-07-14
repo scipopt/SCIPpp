@@ -5,12 +5,9 @@ It automatically manages the memory, and provides a simple interface to create l
 
 ## TODO BEFORE GO-LIVE
 
-- [ ] wait for SCIP to be a Conan package
 - [ ] get Schenker SOSPO approval
 - [ ] push Doxygen docu (?)
 - [ ] enable CI
-  - [ ] style checks
-  - [ ] check for doxygen errors
   - [ ] test release and debug (with coverage)
   - [ ] coverage badges in readme
 
