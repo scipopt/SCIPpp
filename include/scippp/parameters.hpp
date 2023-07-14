@@ -6,6 +6,8 @@
 //! Enum equivalent of SCIP's string parameters.
 namespace scippp::params {
 
+// NOLINTBEGIN(readability-identifier-naming)
+
 //! Parameters with prefix benders
 namespace BENDERS {
     //! the tolerance used for checking optimality in Benders' decomposition. tol where optimality is given by LB + tol
@@ -6638,5 +6640,7 @@ namespace WRITE {
     //! when writing a generic problem the index for the first variable should start with?
     constexpr Param<int> GENERICNAMESOFFSET { "write/genericnamesoffset" };
 }
+
+// NOLINTEND(readability-identifier-naming)
 
 }
