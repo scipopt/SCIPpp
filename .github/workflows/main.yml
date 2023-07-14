@@ -20,9 +20,9 @@ jobs:
       - name: Run CMake
         run: cmake --preset conan-default -DBUILD_TESTS=ON .
       - name: Compile
-        run: cmake --build build/Release --target testScipPP
+        run: cmake --build build --preset conan-release --target testScipPP
       - name: Run Tests
-        run: ./build/Release/test/testScipPP
+        run: ./build/test/Release/testScipPP.exe
   test_release_inx:
     strategy:
       matrix:
