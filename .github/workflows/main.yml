@@ -19,3 +19,11 @@ jobs:
         run: echo "PROJECT_NUMBER = ${GITHUB_REF}" >> Doxyfile
       - name: Run Doxygen
         run: doxygen
+      - name: Zip HTML Docu
+        run: zip -q -9 -r html.zip html
+      - name: Store HTML Docu
+        uses: actions/upload-artifact@v3
+        with:
+          name: doxygen-html
+          path: html.zip
+          retention-days: 2
