@@ -8,8 +8,8 @@ It automatically manages the memory, and provides a simple interface to create l
 - [ ] get Schenker SOSPO approval
 - [ ] push Doxygen docu (?)
 - [ ] enable CI
-  - [ ] test release and debug (with coverage)
-  - [ ] coverage badges in readme
+  - [ ] test debug with coverage
+  - [ ] coverage badges in readme / or tool like CodeCov?
 
 ## Usage
 
