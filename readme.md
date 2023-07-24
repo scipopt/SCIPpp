@@ -150,6 +150,25 @@ cmake --build build/Release --target ScipPP
 cmake --install build/Release
 ```
 
+### If pre-compiled dependencies are not available
+
+If your setting of OS, compiler, C++ or stdlib version is one where conan-center does not host pre-compiled binaries,
+add `--build=missing` when you run `conan install`. The dependencies will then be built from source (don't worry, they
+will be available only for projects using conan, they do not interfere with versions you might already have installed
+on the system). So, when you see an error message like
+
+```
+ERROR: Missing prebuilt package for 'bliss/0.77', 'boost/1.81.0', 'bzip2/1.0.8', 'gmp/6.2.1', 'libbacktrace/cci.20210118', 'scip/8.0.3', 'soplex/6.0.3', 'zlib/1.2.13'
+Check the available packages using 'conan list bliss/0.77:* -r=remote'
+or try to build locally from sources using the '--build=missing' argument
+```
+
+change the install-command to
+
+```bash
+conan install -of . --build=missing .
+```
+
 ### Test
 
 ```bash
