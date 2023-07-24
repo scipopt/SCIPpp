@@ -24,6 +24,8 @@ jobs:
         run: cmake --build build/Debug --target testScipPP
       - name: Run Tests
         run: ./build/Debug/test/testScipPP --log_format=JUNIT --log_level=all --log_sink=boosttest.xml
+      - name: Install GCovr
+        run: pip install gcovr
       - name: Extract Coverage
         run: gcovr -r . --object-directory=./build/Debug/CMakeFiles --exclude-unreachable-branches --exclude-throw-branches -b --sonarqube coverage.xml --xml cobertura.xml
       - uses: codecov/codecov-action@v3
