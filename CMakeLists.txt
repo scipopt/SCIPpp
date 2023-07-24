@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 3.15)
 project(ScipPP LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 
@@ -34,17 +34,13 @@ endif ()
 file(GLOB SCIPPP_SRC source/*.cpp ${CMAKE_CURRENT_BINARY_DIR}/source/version.cpp)
 file(GLOB SCIPPP_HDR include/**/*.hpp)
 add_library(ScipPP ${SCIPPP_SRC})
+target_include_directories(ScipPP PUBLIC include)
 target_link_libraries(ScipPP PUBLIC scip::scip)
 
 # install
-target_sources(ScipPP PUBLIC
-        FILE_SET public_headers
-        TYPE HEADERS
-        BASE_DIRS include
-        FILES ${SCIPPP_HDR}
-        )
-install(TARGETS ScipPP DESTINATION lib)
-install(TARGETS ScipPP FILE_SET public_headers)
+install(TARGETS ScipPP LIBRARY DESTINATION lib)
+set_target_properties(ScipPP PROPERTIES PUBLIC_HEADER "${SCIPPP_HDR}")
+install(TARGETS ScipPP PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/scippp)
 
 if (BUILD_TESTS)
     add_subdirectory(test)
