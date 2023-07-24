@@ -10,10 +10,14 @@ jobs:
     needs: doxygen
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
+      - uses: ssciwr/doxygen-install@v1
         with:
-          name: doxygen-html
-      - run: unzip html.zip
+          version: "1.9.6"
+      - uses: ts-graphviz/setup-graphviz@v1
+      - name: Prepare Doxygen Config
+        run: echo "PROJECT_NUMBER = ${GITHUB_REF}" >> Doxyfile
+      - name: Run Doxygen
+        run: doxygen
       - run: |
           cd html
           git add -A
