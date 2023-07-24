@@ -19,6 +19,7 @@ jobs:
         run: doxygen
       - run: |
           cd html
+          git init
           git add -A
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
