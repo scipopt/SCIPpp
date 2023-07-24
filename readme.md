@@ -8,9 +8,9 @@ It automatically manages the memory, and provides a simple interface to create l
 ## TODO BEFORE GO-LIVE
 
 - [ ] get Schenker SOSPO approval
-- [ ] push Doxygen docu (?)
+- [ ] create GitHub pages once repo is public. Docu is hosted on branch gh-pages
 - [ ] enable CI
-  - [ ] test debug with coverage
+  - [ ] upload test report and coverage report to codecov
   - [ ] coverage badges in readme / or tool like CodeCov?
 
 ## Usage
