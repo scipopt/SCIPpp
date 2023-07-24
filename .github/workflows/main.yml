@@ -7,6 +7,30 @@ on:
     branches: [ "main" ]
 
 jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: turtlebrowser/get-conan@main
+      - name: Run Conan Install
+        run: |
+          conan profile detect
+          conan profile detect --name debug
+          echo "&:build_type=Debug" >> $(conan profile path debug)
+          conan install -of . -pr debug .
+      - name: Run CMake
+        run: cmake --preset conan-debug -DBUILD_TESTS=ON -DUSE_COVERAGE=ON .
+      - name: Compile
+        run: cmake --build build/Debug --target testScipPP
+      - name: Run Tests
+        run: ./build/Debug/test/testScipPP --log_format=JUNIT --log_level=all --log_sink=boosttest.xml
+      - name: Extract Coverage
+        run: gcovr -r . --object-directory=./build/Debug/CMakeFiles --exclude-unreachable-branches --exclude-throw-branches -b --sonarqube coverage.xml --xml cobertura.xml
+      - uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./boosttest.xml,./coverage.xml,./cobertura.xml
+          verbose: true # optional (default = false)
   test_release_win:
     runs-on: windows-2019
     steps:
