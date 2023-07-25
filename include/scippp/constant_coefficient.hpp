@@ -4,7 +4,10 @@
 
 namespace scippp {
 
-//! A class which an index operator that always returns a constant value.
+/**
+ * A class which an index operator that always returns a constant value.
+ * @since 1.0.0
+ */
 class ConstantCoefficient {
     //! Constant value to return.
     const double m_COEFF;
@@ -12,6 +15,7 @@ class ConstantCoefficient {
 public:
     /**
      * Stores the constant value that will be returned by the index operator.
+     * @since 1.0.0
      * @param c Constant value to return.
      */
     constexpr ConstantCoefficient(double c)
@@ -20,6 +24,7 @@ public:
     }
     /**
      * Index operator that always returns the same constant value.
+     * @since 1.0.0
      * @return the constant value.
      */
     inline double operator[](std::size_t) const
@@ -28,9 +33,15 @@ public:
     }
 };
 
-//! An object which index operator always returns 0.
+/**
+ * An object which index operator always returns 0.
+ * @since 1.0.0
+ */
 static constexpr ConstantCoefficient COEFF_ZERO { 0 };
-//! An object which index operator always returns 1.
+/**
+ * An object which index operator always returns 1.
+ * @since 1.0.0
+ */
 static constexpr ConstantCoefficient COEFF_ONE { 1 };
 
 }

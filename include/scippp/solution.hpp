@@ -6,7 +6,10 @@ struct SCIP_Sol;
 
 namespace scippp {
 
-//! Wrapper for a %SCIP solution.
+/**
+ * Wrapper for a %SCIP solution.
+ * @since 1.0.0
+ */
 struct Solution {
     //! Pointer to the underlying %SCIP object.
     Scip* scip { nullptr };

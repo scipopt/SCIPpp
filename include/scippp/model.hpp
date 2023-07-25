@@ -31,6 +31,7 @@ enum class Sense {
  * A %SCIP optimization model.
  *
  * Variables and constraints are automatically released when the model is destructed.
+ * @since 1.0.0
  */
 class Model {
     //! Pointer to the underlying %SCIP object.
@@ -52,29 +53,36 @@ public:
      *
      * By default, all calls to the underlying %C %API are wrapped and the last return code is stored.
      *
+     * @since 1.0.0
      * @param name for the problem.
      * @param scip to create the problem in. If \c nullptr, a new %SCIP data structure will be created.
      * @param includeDefaultPlugins if \c true, the default plugins are added to \p scip.
      */
     explicit Model(const std::string& name, SCIP* scip = nullptr, bool includeDefaultPlugins = true);
 
-    //! Releases the variables and constraints.
+    /**
+     * Releases the variables and constraints.
+     * @since 1.0.0
+     */
     ~Model();
 
     /**
      * Gets the return code of the last call to %SCIP's %C %API when the default call wrapper is used.
+     * @since 1.0.0
      * @return return code of the last call to %SCIP's %C %API.
      */
     [[nodiscard]] SCIP_Retcode getLastReturnCode() const;
 
     /**
      * Replace the current wrapper for every call to %SCIP's %C %API.
+     * @since 1.0.0
      * @param wrapper New wrapper tp use.
      */
     void setScipCallWrapper(std::function<void(SCIP_Retcode)> wrapper);
 
     /**
      * Adds a variable to the model.
+     * @since 1.0.0
      * @param name of the variable when the model is written.
      * @param coeff Coefficient in the objective function.
      * @param varType variable type.
@@ -91,6 +99,7 @@ public:
 
     /**
      * Adds multiple variables to the model.
+     * @since 1.0.0
      * @tparam CoeffType Type of the object holding the coefficients. They are accessed via \c [i] where i goes from 0
      *                   to \p numVars - 1.
      * @param prefix to construct variable names from: prefix + index.
@@ -124,6 +133,7 @@ public:
      * This method can be used when the number of variables to add is known at compile time. The result can be used in a
      * structured binding.
      *
+     * @since 1.0.0
      * @tparam NumVars Number of variables to add.
      * @tparam CoeffType Type of the object holding the coefficients. They are accessed via \c [i] where i goes from 0
      *                   to \p NumVars - 1.
@@ -150,6 +160,7 @@ public:
 
     /**
      * Adds a constraint to the model.
+     * @since 1.0.0
      * @param ineq linear inequality to add.
      * @param name for the constraint when the model is written.
      */
@@ -157,39 +168,48 @@ public:
 
     /**
      * Infinity according the %SCIP config. To be used in variable bounds and constants in constraints.
+     * @since 1.0.0
      * @return infinity according the %SCIP config.
      */
     SCIP_Real infinity();
 
-    //! Solve the model.
+    /**
+     * Solve the model.
+     * @since 1.0.0
+     */
     void solve();
 
     /**
      * Set objective goal.
+     * @since 1.0.0
      * @param objsense Minimize or Maximize.
      */
     void setObjsense(Sense objsense);
 
     /**
      * Returns the solution status.
+     * @since 1.0.0
      * @return solution status.
      */
     SCIP_Status getStatus();
 
     /**
      * Returns the number of feasible primal solutions stored in the solution storage.
+     * @since 1.0.0
      * @return number of solutions.
      */
     int getNSols();
 
     /**
      * Returns the best feasible primal solution found so far or best solution candidate.
+     * @since 1.0.0
      * @return best feasible primal solution.
      */
     Solution getBestSol();
 
     /**
      * Returns the objective value of best solution.
+     * @since 1.0.0
      * @return objective value of best solution.
      */
     double getPrimalbound();
@@ -199,6 +219,7 @@ public:
      *
      * See the namespace scippp::params for a list of parameters, or create new ones using params::Param.
      *
+     * @since 1.0.0
      * @tparam T Type of the value.
      * @tparam PT Value type the parameter expects
      * @param parameter to set.
@@ -231,6 +252,7 @@ public:
     /**
      * Returns a pointer to the underlying %SCIP object.
      *
+     * @since 1.0.0
      * @attention Use this to access the raw SCIP object. That is required only for use-cases not supported by SCIP++.
      *            Consider adding the feature you are using to SCIP++!
      * @return the underlying %SCIP object.

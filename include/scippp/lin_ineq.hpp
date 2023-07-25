@@ -11,6 +11,7 @@ namespace scippp {
  * Represents a linear inequality: lhs <= expr <= rhs.
  *
  * Can be constructed only by operators.
+ * @since 1.0.0
  */
 class LinIneq {
     //! Left-hand-side of the inequality: lhs <= expr <= rhs.
@@ -28,6 +29,7 @@ class LinIneq {
 
 /**
  * Creates the inequality \p lhs <= \p rhs.
+ * @since 1.0.0
  * @param lhs Left-hand-side of the less-or-equal inequality.
  * @param rhs Right-hand-side of the less-or-equal inequality.
  * @return Inequality less-or-equal.
@@ -36,6 +38,7 @@ LinIneq operator<=(const LinExpr& lhs, const LinExpr& rhs);
 
 /**
  * Creates the equality \p lhs == \p rhs.
+ * @since 1.0.0
  * @param lhs Left-hand-side of the equality.
  * @param rhs Right-hand-side of the equality.
  * @return Equality inequality.
@@ -44,6 +47,7 @@ LinIneq operator==(const LinExpr& lhs, const LinExpr& rhs);
 
 /**
  * Creates the inequality \p lhs >= \p rhs.
+ * @since 1.0.0
  * @param lhs Left-hand-side of the greater-or-equal inequality.
  * @param rhs Right-hand-side of the greater-or-equal inequality.
  * @return Inequality greater-or-equal.
