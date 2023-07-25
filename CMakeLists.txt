@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.16)
 project(ScipPP LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 
@@ -38,6 +38,7 @@ target_include_directories(ScipPP PUBLIC include)
 target_link_libraries(ScipPP PUBLIC scip::scip)
 
 # install
+include(GNUInstallDirs)
 install(TARGETS ScipPP LIBRARY DESTINATION lib)
 set_target_properties(ScipPP PROPERTIES PUBLIC_HEADER "${SCIPPP_HDR}")
 install(TARGETS ScipPP PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/scippp)

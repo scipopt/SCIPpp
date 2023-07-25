@@ -145,6 +145,8 @@ the tests) work(s), any kind of dependency management system can be used.
 
 ### Build & Install
 
+Assuming you are using Conan v2 and a CMake version that supports presets (v3.19 and above), run:
+
 ```bash
 conan install -of . .
 cmake --preset conan-release .
@@ -169,6 +171,15 @@ change the install-command to
 
 ```bash
 conan install -of . --build=missing .
+```
+
+### If you are using a CMake version without support for presets
+
+```bash
+conan install -of . .
+cmake . -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=./build/Release/generators/conan_toolchain.cmake -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_BUILD_TYPE=Release
+make ScipPP
+make install
 ```
 
 ### Test
