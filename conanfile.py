@@ -8,6 +8,12 @@ class ScipPlusPlus(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeDeps"
     exports_sources = "CMakeLists.txt", "source/*", "include/*"
+    options = {
+        "with_tests": [True, False]
+    }
+    default_options = {
+        "with_tests": False,
+    }
     _full_version: str = None
 
     def set_version(self):
@@ -23,11 +29,13 @@ class ScipPlusPlus(ConanFile):
 
     def requirements(self):
         self.requires("scip/8.0.3", transitive_headers=True)
-        self.requires("boost/1.81.0")  # required only for tests
+        if self.options.with_tests:
+            self.requires("boost/1.81.0")  # required only for tests
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables[self.name + "_version"] = self._full_version
+        tc.variables["BUILD_TESTS"] = self.options.with_tests
         tc.generate()
 
     def build(self):

@@ -17,9 +17,9 @@ jobs:
           conan profile detect
           conan profile detect --name debug
           echo "&:build_type=Debug" >> $(conan profile path debug)
-          conan install -of . -pr debug .
+          conan install -of . -pr debug -o with_tests=True .
       - name: Run CMake
-        run: cmake --preset conan-debug -DBUILD_TESTS=ON -DUSE_COVERAGE=ON .
+        run: cmake --preset conan-debug -DUSE_COVERAGE=ON .
       - name: Compile
         run: cmake --build build/Debug --target testScipPP
       - name: Run Tests
@@ -42,9 +42,9 @@ jobs:
       - name: Run Conan Install
         run: |
           conan profile detect
-          conan install -of . .
+          conan install -of . -o with_tests=True .
       - name: Run CMake
-        run: cmake --preset conan-default -DBUILD_TESTS=ON .
+        run: cmake --preset conan-default .
       - name: Compile
         run: cmake --build build --preset conan-release --target testScipPP
       - name: Run Tests
@@ -60,9 +60,9 @@ jobs:
       - name: Run Conan Install
         run: |
           conan profile detect
-          conan install -of . .
+          conan install -of . -o with_tests=True .
       - name: Run CMake
-        run: cmake --preset conan-release -DBUILD_TESTS=ON .
+        run: cmake --preset conan-release .
       - name: Compile
         run: cmake --build build/Release --target testScipPP
       - name: Run Tests

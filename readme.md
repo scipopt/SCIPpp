@@ -184,12 +184,16 @@ make install
 
 ### Test
 
+Using Conan, the option `with_tests` has to be set to true.
+
 ```bash
-conan install -of . .
-cmake --preset conan-release -DBUILD_TESTS=ON .
+conan install -of . -o with_tests=True .
+cmake --preset conan-release .
 cmake --build build/Release --target testScipPP
 ./build/Release/test/testScipPP
 ```
+
+When using purely CMake, add `-DBUILD_TESTS=ON`.
 
 ## Utils
 
