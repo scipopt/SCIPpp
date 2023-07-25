@@ -5,7 +5,7 @@
 #---------------------------------------------------------------------------
 # Project related configuration options
 #---------------------------------------------------------------------------
-INPUT                  = readme.md code_of_conduct.md include
+INPUT                  = readme.md code_of_conduct.md changelog.md LICENSE include
 USE_MDFILE_AS_MAINPAGE = readme.md
 PROJECT_NAME           = "SCIP++"
 DOXYFILE_ENCODING      = UTF-8
