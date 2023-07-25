@@ -1,4 +1,9 @@
-find_package(Boost CONFIG REQUIRED)
+find_package(Boost CONFIG REQUIRED COMPONENTS unit_test_framework)
+if (NOT TARGET Boost::unit_test_framework)
+    add_library(Boost::unit_test_framework IMPORTED INTERFACE)
+    set_property(TARGET Boost::unit_test_framework PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIR})
+    set_property(TARGET Boost::unit_test_framework PROPERTY INTERFACE_LINK_LIBRARIES ${Boost_LIBRARIES})
+endif ()
 
 file(GLOB TEST_SOURCES *.cpp)
 add_executable(testScipPP ${TEST_SOURCES})

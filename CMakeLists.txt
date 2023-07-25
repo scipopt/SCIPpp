@@ -12,6 +12,9 @@ configure_file(
         ${CMAKE_CURRENT_BINARY_DIR}/source/version.cpp)
 
 find_package(scip CONFIG REQUIRED)
+if (TARGET libscip)
+    add_library(scip::scip ALIAS libscip)
+endif ()
 
 # enable coverage analysis by setting USE_COVERAGE to ON
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
