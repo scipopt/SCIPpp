@@ -27,12 +27,13 @@ jobs:
       - name: Install GCovr
         run: pip install gcovr
       - name: Extract Coverage
-        run: gcovr -r . --object-directory=./build/Debug/CMakeFiles --exclude-unreachable-branches --exclude-throw-branches -b --sonarqube coverage.xml --xml cobertura.xml
+        run: gcovr -r . -e ./test --object-directory=./build/Debug/CMakeFiles --exclude-unreachable-branches --exclude-throw-branches -b --sonarqube coverage.xml --xml cobertura.xml
       - uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./boosttest.xml,./coverage.xml,./cobertura.xml
           verbose: true # optional (default = false)
+          fail_ci_if_error: true
   test_release_win:
     runs-on: windows-2019
     steps:
