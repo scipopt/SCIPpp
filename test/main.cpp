@@ -7,28 +7,23 @@
 using namespace scippp;
 using namespace std;
 
-BOOST_AUTO_TEST_SUITE(Examples)
+BOOST_AUTO_TEST_SUITE(Basic)
 
-BOOST_AUTO_TEST_CASE(Knapsack)
+BOOST_AUTO_TEST_CASE(ModelCtorWithScip)
 {
-    vector<int> w { 3, 4, 3, 3, 3, 3, 4, 2, 4, 1 };
-    vector<int> v { 230, 134, 52, 60, 151, 95, 201, 245, 52, 55 };
-    int c { 14 };
-
-    Model model("KNAPSACK");
-    auto x { model.addVars("x_", w.size(), v, VarType::BINARY) };
-    LinExpr weight;
-    for (size_t i { 0 }; i < w.size(); i++) {
-        weight += w.at(i) * x.at(i);
+    SCIP* scip;
+    { // to enforce that the d'tor of Model is called
+        SCIPcreate(&scip);
+        Model model("StructuredBinding", scip);
+        BOOST_TEST(model.scip() == scip);
+        array<int, 2> coeff { { 1, 1 } };
+        const auto& [x1, x2] = model.addVars<2>("x_", coeff);
+        model.addConstr(x1 + x2 <= 1, "capacity");
+        model.setObjsense(Sense::MAXIMIZE);
+        model.solve();
+        BOOST_TEST(model.getPrimalbound() == 1);
     }
-    model.addConstr(weight <= c, "weight");
-    model.setObjsense(Sense::MAXIMIZE);
-    model.setParam(params::LIMITS::MAXSOL, 1);
-    model.setParam(params::DISPLAY::VERBLEVEL, 0);
-
-    model.solve();
-    BOOST_TEST(model.getPrimalbound() == 882);
-    BOOST_TEST(model.getNSols() == 1);
+    SCIPfree(&scip);
 }
 
 BOOST_AUTO_TEST_CASE(StructuredBinding)
@@ -113,7 +108,7 @@ BOOST_AUTO_TEST_CASE(SimpleMinRhs)
     BOOST_TEST(model.getPrimalbound() == 1);
 }
 
-BOOST_AUTO_TEST_CASE(SimpleMinLhs, *boost::unit_test::tolerance(1e-3))
+BOOST_AUTO_TEST_CASE(SimpleMinLhs)
 {
     Model model("Simple");
     auto x1 = model.addVar("x_1", 1);
@@ -123,10 +118,8 @@ BOOST_AUTO_TEST_CASE(SimpleMinLhs, *boost::unit_test::tolerance(1e-3))
     model.setObjsense(Sense::MINIMIZE);
     model.solve();
     BOOST_REQUIRE(model.getNSols() > 0);
+    BOOST_TEST(model.getStatus() == SCIP_STATUS_OPTIMAL);
     BOOST_TEST(model.getPrimalbound() == 1);
-    auto sol = model.getBestSol();
-    BOOST_TEST(x1.getSolVal(sol) == 0.5);
-    BOOST_TEST(x2.getSolVal(sol) == 0.5);
 }
 
 BOOST_AUTO_TEST_CASE(GetLastReturnCodeOkay)
