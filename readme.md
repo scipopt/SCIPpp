@@ -1,17 +1,10 @@
 # SCIP++: A C++ wrapper for SCIP
 
 ![CI Status](https://github.com/scipopt/SCIPpp/actions/workflows/main.yml/badge.svg)
+TODO: ADD COVERAGE BADGE
 
 SCIP++ is a C++ wrapper for SCIP's C interface.
 It automatically manages the memory, and provides a simple interface to create linear expressions and inequalities.
-
-## TODO BEFORE GO-LIVE
-
-- [ ] get Schenker SOSPO approval
-- [ ] create GitHub pages once repo is public. Docu is hosted on branch gh-pages
-- [ ] enable CI
-  - [ ] upload test report and coverage report to codecov
-  - [ ] coverage badges in readme / or tool like CodeCov?
 
 ## Usage
 
