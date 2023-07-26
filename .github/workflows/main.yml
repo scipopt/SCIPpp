@@ -21,9 +21,9 @@ jobs:
       - name: Run CMake
         run: cmake --preset conan-debug -DUSE_COVERAGE=ON .
       - name: Compile
-        run: cmake --build build/Debug --target testScipPP
+        run: cmake --build build/Debug --target tests
       - name: Run Tests
-        run: ./build/Debug/test/testScipPP --log_format=JUNIT --log_level=all --log_sink=boosttest.xml
+        run: ./build/Debug/test/tests --log_format=JUNIT --log_level=all --log_sink=boosttest.xml
       - name: Install GCovr
         run: pip install gcovr
       - name: Extract Coverage
@@ -47,9 +47,9 @@ jobs:
       - name: Run CMake
         run: cmake --preset conan-default .
       - name: Compile
-        run: cmake --build build --preset conan-release --target testScipPP
+        run: cmake --build build --preset conan-release --target tests
       - name: Run Tests
-        run: ./build/test/Release/testScipPP.exe
+        run: ./build/test/Release/tests.exe
   test_without_conan:
     runs-on: ubuntu-latest
     steps:
@@ -67,9 +67,9 @@ jobs:
       - name: Build SCIP++
         run: |
           CMAKE_PREFIX_PATH=./lib/cmake/scip:./boost/boost/lib/cmake/Boost-1.81.0 cmake -DBUILD_TESTS=ON .
-          make -j testScipPP
+          make -j tests
       - name: Run tests
-        run: ./test/testScipPP
+        run: ./test/tests
   test_release_inx:
     strategy:
       matrix:
@@ -85,9 +85,9 @@ jobs:
       - name: Run CMake
         run: cmake --preset conan-release .
       - name: Compile
-        run: cmake --build build/Release --target testScipPP
+        run: cmake --build build/Release --target tests
       - name: Run Tests
-        run: ./build/Release/test/testScipPP
+        run: ./build/Release/test/tests
   clang_tidy:
     runs-on: ubuntu-latest
     steps:

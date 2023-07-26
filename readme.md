@@ -132,22 +132,47 @@ SCIP* scip = model.scip();
 
 ## Build
 
+### Without Conan
+
 We use [Conan](https://conan.io/center/) as package manager.
 That is not required! As long as `find_package(scip CONFIG REQUIRED)` (and `find_package(Boost CONFIG REQUIRED)` for
 the tests) work(s), any kind of dependency management system can be used.
 
-### Build & Install
-
-Assuming you are using Conan v2 and a CMake version that supports presets (v3.19 and above), run:
+Build and install:
 
 ```bash
-conan install -of . .
+cmake .
+make ScipPP
+make install
+```
+
+Build and run tests:
+
+```bash
+cmake -DBUILD_TESTS=ON .
+make tests
+./test/tests
+```
+
+### With Conan v2 and CMake v3.19 or later
+
+Build and install:
+
+```bash
+conan install .
 cmake --preset conan-release .
 cmake --build build/Release --target ScipPP
 cmake --install build/Release
 ```
 
-### If pre-compiled dependencies are not available
+Build and run tests:
+
+```bash
+conan install -o with_tests=True .
+cmake --preset conan-release .
+cmake --build build/Release --target tests
+build/Release/test/tests
+```
 
 If your setting of OS, compiler, C++ or stdlib version is one where conan-center does not host pre-compiled binaries,
 add `--build=missing` when you run `conan install`. The dependencies will then be built from source (don't worry, they
@@ -163,30 +188,30 @@ or try to build locally from sources using the '--build=missing' argument
 change the install-command to
 
 ```bash
-conan install -of . --build=missing .
+conan install --build=missing .
 ```
 
-### If you are using a CMake version without support for presets
+### With Conan v2 and CMake v3.18 or earlier
+
+When CMake presets are not support, use the toolchain file that conan generates.
+
+Build and install:
 
 ```bash
-conan install -of . .
+conan install .
 cmake . -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=./build/Release/generators/conan_toolchain.cmake -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_BUILD_TYPE=Release
 make ScipPP
 make install
 ```
 
-### Test
-
-Using Conan, the option `with_tests` has to be set to true.
+Build and run tests:
 
 ```bash
-conan install -of . -o with_tests=True .
-cmake --preset conan-release .
-cmake --build build/Release --target testScipPP
-./build/Release/test/testScipPP
+conan install -o with_tests=True .
+cmake . -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=./build/Release/generators/conan_toolchain.cmake -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_BUILD_TYPE=Release
+make tests
+./build/Release/test/tests
 ```
-
-When using purely CMake, add `-DBUILD_TESTS=ON`.
 
 ## Utils
 
