@@ -1,7 +1,7 @@
 # SCIP++: A C++ wrapper for SCIP
 
 ![CI Status](https://github.com/scipopt/SCIPpp/actions/workflows/main.yml/badge.svg)
-TODO: ADD COVERAGE BADGE
+![Coverage](https://codecov.io/gh/scipopt/SCIPpp/branch/main/graph/badge.svg?token=55wZ1iTNgc)
 
 SCIP++ is a C++ wrapper for SCIP's C interface.
 It automatically manages the memory, and provides a simple interface to create linear expressions and inequalities.
