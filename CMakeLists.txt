@@ -50,6 +50,6 @@ if (BUILD_TESTS)
     add_subdirectory(test)
 endif ()
 
-if (BUILD_TESTS)
+if (BUILD_UTILS)
     add_subdirectory(utils)
 endif ()
