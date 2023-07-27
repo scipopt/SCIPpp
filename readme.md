@@ -1,7 +1,7 @@
 # SCIP++: A C++ wrapper for SCIP
 
 ![CI Status](https://github.com/scipopt/SCIPpp/actions/workflows/main.yml/badge.svg)
-![Coverage](https://img.shields.io/codecov/c/github/scipopt/SCIPpp)
+[![Coverage](https://img.shields.io/codecov/c/github/scipopt/SCIPpp)](https://app.codecov.io/github/scipopt/SCIPpp)
 [![Doxygen](https://img.shields.io/badge/documentation-Doxygen-blue)](https://scipopt.github.io/SCIPpp/)
 
 SCIP++ is a C++ wrapper for SCIP's C interface.
