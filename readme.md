@@ -2,11 +2,14 @@
 
 ![CI Status](https://github.com/scipopt/SCIPpp/actions/workflows/main.yml/badge.svg)
 ![Coverage](https://img.shields.io/codecov/c/github/scipopt/SCIPpp)
+[![Doxygen](https://img.shields.io/badge/documentation-Doxygen-blue)](https://scipopt.github.io/SCIPpp/)
 
 SCIP++ is a C++ wrapper for SCIP's C interface.
 It automatically manages the memory, and provides a simple interface to create linear expressions and inequalities.
 
 ## Usage
+
+The documentation can be found at https://scipopt.github.io/SCIPpp/
 
 Here is a simple example where we create a new model, add two variables, add a linear inequality as constraint, and ask
 SCIP to solve the maximization problem.
