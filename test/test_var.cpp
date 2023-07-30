@@ -1,4 +1,5 @@
 #include <boost/test/unit_test.hpp>
+#include <optional>
 
 #include "scippp/model.hpp"
 #include "scippp/parameters.hpp"
@@ -11,7 +12,7 @@ BOOST_AUTO_TEST_SUITE(Var)
 BOOST_AUTO_TEST_CASE(GetSolVal, *boost::unit_test::tolerance(1e-3))
 {
     Model model("Simple");
-    auto x1 = model.addVar("x_1", 1);
+    auto x1 = model.addVar("x_1", 1, VarType::CONTINUOUS, 0.0, std::nullopt);
     auto x2 = model.addVar("x_2", 1);
     model.addConstr(x1 + x2 >= 1, "capacity");
     model.addConstr(x1 == x2, "equal");

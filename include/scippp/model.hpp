@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <functional>
+#include <optional>
 #include <scip/scip.h>
 #include <string>
 #include <type_traits>
@@ -94,8 +95,8 @@ public:
         const std::string& name,
         SCIP_Real coeff = 0.0,
         VarType varType = VarType::CONTINUOUS,
-        SCIP_Real lb = 0.0,
-        SCIP_Real ub = 1.0);
+        std::optional<double> lb = 0.0,
+        std::optional<double> ub = 1.0);
 
     /**
      * Adds multiple variables to the model.
@@ -116,8 +117,8 @@ public:
         size_t numVars,
         const CoeffType& coeffs = COEFF_ZERO,
         VarType varType = VarType::CONTINUOUS,
-        SCIP_Real lb = 0.0,
-        SCIP_Real ub = 1.0)
+        std::optional<double> lb = 0.0,
+        std::optional<double> ub = 1.0)
     {
         std::vector<Var> result;
         result.reserve(numVars);
