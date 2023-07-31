@@ -74,7 +74,11 @@ void Model::addConstr(const scippp::LinIneq& ineq, const std::string& name)
         ineq.m_lhs, /* left hand side of constraint */
         ineq.m_rhs.has_value() ? ineq.m_rhs.value() : infinity()));
     for (size_t index { 0 }; index < ineq.m_linExpr.m_vars.size(); index++) {
-        m_scipCallWrapper(SCIPaddCoefLinear(m_scip, con, ineq.m_linExpr.m_vars.at(index).var, ineq.m_linExpr.m_coeffs.at(index)));
+        m_scipCallWrapper(SCIPaddCoefLinear(
+            m_scip,
+            con,
+            ineq.m_linExpr.m_vars.at(index).var,
+            ineq.m_linExpr.m_coeffs.at(index)));
     }
     m_scipCallWrapper(SCIPaddCons(m_scip, con));
     m_cons.push_back(con);
