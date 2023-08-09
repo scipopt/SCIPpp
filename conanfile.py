@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.scm import Git
 
 
 class ScipPlusPlus(ConanFile):
@@ -13,10 +14,15 @@ class ScipPlusPlus(ConanFile):
     default_options = {
         "with_tests": False,
     }
-    _full_version: str = "1.0.0"
+    _full_version: str = None
 
     def set_version(self):
-        self.version = self._full_version
+        git = Git(self, folder=self.recipe_folder)
+        try:
+            self._full_version = git.run("describe --tags --dirty=-d").strip()
+            self.version = self._full_version.split('-')[0]
+        except:
+            self.version = "1.0.0"
 
     def layout(self):
         cmake_layout(self)
