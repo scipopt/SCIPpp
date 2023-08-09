@@ -3,6 +3,7 @@
 ![CI Status](https://github.com/scipopt/SCIPpp/actions/workflows/main.yml/badge.svg)
 [![Coverage](https://img.shields.io/codecov/c/github/scipopt/SCIPpp)](https://app.codecov.io/github/scipopt/SCIPpp)
 [![Doxygen](https://img.shields.io/badge/documentation-Doxygen-blue)](https://scipopt.github.io/SCIPpp/)
+[![Conan Center](https://img.shields.io/conan/v/scippp)](https://conan.io/center/recipes/scippp)
 
 SCIP++ is a C++ wrapper for SCIP's C interface.
 It automatically manages the memory, and provides a simple interface to create linear expressions and inequalities.
