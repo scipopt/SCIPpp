@@ -6,7 +6,12 @@
 
 namespace scippp {
 
-Var& Model::addVar(const std::string& name, SCIP_Real coeff, VarType varType, std::optional<double> lb, std::optional<double> ub)
+Var& Model::addVar(
+    const std::string& name,
+    SCIP_Real coeff,
+    VarType varType,
+    std::optional<SCIP_Real> lb,
+    std::optional<SCIP_Real> ub)
 {
     SCIP_VAR* var { nullptr };
     m_scipCallWrapper(SCIPcreateVarBasic(
