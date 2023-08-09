@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <functional>
+#include <optional>
 #include <scip/scip.h>
 #include <string>
 #include <type_traits>
@@ -86,16 +87,16 @@ public:
      * @param name of the variable when the model is written.
      * @param coeff Coefficient in the objective function.
      * @param varType variable type.
-     * @param lb lower bound.
-     * @param ub upper bound.
+     * @param lb lower bound. \c std::nullopt is interpreted as -infinity.
+     * @param ub upper bound. \c std::nullopt is interpreted as infinity.
      * @return Reference to the newly created variable.
      */
     Var& addVar(
         const std::string& name,
         SCIP_Real coeff = 0.0,
         VarType varType = VarType::CONTINUOUS,
-        SCIP_Real lb = 0.0,
-        SCIP_Real ub = 1.0);
+        std::optional<SCIP_Real> lb = 0.0,
+        std::optional<SCIP_Real> ub = 1.0);
 
     /**
      * Adds multiple variables to the model.
@@ -106,8 +107,8 @@ public:
      * @param numVars number of variables to create.
      * @param coeffs Object holding the coefficients for the objective function.
      * @param varType variable type.
-     * @param lb lower bound.
-     * @param ub upper bound.
+     * @param lb lower bound. \c std::nullopt is interpreted as -infinity.
+     * @param ub upper bound. \c std::nullopt is interpreted as infinity.
      * @return Vector of variables.
      */
     template <typename CoeffType = ConstantCoefficient>
@@ -116,8 +117,8 @@ public:
         size_t numVars,
         const CoeffType& coeffs = COEFF_ZERO,
         VarType varType = VarType::CONTINUOUS,
-        SCIP_Real lb = 0.0,
-        SCIP_Real ub = 1.0)
+        std::optional<SCIP_Real> lb = 0.0,
+        std::optional<SCIP_Real> ub = 1.0)
     {
         std::vector<Var> result;
         result.reserve(numVars);
@@ -149,8 +150,8 @@ public:
         const std::string& prefix,
         const CoeffType& coeffs = COEFF_ZERO,
         VarType varType = VarType::CONTINUOUS,
-        SCIP_Real lb = 0.0,
-        SCIP_Real ub = 1.0)
+        std::optional<SCIP_Real> lb = 0.0,
+        std::optional<SCIP_Real> ub = 1.0)
     {
         std::array<Var, NumVars> result;
         auto vec { addVars(prefix, NumVars, coeffs, varType, lb, ub) };

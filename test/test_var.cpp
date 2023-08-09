@@ -1,7 +1,6 @@
 #include <boost/test/unit_test.hpp>
 
 #include "scippp/model.hpp"
-#include "scippp/parameters.hpp"
 
 using namespace scippp;
 using namespace std;

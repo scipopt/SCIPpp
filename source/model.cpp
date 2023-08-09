@@ -6,15 +6,20 @@
 
 namespace scippp {
 
-Var& Model::addVar(const std::string& name, SCIP_Real coeff, VarType varType, SCIP_Real lb, SCIP_Real ub)
+Var& Model::addVar(
+    const std::string& name,
+    SCIP_Real coeff,
+    VarType varType,
+    std::optional<SCIP_Real> lb,
+    std::optional<SCIP_Real> ub)
 {
     SCIP_VAR* var { nullptr };
     m_scipCallWrapper(SCIPcreateVarBasic(
         m_scip, /* SCIP environment */
         &var, /* reference to the variable */
         name.c_str(), /* name of the variable */
-        lb, /* lower bound of the variable */
-        ub, /* upper bound of the variable */
+        lb != std::nullopt ? lb.value() : -SCIPinfinity(m_scip), /* lower bound of the variable */
+        ub != std::nullopt ? ub.value() : SCIPinfinity(m_scip), /* upper bound of the variable */
         coeff, /* obj. coefficient. */
         static_cast<SCIP_Vartype>(varType) /* variable is binary */
         ));
