@@ -43,6 +43,7 @@ jobs:
       - name: Run Conan Install
         run: |
           conan profile detect
+          powershell -Command "(gc $(conan profile path default)) -replace 'compiler.cppstd=14', 'compiler.cppstd=17' | Out-File -encoding ASCII $(conan profile path default)"
           conan install -of . -o with_tests=True .
       - name: Run CMake
         run: cmake --preset conan-default .
