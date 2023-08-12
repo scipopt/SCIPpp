@@ -4,6 +4,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - [Doc:Unreleased]
 
+## [1.0.2] - 2023-08-12
+
+### Fixed
+
+- [PR7](https://github.com/scipopt/SCIPpp/pull/7)
+  Export symbols on Windows.
+
 ## [1.0.1] - 2023-08-10
 
 ### Added
@@ -22,5 +29,6 @@ Initial release
 
 [Doc:Unreleased]: https://scipopt.github.io/SCIPpp/
 [Unreleased]: https://github.com/scipopt/SCIPpp
+[1.0.2]: https://github.com/scipopt/SCIPpp/releases/tag/1.0.2
 [1.0.1]: https://github.com/scipopt/SCIPpp/releases/tag/1.0.1
 [1.0.0]: https://github.com/scipopt/SCIPpp/releases/tag/1.0.0
