@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.15.7)
 project(ScipPP LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 option(USE_COVERAGE "Create coverage report." OFF)
 option(BUILD_TESTS "Build tests." OFF)
