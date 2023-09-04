@@ -17,12 +17,14 @@ public:
         : scip::ObjEventhdlr(scip, "NAME", "DESC")
     {
     }
-    SCIP_DECL_EVENTINIT(scip_init) override
+    SCIP_DECL_EVENTINIT(scip_init)
+    override
     {
         clog << "MyEventHandler: Here I am" << endl;
         return SCIP_OKAY;
     }
-    SCIP_DECL_EVENTEXEC(scip_exec) override
+    SCIP_DECL_EVENTEXEC(scip_exec)
+    override
     {
         return SCIP_OKAY;
     }
