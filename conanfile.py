@@ -72,6 +72,7 @@ class ScipPlusPlus(ConanFile):
 
     def requirements(self):
         self.requires("scip/8.0.3", transitive_headers=True)
+        self.requires("gmp/6.3.0", override=True)  # todo: remove once SCIP 8.0.4 without the conflict is released
         if self.options.with_tests:
             self.requires("boost/[>=1.81.0]")  # required only for tests
 
