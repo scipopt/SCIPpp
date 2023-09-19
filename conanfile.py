@@ -61,11 +61,14 @@ class ScipPlusPlus(ConanFile):
 
     def set_version(self):
         if self.version is None:
+            print("No version set from outside")
             git = Git(self, folder=self.recipe_folder)
             try:
                 self.version = git.run("describe --tags --dirty=-d").strip()
+                print(f"Version determined from Git is {self.version}")
             except:
                 self.version = "1.0.2"
+                print(f"Unable to determine version from Git, using {self.version} instead")
 
     def layout(self):
         cmake_layout(self)
