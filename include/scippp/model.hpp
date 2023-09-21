@@ -279,7 +279,8 @@ public:
      *
      * @since 1.1.0
      * @param filename output file name including extension
-     * @param genericNames using generic variable and constraint names?
+     * @param genericNames using generic variable (x0, x1, ...) and constraint names (c0, c1, ...) instead of the
+     *                     user-given names?
      * @attention Do not use an std::string or std::filesystem::path as argument \p filename,
      *            as this will call the other overload instead!
      */
@@ -290,7 +291,8 @@ public:
      *
      * @since 1.1.0
      * @param extension file extension to derive the output format from
-     * @param genericNames using generic variable and constraint names?
+     * @param genericNames using generic variable (x0, x1, ...) and constraint names (c0, c1, ...) instead of the
+     *                     user-given names?
      */
     void writeOrigProblem(const std::string& extension, bool genericNames = false) const;
 
