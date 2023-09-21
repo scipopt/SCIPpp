@@ -62,6 +62,20 @@ BOOST_AUTO_TEST_CASE(FileLP)
     BOOST_TEST(contains(content, "Minimize"));
 }
 
+BOOST_AUTO_TEST_CASE(FileLPGenericNames)
+{
+    auto model { createModel() };
+
+    TempFile tf("lp");
+    model.writeOrigProblem(tf.path(), true);
+    BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
+    auto content { tf.content() };
+    BOOST_TEST(contains(content, "Obj: +1 x0 +1 x1"));
+    BOOST_TEST(contains(content, "c0:"));
+    BOOST_TEST(contains(content, "c1:"));
+    BOOST_TEST(contains(content, "Minimize"));
+}
+
 BOOST_AUTO_TEST_CASE(FileMPS)
 {
     auto model { createModel() };
