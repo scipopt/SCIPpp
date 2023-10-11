@@ -18,7 +18,7 @@ public:
      * @since 1.0.0
      * @param c Constant value to return.
      */
-    constexpr ConstantCoefficient(double c)
+    explicit constexpr ConstantCoefficient(double c)
         : m_COEFF { c }
     {
     }
