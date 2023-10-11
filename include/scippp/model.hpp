@@ -172,7 +172,30 @@ public:
      * @since 1.0.0
      * @return infinity according the %SCIP config.
      */
-    SCIP_Real infinity();
+    [[nodiscard]] SCIP_Real infinity() const;
+
+    /**
+     * Value treated as zero.
+     * @since 1.1.0
+     * @return value treated as zero.
+     */
+    [[nodiscard]] SCIP_Real epsilon() const;
+
+    /**
+     * Rounds value to the nearest integer with epsilon tolerance.
+     * @since 1.1.0
+     * @param value to round
+     * @return nearest integer as double
+     */
+    [[nodiscard]] SCIP_Real round(SCIP_Real value) const;
+
+    /**
+     * Checks, if value is in range epsilon of 0.0.
+     * @since 1.1.0
+     * @param value to check
+     * @return \c true iff the value is in range epsilon of 0.0.
+     */
+    [[nodiscard]] bool isZero(SCIP_Real value) const;
 
     /**
      * Solve the model.
@@ -192,28 +215,28 @@ public:
      * @since 1.0.0
      * @return solution status.
      */
-    SCIP_Status getStatus();
+    [[nodiscard]] SCIP_Status getStatus() const;
 
     /**
      * Returns the number of feasible primal solutions stored in the solution storage.
      * @since 1.0.0
      * @return number of solutions.
      */
-    int getNSols();
+    [[nodiscard]] int getNSols() const;
 
     /**
      * Returns the best feasible primal solution found so far or best solution candidate.
      * @since 1.0.0
      * @return best feasible primal solution.
      */
-    Solution getBestSol();
+    [[nodiscard]] Solution getBestSol() const;
 
     /**
      * Returns the objective value of best solution.
      * @since 1.0.0
      * @return objective value of best solution.
      */
-    double getPrimalbound();
+    [[nodiscard]] double getPrimalbound() const;
 
     /**
      * Sets a parameter.
@@ -260,7 +283,7 @@ public:
      */
     [[deprecated(R"(Use this to access the raw SCIP object.
                     That is only required for use-cases not supported by SCIP++.
-                    Consider adding the feature you are using to SCIP++!)")]] Scip*
-    scip();
+                    Consider adding the feature you are using to SCIP++!)")]] [[nodiscard]] Scip*
+    scip() const;
 };
 }

@@ -23,7 +23,31 @@ struct Var {
      * @param solution Primal %CIP solution.
      * @return value of this variable in primal %CIP solution.
      */
-    double getSolVal(Solution& solution) const;
+    [[nodiscard]] double getSolVal(const Solution& solution) const;
+
+    /**
+     * Gets the assigned value in the solution and converts it to int.
+     * @since 1.1.0
+     * @param solution Primal %CIP solution.
+     * @return value of this variable in primal %CIP solution as integer.
+     */
+    [[nodiscard]] int getSolValAsInt(const Solution& solution) const;
+
+    /**
+     * Gets the assigned value in the solution and converts it to long long.
+     * @since 1.1.0
+     * @param solution Primal %CIP solution.
+     * @return value of this variable in primal %CIP solution as long integer.
+     */
+    [[nodiscard]] long long getSolValAsLongInt(const Solution& solution) const;
+
+    /**
+     * Checks whether the value of this variable in the primal solution is in range epsilon of 0.0.
+     * @since 1.1.0
+     * @param solution Primal %CIP solution.
+     * @return \c true iff the value of this variable in the primal solution is in range epsilon of 0.0.
+     */
+    [[nodiscard]] bool isZero(const Solution& solution) const;
 };
 
 }
