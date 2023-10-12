@@ -85,9 +85,24 @@ void Model::addConstr(const scippp::LinIneq& ineq, const std::string& name)
     m_cons.push_back(con);
 }
 
-SCIP_Real Model::infinity()
+SCIP_Real Model::infinity() const
 {
     return SCIPinfinity(m_scip);
+}
+
+SCIP_Real Model::epsilon() const
+{
+    return SCIPepsilon(m_scip);
+}
+
+SCIP_Real Model::round(SCIP_Real value) const
+{
+    return SCIPround(m_scip, value);
+}
+
+bool Model::isZero(SCIP_Real value) const
+{
+    return SCIPisZero(m_scip, value);
 }
 
 void Model::solve()
@@ -100,27 +115,27 @@ void Model::setObjsense(Sense objsense)
     m_scipCallWrapper(SCIPsetObjsense(m_scip, static_cast<SCIP_Objsense>(objsense)));
 }
 
-Scip* Model::scip()
+Scip* Model::scip() const
 {
     return m_scip;
 }
 
-SCIP_STATUS Model::getStatus()
+SCIP_STATUS Model::getStatus() const
 {
     return SCIPgetStatus(m_scip);
 }
 
-int Model::getNSols()
+int Model::getNSols() const
 {
     return SCIPgetNSols(m_scip);
 }
 
-Solution Model::getBestSol()
+Solution Model::getBestSol() const
 {
     return Solution { m_scip, SCIPgetBestSol(m_scip) };
 }
 
-double Model::getPrimalbound()
+double Model::getPrimalbound() const
 {
     return SCIPgetPrimalbound(m_scip);
 }

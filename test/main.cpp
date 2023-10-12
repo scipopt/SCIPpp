@@ -153,4 +153,12 @@ BOOST_AUTO_TEST_CASE(SetCallWrapper)
     BOOST_TEST(!result.empty());
 }
 
+BOOST_AUTO_TEST_CASE(EpsilonIsNotZero)
+{
+    Model model("Simple");
+    BOOST_TEST(model.epsilon() > 0);
+    BOOST_TEST(model.isZero(model.epsilon()));
+    BOOST_TEST(model.round(model.epsilon()) == 0.0);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
