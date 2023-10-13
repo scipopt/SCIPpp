@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <array>
+#include <filesystem>
 #include <functional>
 #include <optional>
 #include <scip/scip.h>
@@ -272,6 +273,28 @@ public:
             static_assert(sizeof(T) == 0);
         }
     }
+
+    /**
+     * Writes original problem to file.
+     *
+     * @since 1.1.0
+     * @param filename output file name including extension
+     * @param genericNames using generic variable (x0, x1, ...) and constraint names (c0, c1, ...) instead of the
+     *                     user-given names?
+     * @attention Do not use an std::string or std::filesystem::path as argument \p filename,
+     *            as this will call the other overload instead!
+     */
+    void writeOrigProblem(const std::filesystem::directory_entry& filename, bool genericNames = false) const;
+
+    /**
+     * Writes original problem to standard output.
+     *
+     * @since 1.1.0
+     * @param extension file extension to derive the output format from
+     * @param genericNames using generic variable (x0, x1, ...) and constraint names (c0, c1, ...) instead of the
+     *                     user-given names?
+     */
+    void writeOrigProblem(const std::string& extension, bool genericNames = false) const;
 
     /**
      * Returns a pointer to the underlying %SCIP object.
