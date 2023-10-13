@@ -65,7 +65,7 @@ class ScipPlusPlus(ConanFile):
             try:
                 self.version = git.run("describe --tags --dirty=-d").strip()
             except:
-                self.version = "1.0.2"
+                self.version = "1.x.y"
 
     def layout(self):
         cmake_layout(self)
