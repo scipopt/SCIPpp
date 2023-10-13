@@ -117,7 +117,7 @@ void Model::setObjsense(Sense objsense)
 
 void Model::writeOrigProblem(const std::filesystem::directory_entry& filename, bool genericNames) const
 {
-    m_scipCallWrapper(SCIPwriteOrigProblem(m_scip, filename.path().c_str(), nullptr, genericNames));
+    m_scipCallWrapper(SCIPwriteOrigProblem(m_scip, filename.path().string().c_str(), nullptr, genericNames));
 }
 
 void Model::writeOrigProblem(const std::string& extension, bool genericNames) const
