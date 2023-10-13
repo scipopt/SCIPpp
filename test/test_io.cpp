@@ -16,7 +16,7 @@ class TempFile {
 public:
     explicit TempFile(const string& extension)
     {
-        m_path += boost::filesystem::unique_path("%%%%-%%%%-%%%%-%%%%." + extension).string();
+        m_path += boost::filesystem::unique_path("/%%%%-%%%%-%%%%-%%%%." + extension).string();
     }
     ~TempFile()
     {
