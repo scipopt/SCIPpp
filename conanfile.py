@@ -26,7 +26,6 @@ class ScipPlusPlus(ConanFile):
         "shared": False,
         "fPIC": True
     }
-    _full_version: str = None
 
     @property
     def _min_cppstd(self):
@@ -64,12 +63,9 @@ class ScipPlusPlus(ConanFile):
         if self.version is None:
             git = Git(self, folder=self.recipe_folder)
             try:
-                self._full_version = git.run("describe --tags --dirty=-d").strip()
-                self.version = self._full_version.split('-')[0]
+                self.version = git.run("describe --tags --dirty=-d").strip()
             except:
-                self.version = "1.0.2"
-        else:
-            self._full_version = self.version
+                self.version = "1.x.y"
 
     def layout(self):
         cmake_layout(self)
@@ -81,7 +77,7 @@ class ScipPlusPlus(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables[self.name + "_version"] = self._full_version
+        tc.variables[self.name + "_version"] = self.version
         tc.variables["BUILD_TESTS"] = self.options.with_tests
         tc.generate()
 
