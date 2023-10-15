@@ -4273,7 +4273,8 @@ namespace LIMITS {
     constexpr Param<double> GAP { "limits/gap" };
     //! solving stops, if the absolute gap = |primalbound - dualbound| is below the given value
     constexpr Param<double> ABSGAP { "limits/absgap" };
-    //! solving stops, if the given number of solutions were found (-1: no limit)
+    //! solving stops, if the given number of solutions were found; this limit is first checked in presolving (-1: no
+    //! limit)
     constexpr Param<int> SOLUTIONS { "limits/solutions" };
     //! solving stops, if the given number of solution improvements were found (-1: no limit)
     constexpr Param<int> BESTSOL { "limits/bestsol" };
@@ -5292,7 +5293,7 @@ namespace PROPAGATING::SYMMETRY {
     constexpr Param<int> OFSYMCOMPTIMING { "propagating/symmetry/ofsymcomptiming" };
     //! run orbital fixing during presolving?
     constexpr Param<bool> PERFORMPRESOLVING { "propagating/symmetry/performpresolving" };
-    //! recompute symmetries after a restart has occured? (0 = never, 1 = always, 2 = if OF found reduction)
+    //! recompute symmetries after a restart has occured? (0 = never)
     constexpr Param<int> RECOMPUTERESTART { "propagating/symmetry/recomputerestart" };
     //! Should non-affected variables be removed from permutation to save memory?
     constexpr Param<bool> COMPRESSSYMMETRIES { "propagating/symmetry/compresssymmetries" };
