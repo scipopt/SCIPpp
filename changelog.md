@@ -4,6 +4,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - [Doc:Unreleased]
 
+## [1.1.0] - 2023-10-15
+
+### Added
+
+- [PR12](https://github.com/scipopt/SCIPpp/pull/12)
+  Expose SCIP counterparts via `Model::epsilon`, `Model::round`, and `Model::isZero`.
+- [PR11](https://github.com/scipopt/SCIPpp/pull/11)
+  IO methods `Model::writeOrigProblem` to write a model to a file or standard output.
+
+### Fixed
+
+- [PR12](https://github.com/scipopt/SCIPpp/pull/12)
+  Added more const-correctness
+
 ## [1.0.2] - 2023-08-12
 
 ### Fixed
@@ -28,7 +42,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Initial release
 
 [Doc:Unreleased]: https://scipopt.github.io/SCIPpp/
-[Unreleased]: https://github.com/scipopt/SCIPpp
+[Unreleased]: https://github.com/scipopt/SCIPpp/compare/1.1.0...main
+[1.1.0]: https://github.com/scipopt/SCIPpp/releases/tag/1.1.0
 [1.0.2]: https://github.com/scipopt/SCIPpp/releases/tag/1.0.2
 [1.0.1]: https://github.com/scipopt/SCIPpp/releases/tag/1.0.1
 [1.0.0]: https://github.com/scipopt/SCIPpp/releases/tag/1.0.0
