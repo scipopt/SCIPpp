@@ -18,11 +18,13 @@ class ScipPlusPlus(ConanFile):
     homepage = "https://github.com/scipopt/SCIPpp"
     options = {
         "with_tests": [True, False],
+        "with_utils": [True, False],
         "shared": [True, False],
         "fPIC": [True, False]
     }
     default_options = {
         "with_tests": False,
+        "with_utils": False,
         "shared": False,
         "fPIC": True
     }
@@ -65,7 +67,7 @@ class ScipPlusPlus(ConanFile):
             try:
                 self.version = git.run("describe --tags --dirty=-d").strip()
             except:
-                self.version = "1.x.y"
+                self.version = "1.1.0"
 
     def layout(self):
         cmake_layout(self)
@@ -79,6 +81,7 @@ class ScipPlusPlus(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables[self.name + "_version"] = self.version
         tc.variables["BUILD_TESTS"] = self.options.with_tests
+        tc.variables["BUILD_UTILS"] = self.options.with_utils
         tc.generate()
 
     def build(self):
