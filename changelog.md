@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Using SCIP 8.0.4 now.
+- [PR14](https://github.com/scipopt/SCIPpp/pull/14) Using SCIP 8.0.4 now.
 
 ### Added
 
