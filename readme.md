@@ -115,7 +115,12 @@ model.setObjsense(Sense::MAXIMIZE);
 ### Accessing a Solution
 
 A model can be asked for the status and the number of solutions.
-A variable can be asked for its value in a given solution.
+A variable can be asked for its value in a given solution as
+
+* floating point number via `getSolVal(sol)`.
+* integer via `getSolValAsInt(sol)`.
+* long integer via `getSolValAsLongInt(sol)`, and
+* it can be checked for zero via `isZero(sol)`.
 
 ```cpp
 const auto& [x0, x1] = model.addVars<2>("x_");
@@ -125,6 +130,19 @@ if (model.getNSols() > 0 && model.getStatus() == SCIP_STATUS_OPTIMAL) {
     cout << "x0 + x1 =" << x0.getSolVal(sol) + x1.getSolVal(sol) << endl;
 }
 ```
+
+### IO
+
+A model can be written to file via `Model::writeOrigProblem` if a `std::filesystem::directory_entry` is given as
+argument. If it is just a string representing a file extension, it is written to standard output.
+
+### Numerics
+
+The model exposes
+
+* `SCIPepsilon` via `epsilon()`,
+* `SCIPround` via `round(double)`, and
+* `SCIPisZero` via `isZero(double)`
 
 ### Features Not Yet Supported
 
