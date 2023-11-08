@@ -62,4 +62,16 @@ BOOST_AUTO_TEST_CASE(IsZero)
     BOOST_TEST(model.isZero(x1.getSolVal(sol)));
 }
 
+BOOST_AUTO_TEST_CASE(IsVoid)
+{
+    scippp::Var x;
+    BOOST_TEST(x.var == nullptr);
+    BOOST_TEST(x.isVoid());
+
+    Model model("Simple");
+    auto x1 = model.addVar("x_1", 1);
+    BOOST_TEST(x1.var != nullptr);
+    BOOST_TEST(!x1.isVoid());
+}
+
 BOOST_AUTO_TEST_SUITE_END()
