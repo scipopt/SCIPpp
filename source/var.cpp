@@ -26,4 +26,9 @@ bool Var::isZero(const Solution& solution) const
     return SCIPisZero(solution.scip, getSolVal(solution));
 }
 
+bool Var::isVoid() const
+{
+    return var == nullptr;
+}
+
 }

@@ -48,6 +48,13 @@ struct Var {
      * @return \c true iff the value of this variable in the primal solution is in range epsilon of 0.0.
      */
     [[nodiscard]] bool isZero(const Solution& solution) const;
+
+    /**
+     * Checks whether an existing %SCIP variable is wrapped or the wrapper is empty.
+     * @since 1.2.0
+     * @return \c true iff the wrapper is empty
+     */
+    [[nodiscard]] bool isVoid() const;
 };
 
 }
