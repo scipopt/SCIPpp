@@ -2,11 +2,6 @@
 
 namespace scippp {
 
-LinExpr::LinExpr(double constant)
-    : m_constant { constant }
-{
-}
-
 LinExpr::LinExpr(const Var& var)
     : m_vars { var }
     , m_coeffs(1, 1)
