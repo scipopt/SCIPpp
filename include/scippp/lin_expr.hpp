@@ -29,9 +29,14 @@ public:
      * Creates a linear expression with no variables.
      * @since 1.0.0
      * @remark This is on purpose not an explicit c'tor to allow expressions like x <= 1.
+     * @tparam Arithmetic type that will be casted to \c double via \c static_cast
      * @param constant Constant term to set.
      */
-    LinExpr(double constant);
+    template <typename Arithmetic, std::enable_if_t<std::is_arithmetic_v<Arithmetic>, bool> = true>
+    LinExpr(Arithmetic constant)
+        : m_constant { static_cast<double>(constant) }
+    {
+    }
     /**
      * Creates a linear expression with zero as constant the given variable with coefficient one.
      * @since 1.0.0
