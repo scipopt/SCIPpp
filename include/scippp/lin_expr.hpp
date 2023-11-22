@@ -29,7 +29,8 @@ public:
      * Creates a linear expression with no variables.
      * @since 1.0.0
      * @remark This is on purpose not an explicit c'tor to allow expressions like x <= 1.
-     * @tparam Arithmetic type that will be casted to \c double via \c static_cast
+     * @tparam Arithmetic type that will be casted to \c double.
+     * @warning \c Arithmetic is casted to \c double without creating a narrowing warning!
      * @param constant Constant term to set.
      */
     template <typename Arithmetic, std::enable_if_t<std::is_arithmetic_v<Arithmetic>, bool> = true>
