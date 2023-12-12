@@ -4,6 +4,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - [Doc:Unreleased]
 
+### Changed
+
+- [PR20](https://github.com/scipopt/SCIPpp/pull/20) `LinExpr` can be constructed from any arithmetic type without
+  requiring a `static_cast`.
+
+### Added
+
+- [PR18](https://github.com/scipopt/SCIPpp/pull/18) Add `Var::isVoid`.
+
 ## [1.1.0] - 2023-10-15
 
 ### Changed
