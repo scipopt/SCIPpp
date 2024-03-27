@@ -3,6 +3,7 @@
 
 #include "scippp/model.hpp"
 #include "scippp/parameters.hpp"
+#include "scippp/solving_statistics.hpp"
 
 using namespace scippp;
 using namespace std;
@@ -45,6 +46,7 @@ BOOST_AUTO_TEST_CASE(StructuredBindingWithCoeff)
     model.setObjsense(Sense::MAXIMIZE);
     model.solve();
     BOOST_TEST(model.getPrimalbound() == 0);
+    BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 0);
 }
 
 BOOST_AUTO_TEST_CASE(StructuredBindingWithPredefinedConstantCoeff)
