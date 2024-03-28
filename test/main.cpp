@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_CASE(ModelCtorWithScip)
         model.addConstr(x1 + x2 <= 1, "capacity");
         model.setObjsense(Sense::MAXIMIZE);
         model.solve();
-        BOOST_TEST(model.getPrimalbound() == 1);
+        BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1);
     }
     SCIPfree(&scip);
 }
@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(StructuredBinding)
     model.addConstr(x1 + x2 <= 1, "capacity");
     model.setObjsense(Sense::MAXIMIZE);
     model.solve();
-    BOOST_TEST(model.getPrimalbound() == 1);
+    BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1);
 }
 
 BOOST_AUTO_TEST_CASE(StructuredBindingWithCoeff)
@@ -45,7 +45,6 @@ BOOST_AUTO_TEST_CASE(StructuredBindingWithCoeff)
     model.addConstr(x1 + x2 <= 1, "capacity");
     model.setObjsense(Sense::MAXIMIZE);
     model.solve();
-    BOOST_TEST(model.getPrimalbound() == 0);
     BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 0);
 }
 
@@ -56,7 +55,7 @@ BOOST_AUTO_TEST_CASE(StructuredBindingWithPredefinedConstantCoeff)
     model.addConstr(x1 + x2 <= 1, "capacity");
     model.setObjsense(Sense::MAXIMIZE);
     model.solve();
-    BOOST_TEST(model.getPrimalbound() == 1);
+    BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1);
 }
 
 BOOST_AUTO_TEST_CASE(CoefficientsFromExternalSource)
@@ -74,7 +73,7 @@ BOOST_AUTO_TEST_CASE(CoefficientsFromExternalSource)
     model.setObjsense(Sense::MAXIMIZE);
     model.solve();
     char expected = '2';
-    BOOST_TEST(model.getPrimalbound() == expected);
+    BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == expected);
 }
 
 BOOST_AUTO_TEST_CASE(SimpleMaxRhs)
@@ -85,7 +84,7 @@ BOOST_AUTO_TEST_CASE(SimpleMaxRhs)
     model.addConstr(x1 + x2 <= 1, "capacityRight");
     model.setObjsense(Sense::MAXIMIZE);
     model.solve();
-    BOOST_TEST(model.getPrimalbound() == 1);
+    BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1);
 }
 
 BOOST_AUTO_TEST_CASE(SimpleMaxLhs)
@@ -96,7 +95,7 @@ BOOST_AUTO_TEST_CASE(SimpleMaxLhs)
     model.addConstr(1 >= x1 + x2, "capacityRight");
     model.setObjsense(Sense::MAXIMIZE);
     model.solve();
-    BOOST_TEST(model.getPrimalbound() == 1);
+    BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1);
 }
 
 BOOST_AUTO_TEST_CASE(SimpleMinRhs)
@@ -107,7 +106,7 @@ BOOST_AUTO_TEST_CASE(SimpleMinRhs)
     model.addConstr(1 <= x1 + x2, "capacity");
     model.setObjsense(Sense::MINIMIZE);
     model.solve();
-    BOOST_TEST(model.getPrimalbound() == 1);
+    BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1);
 }
 
 BOOST_AUTO_TEST_CASE(SimpleMinLhs)
@@ -121,7 +120,7 @@ BOOST_AUTO_TEST_CASE(SimpleMinLhs)
     model.solve();
     BOOST_REQUIRE(model.getNSols() > 0);
     BOOST_TEST(model.getStatus() == SCIP_STATUS_OPTIMAL);
-    BOOST_TEST(model.getPrimalbound() == 1);
+    BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1);
 }
 
 BOOST_AUTO_TEST_CASE(GetLastReturnCodeOkay)
@@ -138,7 +137,7 @@ BOOST_AUTO_TEST_CASE(GetLastReturnCodeOkay)
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
-    BOOST_TEST(model.getPrimalbound() == 1);
+    BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
 }
 

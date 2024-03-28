@@ -1,6 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "scippp/model.hpp"
+#include "scippp/solving_statistics.hpp"
 
 using namespace scippp;
 using namespace std;
@@ -24,7 +25,7 @@ BOOST_AUTO_TEST_CASE(lDuN, *boost::unit_test::tolerance(1e-3))
     m1.setObjsense(Sense::MINIMIZE);
     m1.solve();
     BOOST_REQUIRE(m1.getNSols() > 0);
-    BOOST_TEST(m1.getPrimalbound() == 0);
+    BOOST_TEST(m1.getSolvingStatistic(statistics::PRIMALBOUND) == 0);
 
     Model m2("Simple");
     x1 = m2.addVar("x_1", 1, VarType::CONTINUOUS, LB_DEFAULT, nullopt);
@@ -52,7 +53,7 @@ BOOST_AUTO_TEST_CASE(lNuD, *boost::unit_test::tolerance(1e-3))
     m2.setObjsense(Sense::MAXIMIZE);
     m2.solve();
     BOOST_REQUIRE(m2.getNSols() > 0);
-    BOOST_TEST(m2.getPrimalbound() == 1);
+    BOOST_TEST(m2.getSolvingStatistic(statistics::PRIMALBOUND) == 1);
 }
 
 BOOST_AUTO_TEST_CASE(lNuN, *boost::unit_test::tolerance(1e-3))
@@ -72,7 +73,7 @@ BOOST_AUTO_TEST_CASE(lNuN, *boost::unit_test::tolerance(1e-3))
     m2.setObjsense(Sense::MAXIMIZE);
     m2.solve();
     BOOST_REQUIRE(m2.getNSols() > 0);
-    BOOST_TEST(m2.getPrimalbound() == 1);
+    BOOST_TEST(m2.getSolvingStatistic(statistics::PRIMALBOUND) == 1);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

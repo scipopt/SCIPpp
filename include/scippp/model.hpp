@@ -245,6 +245,7 @@ public:
      * @deprecated since 1.2.0, use getSolvingStatistic with statistics::PRIMALBOUND instead.
      * @return objective value of best solution.
      */
+    [[deprecated("use getSolvingStatistic with statistics::PRIMALBOUND instead")]]
     [[nodiscard]] double getPrimalbound() const;
 
     /**
