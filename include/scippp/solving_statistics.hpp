@@ -169,12 +169,9 @@ static const Statistic<SCIP_Real> AVG_INFERENCE_SCORE_CURRENT_RUN { &SCIPgetAvgI
 static const Statistic<SCIP_Real> AVG_CUTOFF_SCORE { &SCIPgetAvgCutoffScore };
 //! average cutoff score value over all variables, only using the cutoff information of the current run
 static const Statistic<SCIP_Real> AVG_CUTOFF_SCORE_CURRENT_RUN { &SCIPgetAvgCutoffScoreCurrentRun };
-//! average normalized efficacy of a GMI cut over all variables
-static const Statistic<SCIP_Real> AVG_G_M_IEFF { &SCIPgetAvgGMIeff };
 //! total number of LPs solved so far
 static const Statistic<SCIP_Real> DETERMINISTIC_TIME { &SCIPgetDeterministicTime };
 //! total number of implications between variables that are stored in the implication graph
 static const Statistic<int> N_IMPLICATIONS { &SCIPgetNImplications };
-static const Statistic<SCIP_Real> PRIMAL_DUAL_INTEGRAL { &SCIPgetPrimalDualIntegral };
 
 }
