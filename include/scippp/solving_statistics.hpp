@@ -118,6 +118,7 @@ static const Statistic<SCIP_Longint> N_BACKTRACKS { &SCIPgetNBacktracks };
 static const Statistic<int> N_ACTIVE_CONSS { &SCIPgetNActiveConss };
 //! total number of enabled constraints at the current node
 static const Statistic<int> N_ENABLED_CONSS { &SCIPgetNEnabledConss };
+//! average dual bound of all unprocessed nodes for original problem
 static const Statistic<SCIP_Real> AVG_DUALBOUND { &SCIPgetAvgDualbound };
 //! average lower (dual) bound of all unprocessed nodes in transformed problem
 static const Statistic<SCIP_Real> AVG_LOWERBOUND { &SCIPgetAvgLowerbound };
@@ -133,6 +134,7 @@ static const Statistic<SCIP_Real> LOWERBOUND_ROOT { &SCIPgetLowerboundRoot };
 static const Statistic<SCIP_Real> FIRST_LP_DUALBOUND_ROOT { &SCIPgetFirstLPDualboundRoot };
 //! lower (dual) bound in transformed problem obtained by first LP solve at the root node
 static const Statistic<SCIP_Real> FIRST_LP_LOWERBOUND_ROOT { &SCIPgetFirstLPLowerboundRoot };
+//! primal bound of the very first solution
 static const Statistic<SCIP_Real> FIRST_PRIMAL_BOUND { &SCIPgetFirstPrimalBound };
 //! global primal bound (objective value of best solution or user objective limit) for the original problem
 static const Statistic<SCIP_Real> PRIMALBOUND { &SCIPgetPrimalbound };
@@ -154,6 +156,7 @@ static const Statistic<SCIP_Longint> N_BEST_SOLS_FOUND { &SCIPgetNBestSolsFound 
 static const Statistic<SCIP_Real> AVG_PSEUDOCOST_SCORE { &SCIPgetAvgPseudocostScore };
 //! average pseudo cost score value over all variables, assuming a fractionality of 0.5,
 static const Statistic<SCIP_Real> AVG_PSEUDOCOST_SCORE_CURRENT_RUN { &SCIPgetAvgPseudocostScoreCurrentRun };
+//! average conflict score value over all variables
 static const Statistic<SCIP_Real> AVG_CONFLICT_SCORE { &SCIPgetAvgConflictScore };
 //! average conflict score value over all variables, only using the conflict information of the current run
 static const Statistic<SCIP_Real> AVG_CONFLICT_SCORE_CURRENT_RUN { &SCIPgetAvgConflictScoreCurrentRun };
