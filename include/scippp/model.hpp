@@ -219,6 +219,14 @@ public:
      */
     [[nodiscard]] SCIP_Status getStatus() const;
 
+    /**
+     * Query statistics about the solving process.
+     *
+     * @tparam T Type of the statistics value.
+     * @since 1.2.0
+     * @param statistic Statistics value to access.
+     * @return Statistics value.
+     */
     template<typename T>
     [[nodiscard]] T getSolvingStatistic(const statistics::Statistic<T>& statistic) const
     {
