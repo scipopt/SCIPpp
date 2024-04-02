@@ -36,6 +36,8 @@ BOOST_AUTO_TEST_CASE(StructuredBinding)
     model.setObjsense(Sense::MAXIMIZE);
     model.solve();
     BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1);
+    // test that deprecated method returns the same result
+    BOOST_TEST(model.getPrimalbound() == 1);
 }
 
 BOOST_AUTO_TEST_CASE(StructuredBindingWithCoeff)
