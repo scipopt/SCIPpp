@@ -227,7 +227,7 @@ public:
      * @param statistic Statistics value to access.
      * @return Statistics value.
      */
-    template<typename T>
+    template <typename T>
     [[nodiscard]] T getSolvingStatistic(const statistics::Statistic<T>& statistic) const
     {
         return statistic(m_scip);
@@ -253,8 +253,9 @@ public:
      * @deprecated since 1.2.0, use getSolvingStatistic with statistics::PRIMALBOUND instead.
      * @return objective value of best solution.
      */
-    [[deprecated("use getSolvingStatistic with statistics::PRIMALBOUND instead")]]
-    [[nodiscard]] double getPrimalbound() const;
+    [[deprecated("use getSolvingStatistic with statistics::PRIMALBOUND instead")]] //
+    [[nodiscard]] double
+    getPrimalbound() const;
 
     /**
      * Sets a parameter.
