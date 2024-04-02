@@ -11,7 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- [PR22](https://github.com/scipopt/SCIPpp/pull/22) Add `Model::getSolvingStatistic`.
 - [PR18](https://github.com/scipopt/SCIPpp/pull/18) Add `Var::isVoid`.
+
+### Deprecated
+
+- [PR22](https://github.com/scipopt/SCIPpp/pull/22)
+  `Model::getPrimalbound()`, use `Model::getSolvingStatistic(statistics::PRIMALBOUND)` instead.
 
 ## [1.1.0] - 2023-10-15
 
