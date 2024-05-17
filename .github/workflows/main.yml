@@ -106,7 +106,7 @@ jobs:
           pushd ~/.conan2/profiles
           sed -i 's/gnu17/17/g' *
           popd
-          conan install -of . .
+          conan graph explain -of . .
       - name: Create CMake Compilation Database
         run: cmake --preset conan-release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .
       - name: Run Clang-Tidy
