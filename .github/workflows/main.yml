@@ -74,26 +74,11 @@ jobs:
           make -j tests
       - name: Run tests
         run: ./test/tests
-  test_release_linux:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: turtlebrowser/get-conan@main
-      - name: Run Conan Install
-        run: |
-          conan profile detect
-          pushd ~/.conan2/profiles
-          sed -i 's/gnu17/17/g' *
-          popd
-          conan install -of . -o with_tests=True . --build=missing
-      - name: Run CMake
-        run: cmake --preset conan-release .
-      - name: Compile
-        run: cmake --build build/Release --target tests
-      - name: Run Tests
-        run: ./build/Release/test/tests
-  test_release_mac:
-    runs-on:  macos-11
+  test_release_inx:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-11 ]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
       - uses: turtlebrowser/get-conan@main
