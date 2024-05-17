@@ -20,7 +20,7 @@ jobs:
           pushd ~/.conan2/profiles
           sed -i 's/gnu17/17/g' *
           popd
-          conan install -of . -pr debug -o with_tests=True .
+          conan install -of . -pr debug -o with_tests=True . --build=missing
       - name: Run CMake
         run: cmake --preset conan-debug -DUSE_COVERAGE=ON .
       - name: Compile
@@ -47,7 +47,7 @@ jobs:
         run: |
           conan profile detect
           powershell -Command "(gc $(conan profile path default)) -replace 'compiler.cppstd=14', 'compiler.cppstd=17' | Out-File -encoding ASCII $(conan profile path default)"
-          conan install -of . -o with_tests=True .
+          conan install -of . -o with_tests=True . --build=missing
       - name: Run CMake
         run: cmake --preset conan-default .
       - name: Compile
@@ -88,7 +88,7 @@ jobs:
           pushd ~/.conan2/profiles
           sed -i 's/gnu17/17/g' *
           popd
-          conan install -of . -o with_tests=True .
+          conan install -of . -o with_tests=True . --build=missing
       - name: Run CMake
         run: cmake --preset conan-release .
       - name: Compile
@@ -106,7 +106,7 @@ jobs:
           pushd ~/.conan2/profiles
           sed -i 's/gnu17/17/g' *
           popd
-          conan install -of . .
+          conan install -of . . --build=missing
       - name: Create CMake Compilation Database
         run: cmake --preset conan-release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .
       - name: Run Clang-Tidy
