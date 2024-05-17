@@ -17,6 +17,9 @@ jobs:
           conan profile detect
           conan profile detect --name debug
           echo "&:build_type=Debug" >> $(conan profile path debug)
+          pushd ~/.conan2/profiles
+          sed -i 's/gnu17/17/g' *
+          popd
           conan install -of . -pr debug -o with_tests=True .
       - name: Run CMake
         run: cmake --preset conan-debug -DUSE_COVERAGE=ON .
@@ -59,15 +62,15 @@ jobs:
         run: sudo apt update && sudo apt install libtbb2
       - uses: MarkusJx/install-boost@v2.4.1
         with:
-          boost_version: 1.81.0
+          boost_version: 1.84.0
       - name: Install SCIP
         run: |
-          wget https://github.com/scipopt/scip/releases/download/v803/SCIPOptSuite-8.0.3-Linux-ubuntu.sh
-          chmod +x SCIPOptSuite-8.0.3-Linux-ubuntu.sh
-          ./SCIPOptSuite-8.0.3-Linux-ubuntu.sh --skip-license
+          wget https://github.com/scipopt/scip/releases/download/v901/SCIPOptSuite-9.0.1-Linux-ubuntu22.sh
+          chmod +x SCIPOptSuite-9.0.1-Linux-ubuntu22.sh
+          ./SCIPOptSuite-9.0.1-Linux-ubuntu22.sh --skip-license
       - name: Build SCIP++
         run: |
-          CMAKE_PREFIX_PATH=./lib/cmake/scip:./boost/boost/lib/cmake/Boost-1.81.0 cmake -DBUILD_TESTS=ON .
+          CMAKE_PREFIX_PATH=./lib/cmake/scip:./boost/boost/lib/cmake/Boost-1.84.0 cmake -DBUILD_TESTS=ON .
           make -j tests
       - name: Run tests
         run: ./test/tests
@@ -82,6 +85,9 @@ jobs:
       - name: Run Conan Install
         run: |
           conan profile detect
+          pushd ~/.conan2/profiles
+          sed -i 's/gnu17/17/g' *
+          popd
           conan install -of . -o with_tests=True .
       - name: Run CMake
         run: cmake --preset conan-release .
@@ -97,6 +103,9 @@ jobs:
       - name: Run Conan Install
         run: |
           conan profile detect
+          pushd ~/.conan2/profiles
+          sed -i 's/gnu17/17/g' *
+          popd
           conan install -of . .
       - name: Create CMake Compilation Database
         run: cmake --preset conan-release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .
@@ -117,7 +126,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: ssciwr/doxygen-install@v1
         with:
-          version: "1.9.6"
+          version: "1.10.0"
       - uses: ts-graphviz/setup-graphviz@v1
       - name: Prepare Doxygen Config
         run: echo "PROJECT_NUMBER = ${GITHUB_REF}" >> Doxyfile
