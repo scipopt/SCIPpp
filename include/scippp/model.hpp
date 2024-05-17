@@ -15,6 +15,7 @@
 #include "scippp/lin_ineq.hpp"
 #include "scippp/param.hpp"
 #include "scippp/solution.hpp"
+#include "scippp/statistics.hpp"
 #include "scippp/var.hpp"
 #include "scippp/var_type.hpp"
 
@@ -219,6 +220,20 @@ public:
     [[nodiscard]] SCIP_Status getStatus() const;
 
     /**
+     * Query statistics about the solving process.
+     *
+     * @tparam T Type of the statistics value.
+     * @since 1.2.0
+     * @param statistic Statistics value to access.
+     * @return Statistics value.
+     */
+    template <typename T>
+    [[nodiscard]] T getSolvingStatistic(const statistics::Statistic<T>& statistic) const
+    {
+        return statistic(m_scip);
+    }
+
+    /**
      * Returns the number of feasible primal solutions stored in the solution storage.
      * @since 1.0.0
      * @return number of solutions.
@@ -235,9 +250,12 @@ public:
     /**
      * Returns the objective value of best solution.
      * @since 1.0.0
+     * @deprecated since 1.2.0, use getSolvingStatistic with statistics::PRIMALBOUND instead.
      * @return objective value of best solution.
      */
-    [[nodiscard]] double getPrimalbound() const;
+    [[deprecated("use getSolvingStatistic with statistics::PRIMALBOUND instead")]] //
+    [[nodiscard]] double
+    getPrimalbound() const;
 
     /**
      * Sets a parameter.

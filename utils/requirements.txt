@@ -1,0 +1,2 @@
+case-converter==1.1.0
+CppHeaderParser==2.7.4

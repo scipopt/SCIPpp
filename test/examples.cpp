@@ -2,6 +2,7 @@
 
 #include "scippp/model.hpp"
 #include "scippp/parameters.hpp"
+#include "scippp/solving_statistics.hpp"
 
 using namespace scippp;
 using namespace std;
@@ -26,7 +27,7 @@ BOOST_AUTO_TEST_CASE(Knapsack)
     model.setParam(params::DISPLAY::VERBLEVEL, 0);
 
     model.solve();
-    BOOST_TEST(model.getPrimalbound() == 882);
+    BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 882);
     BOOST_TEST(model.getNSols() == 1);
 }
 
