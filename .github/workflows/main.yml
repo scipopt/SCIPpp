@@ -101,7 +101,7 @@ jobs:
         run: |
           conan profile detect
           pushd ~/.conan2/profiles
-          gsed -i 's/gnu17/17/g' *
+          sed -i'' -e 's/gnu17/17/g' *
           popd
           conan install -of . -o with_tests=True . --build=missing
       - name: Run CMake
