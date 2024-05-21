@@ -4,6 +4,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - [Doc:Unreleased]
 
+## [1.2.0] - 2023-05-21
+
 ### Changed
 
 - [PR20](https://github.com/scipopt/SCIPpp/pull/20) `LinExpr` can be constructed from any arithmetic type without
