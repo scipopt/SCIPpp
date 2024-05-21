@@ -67,15 +67,15 @@ class ScipPlusPlus(ConanFile):
             try:
                 self.version = git.run("describe --tags --dirty=-d").strip()
             except:
-                self.version = "1.1.0"
+                self.version = "1.2.0"
 
     def layout(self):
         cmake_layout(self)
 
     def requirements(self):
-        self.requires("scip/8.0.4", transitive_headers=True)
+        self.requires("scip/9.0.1", transitive_headers=True)
         if self.options.with_tests:
-            self.requires("boost/[>=1.81.0 <2]")  # required only for tests
+            self.requires("boost/[>=1.84.0 <2]")  # required only for tests
 
     def generate(self):
         tc = CMakeToolchain(self)

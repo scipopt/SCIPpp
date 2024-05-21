@@ -144,6 +144,17 @@ The model exposes
 * `SCIPround` via `round(double)`, and
 * `SCIPisZero` via `isZero(double)`
 
+### Access Solving Statistics
+
+Use the `Statistics<T>` objects from the header [solving_statistics.hpp](include/scippp/solving_statistics.hpp) to
+access solving statistics in a type-safe way:
+
+```cpp
+...
+model.solve();
+auto pb { model.getSolvingStatistic(statistics::PRIMALBOUND) };
+```
+
 ### Features Not Yet Supported
 
 For features not yet supported by SCIP++, one can access the underlying raw SCIP object via
@@ -239,6 +250,9 @@ make tests
 
 Use `gen_constexpr_parameters` to transform all SCIP parameters into constexpr `scippp::params::Param<T>` objects which
 can be added to the `parameters.hpp` header.
+
+Use `extract_solvingstats` to transform all SCIP methods that access solving statistics into static const
+`scippp::statistics::Statistic<T>` objects which can be added to the `solving_statistics.hpp` header.
 
 ## Maintainer
 
