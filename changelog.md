@@ -63,7 +63,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Initial release
 
 [Doc:Unreleased]: https://scipopt.github.io/SCIPpp/
-[Unreleased]: https://github.com/scipopt/SCIPpp/compare/1.1.0...main
+[Unreleased]: https://github.com/scipopt/SCIPpp/compare/1.2.0...main
+[1.2.0]: https://github.com/scipopt/SCIPpp/releases/tag/1.2.0
 [1.1.0]: https://github.com/scipopt/SCIPpp/releases/tag/1.1.0
 [1.0.2]: https://github.com/scipopt/SCIPpp/releases/tag/1.0.2
 [1.0.1]: https://github.com/scipopt/SCIPpp/releases/tag/1.0.1
