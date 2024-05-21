@@ -62,7 +62,7 @@ jobs:
         run: sudo apt update && sudo apt install libtbb12
       - uses: MarkusJx/install-boost@v2.4.1
         with:
-          boost_version: 1.83.0
+          boost_version: 1.84.0
       - name: Install SCIP
         run: |
           wget https://github.com/scipopt/scip/releases/download/v901/SCIPOptSuite-9.0.1-Linux-ubuntu22.sh
@@ -70,7 +70,7 @@ jobs:
           ./SCIPOptSuite-9.0.1-Linux-ubuntu22.sh --skip-license
       - name: Build SCIP++
         run: |
-          CMAKE_PREFIX_PATH=./lib/cmake/scip:./boost/boost/lib/cmake/Boost-1.83.0 cmake -DBUILD_TESTS=ON .
+          CMAKE_PREFIX_PATH=./lib/cmake/scip:./boost/boost/lib/cmake/Boost-1.84.0 cmake -DBUILD_TESTS=ON .
           make -j tests
       - name: Run tests
         run: ./test/tests
