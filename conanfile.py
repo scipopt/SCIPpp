@@ -73,7 +73,7 @@ class ScipPlusPlus(ConanFile):
         cmake_layout(self)
 
     def requirements(self):
-        self.requires("scip/8.1.0", transitive_headers=True)
+        self.requires("scip/9.0.1", transitive_headers=True)
         if self.options.with_tests:
             self.requires("boost/1.84.0")  # required only for tests
 
