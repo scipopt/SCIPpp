@@ -15,8 +15,27 @@ struct Solution;
  * @since 1.0.0
  */
 struct Var {
-    //! Pointer to the underlying %SCIP variable.
+    /**
+     * Pointer to the underlying %SCIP variable.
+     * @deprecated since 1.3.0: Use #getVar() instead
+     */
     SCIP_Var* var { nullptr };
+
+    /**
+     * Pointer to the underlying %SCIP variable.
+     * @since 1.3.0
+     * @return underlying %SCIP variable.
+     */
+    [[nodiscard]] SCIP_Var* getVar();
+
+    /**
+     * Pointer to the underlying %SCIP variable.
+     *
+     * @since 1.3.0
+     * @return underlying %SCIP variable.
+     */
+    [[nodiscard]] const SCIP_Var* getVar() const;
+
     /**
      * Get the assigned value in the solution.
      * @since 1.0.0
