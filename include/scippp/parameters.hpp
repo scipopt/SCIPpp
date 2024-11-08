@@ -7218,7 +7218,6 @@ namespace WRITE {
     constexpr Param<int> GENERICNAMESOFFSET { "write/genericnamesoffset" };
 }
 
-
 // NOLINTEND(readability-identifier-naming)
 
 }
