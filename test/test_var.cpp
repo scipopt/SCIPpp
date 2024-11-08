@@ -66,6 +66,7 @@ BOOST_AUTO_TEST_CASE(IsVoid)
 {
     scippp::Var x;
     BOOST_TEST(x.var == nullptr);
+    BOOST_TEST(x.getVar() == nullptr);
     BOOST_TEST(x.isVoid());
 
     Model model("Simple");
