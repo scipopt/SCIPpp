@@ -135,7 +135,7 @@ jobs:
       - name: Zip HTML Docu
         run: zip -q -9 -r html.zip html
       - name: Store HTML Docu
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: doxygen-html
           path: html.zip
