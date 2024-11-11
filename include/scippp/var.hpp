@@ -34,7 +34,7 @@ struct Var {
      * @since 1.3.0
      * @return underlying %SCIP variable.
      */
-    [[nodiscard]] const SCIP_Var* getVar() const;
+    [[nodiscard]] SCIP_Var* const getVar() const;
 
     /**
      * Get the assigned value in the solution.

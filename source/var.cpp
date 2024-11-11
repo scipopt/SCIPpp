@@ -12,7 +12,7 @@ SCIP_Var* Var::getVar()
     return var;
 }
 
-const SCIP_Var* Var::getVar() const
+SCIP_Var* const Var::getVar() const
 {
     return var;
 }
