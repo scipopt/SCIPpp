@@ -1,10 +1,21 @@
 #include "scippp/var.hpp"
 
 #include "scippp/solution.hpp"
+
 #include <scip/scip_numerics.h>
 #include <scip/scip_sol.h>
 
 namespace scippp {
+
+SCIP_Var* Var::getVar()
+{
+    return var;
+}
+
+SCIP_Var* const Var::getVar() const
+{
+    return var;
+}
 
 double Var::getSolVal(const Solution& sol) const
 {
