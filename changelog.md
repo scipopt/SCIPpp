@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- [PR27](https://github.com/scipopt/SCIPpp/pull/27) Update to SCIP v9.2.0.
+- [PR27](https://github.com/scipopt/SCIPpp/pull/27) Update to SCIP 9.2.0.
 
 ## [1.2.0] - 2024-05-21
 
