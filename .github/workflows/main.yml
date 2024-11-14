@@ -65,9 +65,9 @@ jobs:
           boost_version: 1.84.0
       - name: Install SCIP
         run: |
-          wget https://github.com/scipopt/scip/releases/download/v901/SCIPOptSuite-9.0.1-Linux-ubuntu22.sh
-          chmod +x SCIPOptSuite-9.0.1-Linux-ubuntu22.sh
-          ./SCIPOptSuite-9.0.1-Linux-ubuntu22.sh --skip-license
+          wget https://github.com/scipopt/scip/releases/download/v920/SCIPOptSuite-9.2.0-Linux-ubuntu22.sh
+          chmod +x SCIPOptSuite-9.2.0-Linux-ubuntu22.sh
+          ./SCIPOptSuite-9.2.0-Linux-ubuntu22.sh --skip-license
       - name: Build SCIP++
         run: |
           CMAKE_PREFIX_PATH=./lib/cmake/scip:./boost/boost/lib/cmake/Boost-1.84.0 cmake -DBUILD_TESTS=ON .
@@ -77,7 +77,7 @@ jobs:
   test_release_inx:
     strategy:
       matrix:
-        os: [ ubuntu-latest, macos-11 ]
+        os: [ ubuntu-latest, macos-13 ]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -88,7 +88,7 @@ jobs:
           pushd ~/.conan2/profiles
           sed -i'' -e 's/gnu17/17/g' *
           popd
-          conan install -of . -o with_tests=True .
+          conan install -of . -o with_tests=True --build=missing .
       - name: Run CMake
         run: cmake --preset conan-release .
       - name: Compile
@@ -119,14 +119,14 @@ jobs:
         with:
           source: source include test
           extensions: 'hpp,cpp'
-          clangFormatVersion: 16
+          clangFormatVersion: 17
   doxygen:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: ssciwr/doxygen-install@v1
         with:
-          version: "1.10.0"
+          version: "1.12.0"
       - uses: ts-graphviz/setup-graphviz@v1
       - name: Prepare Doxygen Config
         run: echo "PROJECT_NUMBER = ${GITHUB_REF}" >> Doxyfile
@@ -135,7 +135,7 @@ jobs:
       - name: Zip HTML Docu
         run: zip -q -9 -r html.zip html
       - name: Store HTML Docu
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: doxygen-html
           path: html.zip
