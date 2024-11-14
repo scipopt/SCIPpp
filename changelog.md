@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 
-- [PR28](https://github.com/scipopt/SCIPpp/pull/28) Add `Var::getVar()`.
+- [PR28](https://github.com/scipopt/SCIPpp/pull/28) Add `Var::getVar`.
 
 ## [1.2.0] - 2024-05-21
 
