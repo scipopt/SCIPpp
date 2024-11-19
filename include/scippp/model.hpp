@@ -332,6 +332,7 @@ public:
      * Adds a solution to %SCIP's solution pool.
      *
      * @since 1.3.0
+     * @param initialSolution to add to the solution pool.
      * @param printReason Should all reasons of violations be printed?
      * @param completely Should all violations be checked if \p printReason is true?
      * @param checkBounds Should the bounds of the variables be checked?
