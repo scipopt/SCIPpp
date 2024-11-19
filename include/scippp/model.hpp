@@ -339,11 +339,11 @@ public:
      * @return \c true iff the solution was feasible and stored in the solution storage (i.e, good enough to keep).
      */
     bool addSolution(
-      const InitialSolution& initialSolution,
-      bool printReason = true,
-      bool completely = true,
-      bool checkBounds = true,
-      bool checkIntegrality = true,
-      bool checkLpRows = true);
+        const InitialSolution& initialSolution,
+        bool printReason = true,
+        bool completely = true,
+        bool checkBounds = true,
+        bool checkIntegrality = true,
+        bool checkLpRows = true);
 };
 }

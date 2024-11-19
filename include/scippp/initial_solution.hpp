@@ -15,6 +15,7 @@ class InitialSolution {
     friend class Model;
     //! Variable assignment in the initial solution.
     std::map<SCIP_Var*, double> m_values {};
+
 public:
     void setValue(const Var& var, double value);
 };
