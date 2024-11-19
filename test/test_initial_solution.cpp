@@ -32,4 +32,14 @@ BOOST_DATA_TEST_CASE(InitialSolutionStored, bdata::make({ 1, 2, 3 }), indexSetTo
     BOOST_TEST(x3.getSolValAsInt(sol) == (indexSetToOne == 3 ? 1 : 0));
 }
 
+BOOST_AUTO_TEST_CASE(Infeasible)
+{
+    Model model("Simple");
+    auto x1 = model.addVar("x_1", 1, VarType::BINARY);
+    model.setObjsense(Sense::MAXIMIZE);
+    InitialSolution is;
+    is.setValue(x1, 2);
+    BOOST_TEST(!model.addSolution(is));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
