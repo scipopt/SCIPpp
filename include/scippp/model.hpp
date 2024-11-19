@@ -329,7 +329,8 @@ public:
     scip() const;
 
     /**
-     * todo
+     * Adds a solution to %SCIP's solution pool.
+     *
      * @since 1.3.0
      * @param printReason Should all reasons of violations be printed?
      * @param completely Should all violations be checked if \p printReason is true?
