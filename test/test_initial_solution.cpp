@@ -42,4 +42,16 @@ BOOST_AUTO_TEST_CASE(Infeasible)
     BOOST_TEST(!model.addSolution(is));
 }
 
+BOOST_AUTO_TEST_CASE(UpdateSolution)
+{
+    Model model("Simple");
+    const auto& [x1, x2] = model.addVars<2>("x_");
+    InitialSolution is;
+    is(x1) = 4;
+    is(x1) += 38;
+    is(x2) += 42;
+    BOOST_TEST(is(x1) == 42);
+    BOOST_TEST(is(x2) == 42);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -10,4 +10,9 @@ void InitialSolution::setValue(const Var& var, double value)
     m_values[var.var] = value;
 }
 
+double& InitialSolution::operator()(const Var& var)
+{
+    return m_values[var.var];
+}
+
 }
