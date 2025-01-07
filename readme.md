@@ -256,7 +256,7 @@ Use `extract_solvingstats` to transform all SCIP methods that access solving sta
 
 ## Maintainer
 
-This project is maintained by Ivo Hedtke `ivo (dot) hedtke (at) dbschenker (dot) com`.
+This project is maintained by Tilo Wiedera `tilo (dot) wiedera (at) dbschenker (dot) com`.
 
 ## Code of Conduct
 
