@@ -46,6 +46,32 @@ public:
      */
     LinExpr(const Var& var);
 
+    LinExpr(const std::initializer_list<Var>& vars)
+        : m_vars { vars.begin(), vars.end() }
+        , m_coeffs(vars.size(), 1)
+    {
+    }
+
+    template <typename Span>
+        requires requires { typename Span::value_type; }
+    LinExpr(const Span& vars)
+        : m_vars { vars.begin(), vars.end() }
+        , m_coeffs(vars.size(), 1)
+    {
+    }
+
+    template <typename VarSpan, typename CoeffSpan>
+        requires requires {
+            typename VarSpan::value_type;
+            typename CoeffSpan::value_type;
+        }
+    LinExpr(const VarSpan& vars, const CoeffSpan& coeffs)
+        : m_vars(vars.begin(), vars.end())
+        , m_coeffs(coeffs.begin(), coeffs.end())
+    {
+        // assert(vars.size() == coeffs.size());
+    }
+
     /**
      * Returns the constant term of the expression.
      * @since 1.0.0
