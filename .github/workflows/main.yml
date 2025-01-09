@@ -9,6 +9,9 @@ on:
 jobs:
   coverage:
     runs-on: ubuntu-latest
+    env:
+      CC: gcc-11
+      CXX: g++-11
     steps:
       - uses: actions/checkout@v3
       - uses: turtlebrowser/get-conan@main
@@ -56,6 +59,9 @@ jobs:
         run: ./build/test/Release/tests.exe
   test_without_conan:
     runs-on: ubuntu-latest
+    env:
+      CC: gcc-11
+      CXX: g++-11
     steps:
       - uses: actions/checkout@v3
       - name: Install parallelism library for C++
@@ -97,6 +103,9 @@ jobs:
         run: ./build/Release/test/tests
   clang_tidy:
     runs-on: ubuntu-latest
+    env:
+      CC: gcc-11
+      CXX: g++-11
     steps:
       - uses: actions/checkout@v3
       - uses: turtlebrowser/get-conan@main
