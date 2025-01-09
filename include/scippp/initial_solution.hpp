@@ -2,9 +2,6 @@
 
 #include <map>
 
-// forward declare
-struct SCIP_Var;
-
 namespace scippp {
 
 // forward declare
@@ -18,7 +15,7 @@ class Var;
 class InitialSolution {
     friend class Model;
     //! Variable assignment in the initial solution.
-    std::map<SCIP_Var*, double> m_values {};
+    std::map<const Var*, double> m_values {};
 
 public:
     /**

@@ -161,7 +161,7 @@ bool Model::addSolution(
     SCIP_Sol* sol { nullptr };
     m_scipCallWrapper(SCIPcreateSol(m_scip, &sol, nullptr));
     for (const auto& [var, value] : initialSolution.m_values) {
-        m_scipCallWrapper(SCIPsetSolVal(m_scip, sol, var, value));
+        m_scipCallWrapper(SCIPsetSolVal(m_scip, sol, var->getVar(), value));
     }
     SCIP_Bool isFeasible { false };
     m_scipCallWrapper(SCIPcheckSol(
