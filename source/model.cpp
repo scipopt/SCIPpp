@@ -150,4 +150,29 @@ double Model::getPrimalbound() const
     return SCIPgetPrimalbound(m_scip);
 }
 
+bool Model::addSolution(
+    const InitialSolution& initialSolution,
+    bool printReason,
+    bool completely,
+    bool checkBounds,
+    bool checkIntegrality,
+    bool checkLpRows)
+{
+    SCIP_Sol* sol { nullptr };
+    m_scipCallWrapper(SCIPcreateSol(m_scip, &sol, nullptr));
+    for (const auto& [var, value] : initialSolution.m_values) {
+        m_scipCallWrapper(SCIPsetSolVal(m_scip, sol, var->getVar(), value));
+    }
+    SCIP_Bool isFeasible { false };
+    m_scipCallWrapper(SCIPcheckSol(
+        m_scip, sol, printReason, completely, checkBounds, checkIntegrality, checkLpRows, &isFeasible));
+    SCIP_Bool isStored { false };
+    if (isFeasible) {
+        m_scipCallWrapper(SCIPaddSolFree(m_scip, &sol, &isStored));
+    } else {
+        m_scipCallWrapper(SCIPfreeSol(m_scip, &sol));
+    }
+    return isStored;
+}
+
 }

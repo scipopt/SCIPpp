@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "scippp/constant_coefficient.hpp"
+#include "scippp/initial_solution.hpp"
 #include "scippp/lin_expr.hpp"
 #include "scippp/lin_ineq.hpp"
 #include "scippp/param.hpp"
@@ -326,5 +327,25 @@ public:
                     That is only required for use-cases not supported by SCIP++.
                     Consider adding the feature you are using to SCIP++!)")]] [[nodiscard]] Scip*
     scip() const;
+
+    /**
+     * Adds a solution to %SCIP's solution pool.
+     *
+     * @since 1.3.0
+     * @param initialSolution to add to the solution pool.
+     * @param printReason Should all reasons of violations be printed?
+     * @param completely Should all violations be checked if \p printReason is true?
+     * @param checkBounds Should the bounds of the variables be checked?
+     * @param checkIntegrality Should integrality be checked?
+     * @param checkLpRows Do constraints represented by rows in the current LP have to be checked?
+     * @return \c true iff the solution was feasible and stored in the solution storage (i.e, good enough to keep).
+     */
+    bool addSolution(
+        const InitialSolution& initialSolution,
+        bool printReason = true,
+        bool completely = true,
+        bool checkBounds = true,
+        bool checkIntegrality = true,
+        bool checkLpRows = true);
 };
 }

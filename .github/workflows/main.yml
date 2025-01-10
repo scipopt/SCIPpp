@@ -8,7 +8,10 @@ on:
 
 jobs:
   coverage:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    env:
+      CC: gcc-11
+      CXX: g++-11
     steps:
       - uses: actions/checkout@v3
       - uses: turtlebrowser/get-conan@main
@@ -55,7 +58,10 @@ jobs:
       - name: Run Tests
         run: ./build/test/Release/tests.exe
   test_without_conan:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    env:
+      CC: gcc-11
+      CXX: g++-11
     steps:
       - uses: actions/checkout@v3
       - name: Install parallelism library for C++
@@ -74,11 +80,29 @@ jobs:
           make -j tests
       - name: Run tests
         run: ./test/tests
-  test_release_inx:
-    strategy:
-      matrix:
-        os: [ ubuntu-latest, macos-13 ]
-    runs-on: ${{ matrix.os }}
+  test_release_mac:
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v3
+      - uses: turtlebrowser/get-conan@main
+      - name: Run Conan Install
+        run: |
+          conan profile detect
+          pushd ~/.conan2/profiles
+          sed -i'' -e 's/gnu17/17/g' *
+          popd
+          conan install -of . -o with_tests=True --build=missing .
+      - name: Run CMake
+        run: cmake --preset conan-release .
+      - name: Compile
+        run: cmake --build build/Release --target tests
+      - name: Run Tests
+        run: ./build/Release/test/tests
+  test_release_linux:
+    runs-on: ubuntu-22.04
+    env:
+      CC: gcc-11
+      CXX: g++-11
     steps:
       - uses: actions/checkout@v3
       - uses: turtlebrowser/get-conan@main
@@ -96,7 +120,10 @@ jobs:
       - name: Run Tests
         run: ./build/Release/test/tests
   clang_tidy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    env:
+      CC: gcc-11
+      CXX: g++-11
     steps:
       - uses: actions/checkout@v3
       - uses: turtlebrowser/get-conan@main
@@ -112,7 +139,7 @@ jobs:
       - name: Run Clang-Tidy
         run: clang-tidy-14 -p build/Release source/*.cpp include/**/*.hpp
   clang_format:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - uses: DoozyX/clang-format-lint-action@v0.16.2
@@ -121,7 +148,7 @@ jobs:
           extensions: 'hpp,cpp'
           clangFormatVersion: 17
   doxygen:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - uses: ssciwr/doxygen-install@v1
