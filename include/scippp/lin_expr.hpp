@@ -39,12 +39,67 @@ public:
     {
     }
     /**
-     * Creates a linear expression with zero as constant the given variable with coefficient one.
+     * Creates a linear expression with zero as constant and the given variable with coefficient one.
      * @since 1.0.0
-     * @remark This is on purpose not an explicit c'tor to allow expressions like x <= 1.
+     * @remark This is on purpose not an explicit c'tor to allow expressions like <code>x <= 1</code>.
      * @param var Variable to store with coefficient one in the expression.
      */
     LinExpr(const Var& var);
+    /**
+     * Creates a linear expression with zero as constant and the given variables with coefficient one.
+     * @since 1.3.0
+     * @remark This is on purpose not an explicit c'tor to allow expressions like <code>... + {x1, x2}</code>.
+     * @param vars Variables to store with coefficient one in the expression.
+     */
+    LinExpr(std::initializer_list<Var> vars);
+    /**
+     * Creates a linear expression with zero as constant and the given variables and coefficients.
+     * @since 1.3.0
+     * @param vars Variables to store in the expression.
+     * @param coeffs Coefficients to store in the expression.
+     * @pre \p vars and \p coeffs have the same length.
+     */
+    LinExpr(std::initializer_list<Var> vars, std::initializer_list<double> coeffs);
+    /**
+     * @copybrief LinExpr(std::initializer_list<Var>)
+     * @since 1.3.0
+     * @remark This is on purpose not an explicit c'tor to allow expressions like <code>... + vars</code>.
+     * @tparam N Size of the array \p vars.
+     * @param vars Variables to store with coefficient one in the expression.
+     */
+    template <std::size_t N>
+    LinExpr(const std::array<Var, N>& vars)
+        : m_vars { vars.begin(), vars.end() }
+        , m_coeffs(vars.size(), 1)
+    {
+    }
+    /**
+     * @copybrief LinExpr(std::initializer_list<Var>, std::initializer_list<double>)
+     * @since 1.3.0
+     * @tparam N Size of the arrays \p vars and \p coeffs.
+     * @param vars Variables to store in the expression.
+     * @param coeffs Coefficients to store in the expression.
+     */
+    template <std::size_t N>
+    LinExpr(const std::array<Var, N>& vars, std::array<double, N>& coeffs)
+        : m_vars { vars.begin(), vars.end() }
+        , m_coeffs { coeffs.begin(), coeffs.end() }
+    {
+    }
+    /**
+     * @copybrief LinExpr(std::initializer_list<Var>)
+     * @since 1.3.0
+     * @remark This is on purpose not an explicit c'tor to allow expressions like <code>... + vars</code>.
+     * @param vars Variables to store with coefficient one in the expression.
+     */
+    LinExpr(const std::vector<Var>& vars);
+    /**
+     * @copybrief LinExpr(std::initializer_list<Var>, std::initializer_list<double>)
+     * @since 1.3.0
+     * @param vars Variables to store in the expression.
+     * @param coeffs Coefficients to store in the expression.
+     */
+    LinExpr(const std::vector<Var>& vars, const std::vector<double>& coeffs);
 
     /**
      * Returns the constant term of the expression.

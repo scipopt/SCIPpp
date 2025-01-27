@@ -1,11 +1,39 @@
 #include "scippp/lin_expr.hpp"
 
+#include <cassert>
+
 namespace scippp {
 
 LinExpr::LinExpr(const Var& var)
     : m_vars { var }
     , m_coeffs(1, 1)
 {
+}
+
+LinExpr::LinExpr(std::initializer_list<Var> vars)
+    : m_vars { vars }
+    , m_coeffs(vars.size(), 1)
+{
+}
+
+LinExpr::LinExpr(std::initializer_list<Var> vars, std::initializer_list<double> coeffs)
+    : m_vars { vars }
+    , m_coeffs { coeffs }
+{
+    assert(vars.size() == coeffs.size());
+}
+
+LinExpr::LinExpr(const std::vector<Var>& vars)
+    : m_vars { vars }
+    , m_coeffs(vars.size(), 1)
+{
+}
+
+LinExpr::LinExpr(const std::vector<Var>& vars, const std::vector<double>& coeffs)
+    : m_vars { vars }
+    , m_coeffs { coeffs }
+{
+    assert(vars.size() == coeffs.size());
 }
 
 double LinExpr::getConstant() const
