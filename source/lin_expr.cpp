@@ -20,7 +20,7 @@ LinExpr::LinExpr(std::initializer_list<Var> vars, std::initializer_list<double> 
     : m_vars { vars }
     , m_coeffs { coeffs }
 {
-    assert(vars.size() == coeffs.size());
+    assert(vars.size() == coeffs.size()); // GCOVR_EXCL_LINE
 }
 
 LinExpr::LinExpr(const std::vector<Var>& vars)
@@ -33,7 +33,7 @@ LinExpr::LinExpr(const std::vector<Var>& vars, const std::vector<double>& coeffs
     : m_vars { vars }
     , m_coeffs { coeffs }
 {
-    assert(vars.size() == coeffs.size());
+    assert(vars.size() == coeffs.size()); // GCOVR_EXCL_LINE
 }
 
 double LinExpr::getConstant() const
