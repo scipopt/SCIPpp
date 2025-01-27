@@ -10,6 +10,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 
+- [PR36](https://github.com/scipopt/SCIPpp/pull/36)
+  New c'tors for `LinExpr` to allow use-cases like
+  ```cpp
+  const Var& [x1, x2] = ...
+  const array A_VARS = ...
+  const vector V_VARS = ...
+  
+  LinExpr le(A_VARS); // new c'tor for std::array
+  le += V_VARS; // new c'tor for std::vector
+  le += {x1, x2}; // new c'tor for std::initializer_list
+  // all of them also available with a second argument for coefficients
+  ```
 - [PR31](https://github.com/scipopt/SCIPpp/pull/31) Add `InitialSolution` and `Model::addSolution`.
 - [PR28](https://github.com/scipopt/SCIPpp/pull/28) Add `Var::getVar`.
 
