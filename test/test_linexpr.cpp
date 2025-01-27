@@ -73,6 +73,8 @@ BOOST_AUTO_TEST_CASE(AddInitializerList)
     LinExpr l;
     l += { x1, x2 };
     model.addConstr(l <= 1, "capacity");
+    // duplicate, but different c'tor:
+    model.addConstr(LinExpr({ x1, x2 }, { 2.0, 2.0 }) <= 2, "capacity2");
     model.setObjsense(Sense::MAXIMIZE);
     model.solve();
     BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1);
