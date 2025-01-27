@@ -25,10 +25,12 @@ BOOST_AUTO_TEST_CASE(AddOneVar)
 BOOST_AUTO_TEST_CASE(CtorArray)
 {
     Model model("Simple");
-    array coeff { 1, 1 };
+    array coeff { 1.0, 1.0 };
     const auto VARS = model.addVars<2>("x_", coeff);
-    LinExpr l(VARS);
-    model.addConstr(l <= 1, "capacity");
+    LinExpr l1(VARS);
+    model.addConstr(l1 <= 1, "capacity1");
+    LinExpr l2(VARS, coeff);
+    model.addConstr(l2 <= 1, "capacity2"); // duplicate, but different c'tor
     model.setObjsense(Sense::MAXIMIZE);
     model.solve();
     BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1);
