@@ -1,5 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
+#include <algorithm>
+
 #include "scippp/model.hpp"
 #include "scippp/solving_statistics.hpp"
 
@@ -96,6 +98,30 @@ BOOST_AUTO_TEST_CASE(AddInitializerList)
     model.setObjsense(Sense::MAXIMIZE);
     model.solve();
     BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1);
+}
+
+BOOST_AUTO_TEST_CASE(CheckInternalsUsingFriendStruct)
+{
+    const double VAL { 2.0 };
+    for (size_t num { 1 }; num < 4; ++num) {
+        Model m("m");
+        const auto VARS = m.addVars("x", num);
+
+        LinExpr lDef(VARS);
+        BOOST_TEST(lDef.getConstant() == 0);
+        BOOST_TEST(lDef.m_constant == 0);
+        BOOST_TEST(lDef.m_vars.size() == num);
+        BOOST_TEST(lDef.m_coeffs.size() == num);
+        BOOST_TEST(all_of(lDef.m_coeffs.begin(), lDef.m_coeffs.end(), [](double d) { return d == 1; }));
+
+        const vector COEFF(num, VAL);
+        LinExpr lCoeff(VARS, COEFF);
+        BOOST_TEST(lCoeff.getConstant() == 0);
+        BOOST_TEST(lCoeff.m_constant == 0);
+        BOOST_TEST(lCoeff.m_vars.size() == num);
+        BOOST_TEST(lCoeff.m_coeffs.size() == num);
+        BOOST_TEST(all_of(lCoeff.m_coeffs.begin(), lCoeff.m_coeffs.end(), [&VAL](double d) { return d == VAL; }));
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -5,6 +5,10 @@
 
 #include "scippp/var.hpp"
 
+// just for tests, see test_linexpr.cpp
+namespace LinExpression { // NOLINT(readability-identifier-naming)
+struct CheckInternalsUsingFriendStruct;
+}
 namespace scippp {
 
 /**
@@ -13,6 +17,7 @@ namespace scippp {
  */
 class LinExpr {
     friend class Model;
+    friend struct LinExpression::CheckInternalsUsingFriendStruct; // just for tests, see test_linexpr.cpp
     //! Constant term.
     double m_constant { 0.0 };
     //! Variables in the linear combination.
