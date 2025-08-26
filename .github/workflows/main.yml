@@ -41,7 +41,7 @@ jobs:
           verbose: true # optional (default = false)
           fail_ci_if_error: true
   test_release_win:
-    runs-on: windows-2019
+    runs-on: windows-2022
     steps:
       - uses: actions/checkout@v3
       - uses: turtlebrowser/get-conan@main
