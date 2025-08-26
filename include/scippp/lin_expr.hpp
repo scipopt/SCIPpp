@@ -54,7 +54,7 @@ public:
      */
     LinExpr(std::initializer_list<Var> vars);
     /**
-     * Creates a linear expression with zero as constant and the given variables and coefficients.
+     * Creates a linear expression with zero as constant and the given variables with the provided coefficients.
      * @since 1.3.0
      * @param vars Variables to store in the expression.
      * @param coeffs Coefficients to store in the expression.
