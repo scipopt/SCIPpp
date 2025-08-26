@@ -24,16 +24,34 @@ BOOST_AUTO_TEST_CASE(AddOneVar)
 
 BOOST_AUTO_TEST_CASE(CtorArray)
 {
-    Model model("Simple");
-    array coeff { 1.0, 1.0 };
-    const auto VARS = model.addVars<2>("x_", coeff);
-    LinExpr l1(VARS);
-    model.addConstr(l1 <= 1, "capacity1");
-    LinExpr l2(VARS, coeff);
-    model.addConstr(l2 <= 1, "capacity2"); // duplicate, but different c'tor
-    model.setObjsense(Sense::MAXIMIZE);
-    model.solve();
-    BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1);
+    array objCoeff { 1.0, 1.0 };
+
+    Model m1("m1");
+    const auto VARS1 = m1.addVars<2>("x_", objCoeff);
+    LinExpr l1(VARS1);
+    m1.addConstr(l1 <= 1, "capacity");
+    m1.setObjsense(Sense::MAXIMIZE);
+    m1.solve();
+    BOOST_TEST(m1.getSolvingStatistic(statistics::PRIMALBOUND) == 1.0);
+
+    Model m2("m2");
+    const auto VARS2 = m2.addVars<2>("x_", objCoeff);
+    LinExpr l2(VARS2, objCoeff); // same as before, but different c'tor
+    m2.addConstr(l2 <= 1, "capacity");
+    m2.setObjsense(Sense::MAXIMIZE);
+    m2.solve();
+    BOOST_TEST(m2.getSolvingStatistic(statistics::PRIMALBOUND) == 1.0);
+
+    const double FAC { 2.0 };
+    array constrCoeff { FAC, FAC };
+
+    Model m3("m3");
+    const auto VARS3 = m3.addVars<2>("x_", objCoeff);
+    LinExpr l3(VARS3, constrCoeff);
+    m3.addConstr(l3 <= 1, "capacity");
+    m3.setObjsense(Sense::MAXIMIZE);
+    m3.solve();
+    BOOST_TEST(m3.getSolvingStatistic(statistics::PRIMALBOUND) == 1.0 / FAC);
 }
 
 BOOST_AUTO_TEST_CASE(AddArray)
