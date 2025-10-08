@@ -4,6 +4,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - [Doc:Unreleased]
 
+## [1.3.0] - 2025-10-08
+
 ### Changed
 
 - [PR37](https://github.com/scipopt/SCIPpp/pull/37) Update to SCIP 9.2.3.
@@ -84,7 +86,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Initial release
 
 [Doc:Unreleased]: https://scipopt.github.io/SCIPpp/
-[Unreleased]: https://github.com/scipopt/SCIPpp/compare/1.2.0...main
+[Unreleased]: https://github.com/scipopt/SCIPpp/compare/1.3.0...main
+[1.3.0]: https://github.com/scipopt/SCIPpp/releases/tag/1.3.0
 [1.2.0]: https://github.com/scipopt/SCIPpp/releases/tag/1.2.0
 [1.1.0]: https://github.com/scipopt/SCIPpp/releases/tag/1.1.0
 [1.0.2]: https://github.com/scipopt/SCIPpp/releases/tag/1.0.2
