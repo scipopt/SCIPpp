@@ -71,9 +71,9 @@ jobs:
           boost_version: 1.84.0
       - name: Install SCIP
         run: |
-          wget https://github.com/scipopt/scip/releases/download/v920/SCIPOptSuite-9.2.0-Linux-ubuntu22.sh
-          chmod +x SCIPOptSuite-9.2.0-Linux-ubuntu22.sh
-          ./SCIPOptSuite-9.2.0-Linux-ubuntu22.sh --skip-license
+          wget https://github.com/scipopt/scip/releases/download/v923/SCIPOptSuite-9.2.3-Linux-ubuntu22.sh
+          chmod +x SCIPOptSuite-9.2.3-Linux-ubuntu22.sh
+          ./SCIPOptSuite-9.2.3-Linux-ubuntu22.sh --skip-license
       - name: Build SCIP++
         run: |
           CMAKE_PREFIX_PATH=./lib/cmake/scip:./boost/boost/lib/cmake/Boost-1.84.0 cmake -DBUILD_TESTS=ON .
