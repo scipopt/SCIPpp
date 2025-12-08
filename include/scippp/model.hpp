@@ -355,6 +355,6 @@ public:
      * @since 1.4.0
      * @return The generated %IIS.
      */
-    IIS generateIIS() const;
+    [[nodiscard]] IIS generateIIS() const;
 };
 }
