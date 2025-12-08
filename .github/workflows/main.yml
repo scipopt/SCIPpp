@@ -77,10 +77,11 @@ jobs:
       - name: Run tests
         run: ./test/tests
   test_release_mac:
-    runs-on: macos-13
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v3
-      - uses: turtlebrowser/get-conan@main
+      - name: Install Conan
+        run: brew install conan
       - name: Run Conan Install
         run: |
           conan profile detect
