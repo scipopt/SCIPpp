@@ -183,14 +183,17 @@ IIS Model::generateIIS() const
     auto* subscip { SCIPiisGetSubscip(iis) };
     assert(subscip); // GCOVR_EXCL_LINE
     auto nConss { SCIPgetNOrigConss(subscip) };
-    auto** conss { SCIPgetOrigConss(subscip) };
 
     IIS result;
-    result.consIds.reserve(nConss);
-    for (size_t i { 0 }; i < nConss; ++i) {
-        SCIP_CONS* cons = conss[i];
-        assert(cons); // GCOVR_EXCL_LINE
-        result.consIds.emplace_back(SCIPconsGetName(cons));
+    if (nConss > 0) {
+        auto** conss { SCIPgetOrigConss(subscip) };
+        assert(conss); // GCOVR_EXCL_LINE
+        result.consIds.reserve(nConss);
+        for (size_t i { 0 }; i < nConss; ++i) {
+            SCIP_CONS* cons = conss[i];
+            assert(cons); // GCOVR_EXCL_LINE
+            result.consIds.emplace_back(SCIPconsGetName(cons));
+        }
     }
     return result;
 }
