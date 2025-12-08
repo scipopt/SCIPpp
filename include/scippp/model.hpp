@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "scippp/constant_coefficient.hpp"
+#include "scippp/iis.hpp"
 #include "scippp/initial_solution.hpp"
 #include "scippp/lin_expr.hpp"
 #include "scippp/lin_ineq.hpp"
@@ -347,5 +348,13 @@ public:
         bool checkBounds = true,
         bool checkIntegrality = true,
         bool checkLpRows = true);
+
+    /**
+     * Creates an %Irreducible %Infeasible %Subsystem (%IIS) of the current model.
+     *
+     * @since 1.4.0
+     * @return The generated %IIS.
+     */
+    IIS generateIIS() const;
 };
 }

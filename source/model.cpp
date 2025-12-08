@@ -175,4 +175,24 @@ bool Model::addSolution(
     return isStored;
 }
 
+IIS Model::generateIIS() const
+{
+    m_scipCallWrapper(SCIPgenerateIIS(m_scip));
+    auto* iis { SCIPgetIIS(m_scip) };
+    assert(iis); // GCOVR_EXCL_LINE
+    auto* subscip { SCIPiisGetSubscip(iis) };
+    assert(subscip); // GCOVR_EXCL_LINE
+    auto nConss { SCIPgetNOrigConss(subscip) };
+    auto** conss { SCIPgetOrigConss(subscip) };
+
+    IIS result;
+    result.consIds.reserve(nConss);
+    for (size_t i { 0 }; i < nConss; ++i) {
+        SCIP_CONS* cons = conss[i];
+        assert(cons); // GCOVR_EXCL_LINE
+        result.consIds.emplace_back(SCIPconsGetName(cons));
+    }
+    return result;
+}
+
 }
