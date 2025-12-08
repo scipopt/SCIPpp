@@ -47,7 +47,7 @@ class Model {
     //! Constraints.
     std::vector<SCIP_Cons*> m_cons {};
     //! Stores the return of the last %SCIP call when the default call wrapper is used.
-    SCIP_Retcode m_lastReturnCode;
+    mutable SCIP_Retcode m_lastReturnCode;
     //! Wrapper for every call to %SCIP's %C %API.
     std::function<void(SCIP_Retcode)> m_scipCallWrapper;
 
@@ -204,14 +204,14 @@ public:
      * Solve the model.
      * @since 1.0.0
      */
-    void solve();
+    void solve() const;
 
     /**
      * Set objective goal.
      * @since 1.0.0
      * @param objsense Minimize or Maximize.
      */
-    void setObjsense(Sense objsense);
+    void setObjsense(Sense objsense) const;
 
     /**
      * Returns the solution status.
@@ -270,7 +270,7 @@ public:
      * @param value to set the parameter to.
      */
     template <typename T, typename PT>
-    void setParam(params::Param<PT> parameter, T value)
+    void setParam(params::Param<PT> parameter, T value) const
     {
         auto ptValue { static_cast<PT>(value) };
         const auto* cName { parameter.scipName.data() };
@@ -346,6 +346,6 @@ public:
         bool completely = true,
         bool checkBounds = true,
         bool checkIntegrality = true,
-        bool checkLpRows = true);
+        bool checkLpRows = true) const;
 };
 }
