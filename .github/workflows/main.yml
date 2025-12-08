@@ -64,27 +64,24 @@ jobs:
       CXX: g++-11
     steps:
       - uses: actions/checkout@v3
-      - name: Install parallelism library for C++
-        run: sudo apt update && sudo apt install libtbb12
-      - uses: MarkusJx/install-boost@v2.4.1
-        with:
-          boost_version: 1.84.0
       - name: Install SCIP
         run: |
-          wget https://github.com/scipopt/scip/releases/download/v923/SCIPOptSuite-9.2.3-Linux-ubuntu22.sh
-          chmod +x SCIPOptSuite-9.2.3-Linux-ubuntu22.sh
-          ./SCIPOptSuite-9.2.3-Linux-ubuntu22.sh --skip-license
+          wget -q https://github.com/scipopt/scip/releases/download/v10.0.0/scipoptsuite_10.0.0-1+jammy_amd64.deb
+          sudo apt update
+          sudo apt install -y ./scipoptsuite_10.0.0-1+jammy_amd64.deb
+          sudo apt install -y libmpfr-dev libboost-all-dev
       - name: Build SCIP++
         run: |
-          CMAKE_PREFIX_PATH=./lib/cmake/scip:./boost/boost/lib/cmake/Boost-1.84.0 cmake -DBUILD_TESTS=ON .
+          cmake -DBUILD_TESTS=ON .
           make -j tests
       - name: Run tests
         run: ./test/tests
   test_release_mac:
-    runs-on: macos-13
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v3
-      - uses: turtlebrowser/get-conan@main
+      - name: Install Conan
+        run: brew install conan
       - name: Run Conan Install
         run: |
           conan profile detect
