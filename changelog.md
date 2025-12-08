@@ -4,6 +4,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - [Doc:Unreleased]
 
+### Added
+
+- [PR41](https://github.com/scipopt/SCIPpp/pull/41) Basic support of IIS extraction via `Model::generateIIS`.
+  This requires that the plugin `IISfinderGreedy` is loaded (which is done by default) or any other plugin that can
+  find IIS'. Example usage:
+  ```cpp
+  Model model = ...;
+  auto iis { model.generateIIS() };
+  std::cout << "Contradicting are:\n";
+  for (const auto& consId : iis.consIds) {
+    std::cout << "  " << consId << "\n";
+  }
+  ```
+
 ### Changed
 
 - [PR38](https://github.com/scipopt/SCIPpp/pull/38) Update to SCIP 10.0.0.
