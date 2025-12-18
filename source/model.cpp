@@ -190,7 +190,7 @@ IIS Model::generateIIS() const
         assert(conss); // GCOVR_EXCL_LINE
         result.consIds.reserve(nConss);
         for (size_t i { 0 }; i < nConss; ++i) {
-            SCIP_CONS* cons = conss[i];
+            auto* cons = conss[i];
             assert(cons); // GCOVR_EXCL_LINE
             result.consIds.emplace_back(SCIPconsGetName(cons));
         }
