@@ -4,6 +4,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - [Doc:Unreleased]
 
+## [1.4.0] - 2025-12-18
+
 ### Added
 
 - [PR41](https://github.com/scipopt/SCIPpp/pull/41) Basic support of IIS extraction via `Model::generateIIS`.
@@ -106,7 +108,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Initial release
 
 [Doc:Unreleased]: https://scipopt.github.io/SCIPpp/
-[Unreleased]: https://github.com/scipopt/SCIPpp/compare/1.3.0...main
+[Unreleased]: https://github.com/scipopt/SCIPpp/compare/1.4.0...main
+[1.4.0]: https://github.com/scipopt/SCIPpp/releases/tag/1.4.0
 [1.3.0]: https://github.com/scipopt/SCIPpp/releases/tag/1.3.0
 [1.2.0]: https://github.com/scipopt/SCIPpp/releases/tag/1.2.0
 [1.1.0]: https://github.com/scipopt/SCIPpp/releases/tag/1.1.0
