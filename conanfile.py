@@ -80,8 +80,8 @@ class ScipPlusPlus(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables[self.name + "_version"] = self.version
-        tc.variables["BUILD_TESTS"] = self.options.with_tests
-        tc.variables["BUILD_UTILS"] = self.options.with_utils
+        tc.cache_variables["BUILD_TESTS"] = self.options.with_tests
+        tc.cache_variables["BUILD_UTILS"] = self.options.with_utils
         tc.generate()
 
     def build(self):
