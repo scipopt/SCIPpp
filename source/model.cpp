@@ -105,12 +105,12 @@ bool Model::isZero(SCIP_Real value) const
     return SCIPisZero(m_scip, value);
 }
 
-void Model::solve()
+void Model::solve() const
 {
     m_scipCallWrapper(SCIPsolve(m_scip));
 }
 
-void Model::setObjsense(Sense objsense)
+void Model::setObjsense(Sense objsense) const
 {
     m_scipCallWrapper(SCIPsetObjsense(m_scip, static_cast<SCIP_Objsense>(objsense)));
 }
@@ -156,7 +156,7 @@ bool Model::addSolution(
     bool completely,
     bool checkBounds,
     bool checkIntegrality,
-    bool checkLpRows)
+    bool checkLpRows) const
 {
     SCIP_Sol* sol { nullptr };
     m_scipCallWrapper(SCIPcreateSol(m_scip, &sol, nullptr));

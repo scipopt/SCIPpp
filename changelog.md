@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- [PR40](https://github.com/scipopt/SCIPpp/pull/40) `Model::addSolution()`, `Model::setObjsense()`, `Model::setParam()`,
+  and `Model::solve()` are now const member functions.
 - [PR38](https://github.com/scipopt/SCIPpp/pull/38) Update to SCIP 10.0.0.
 
 ## [1.3.0] - 2025-10-08
