@@ -5,8 +5,7 @@
 #include <filesystem>
 #include <functional>
 #include <memory>
-#include <objscip/objeventhdlr.h>
-#include <objscip/objmessagehdlr.h>
+#include <objscip/objscip.h>
 #include <optional>
 #include <scip/scip.h>
 #include <string>
@@ -55,6 +54,33 @@ class Model {
     mutable SCIP_Retcode m_lastReturnCode;
     //! Wrapper for every call to %SCIP's %C %API.
     std::function<void(SCIP_Retcode)> m_scipCallWrapper;
+
+    /**
+     * Constructs a plugin and includes it.
+     *
+     * @tparam Plugin Type of the plugin, derived from \p Base.
+     * @tparam Base objscip base class of the plugin.
+     * @tparam Args Types of the additional constructor arguments.
+     * @param args passed to the constructor of \p Plugin after the %SCIP data structure.
+     * @return Non-owning pointer to the plugin, or \c nullptr if including failed.
+     */
+    template <typename Plugin, typename Base, typename... Args>
+    Plugin* constructAndInclude(Args&&... args) const
+    {
+        static_assert(std::is_base_of_v<Base, Plugin>, "Plugin must derive from the objscip base class");
+        auto plugin { std::make_unique<Plugin>(m_scip, std::forward<Args>(args)...) };
+        auto* result { plugin.get() };
+        // Converting to the base explicitly selects the matching overload, even if Plugin has multiple objscip bases.
+        return includeObj(std::unique_ptr<Base>(std::move(plugin))) ? result : nullptr;
+    }
+
+    /**
+     * Includes an event handler, %SCIP takes ownership on success.
+     *
+     * @param eventhdlr to include, it is deleted if including fails.
+     * @return \c true iff including succeeded.
+     */
+    bool includeObj(std::unique_ptr<scip::ObjEventhdlr> eventhdlr) const;
 
 public:
     /**
@@ -474,20 +500,13 @@ public:
      * @tparam Eventhdlr Type of the event handler, derived from scip::ObjEventhdlr.
      * @tparam Args Types of the additional constructor arguments.
      * @param args passed to the constructor of \p Eventhdlr after the %SCIP data structure.
+     * @return Non-owning pointer to the handler, or \c nullptr if including failed.
      * @attention Must be called before solve().
      */
     template <typename Eventhdlr, typename... Args>
-    void includeEventhdlr(Args&&... args) const
+    Eventhdlr* includeEventhdlr(Args&&... args) const
     {
-        static_assert(
-            std::is_base_of_v<scip::ObjEventhdlr, Eventhdlr>, "Eventhdlr must derive from scip::ObjEventhdlr");
-        auto handler { std::make_unique<Eventhdlr>(m_scip, std::forward<Args>(args)...) };
-        const auto RETCODE { SCIPincludeObjEventhdlr(m_scip, handler.get(), TRUE) };
-        // SCIP owns the handler only on success, otherwise we still have to delete it.
-        if (RETCODE == SCIP_OKAY) {
-            handler.release();
-        }
-        m_scipCallWrapper(RETCODE);
+        return constructAndInclude<Eventhdlr, scip::ObjEventhdlr>(std::forward<Args>(args)...);
     }
 };
 }

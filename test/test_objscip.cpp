@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(UseEventHandler)
     auto x2 = model.addVar("x_2", 1);
     model.addConstr(x1 + x2 >= 1, "capacity");
     model.addConstr(x1 == x2, "equal");
-    model.includeEventhdlr<BestSolCounter>(nBestSols);
+    BOOST_TEST(model.includeEventhdlr<BestSolCounter>(nBestSols) != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.setObjsense(Sense::MINIMIZE);
     model.solve();
@@ -65,10 +65,10 @@ BOOST_AUTO_TEST_CASE(IncludeEventHandlerTwice)
 {
     int nBestSols { 0 };
     Model model("Simple");
-    model.includeEventhdlr<BestSolCounter>(nBestSols);
+    BOOST_TEST(model.includeEventhdlr<BestSolCounter>(nBestSols) != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     // SCIP rejects a second event handler with the same name, the handler is then deleted by SCIP++
-    model.includeEventhdlr<BestSolCounter>(nBestSols);
+    BOOST_TEST(model.includeEventhdlr<BestSolCounter>(nBestSols) == nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_INVALIDDATA);
 }
 

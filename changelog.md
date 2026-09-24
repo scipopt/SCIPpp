@@ -14,9 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ```
 - [PR44](https://github.com/scipopt/SCIPpp/pull/44) Custom event handlers derived from `scip::ObjEventhdlr` can be
   included via `Model::includeEventhdlr` without accessing the raw SCIP object. It forwards its arguments to the
-  constructor of the handler after the SCIP data structure:
+  constructor of the handler after the SCIP data structure, and returns a non-owning pointer to the handler:
   ```cpp
-  model.includeEventhdlr<MyEventHandler>(arg1, arg2);
+  MyEventHandler* handler = model.includeEventhdlr<MyEventHandler>(arg1, arg2);
   ```
 
 ### Changed
