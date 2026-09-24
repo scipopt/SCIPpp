@@ -15,4 +15,9 @@ void Model::setMessagehdlr(std::unique_ptr<scip::ObjMessagehdlr> handler) const
     m_scipCallWrapper(RETCODE);
 }
 
+void Model::activatePricer(const scip::ObjPricer& pricer) const
+{
+    m_scipCallWrapper(SCIPactivatePricer(m_scip, SCIPfindPricer(m_scip, pricer.scip_name_)));
+}
+
 }

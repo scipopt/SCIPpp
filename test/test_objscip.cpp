@@ -21,6 +21,7 @@
 #include <objscip/objmessagehdlr.h>
 #include <objscip/objnodesel.h>
 #include <objscip/objpresol.h>
+#include <objscip/objpricer.h>
 #include <objscip/objprop.h>
 #include <objscip/objreader.h>
 #include <objscip/objrelax.h>
@@ -770,6 +771,51 @@ BOOST_AUTO_TEST_CASE(UseIISFinder)
     // the default IIS finder still computes the IIS
     BOOST_TEST(model.generateIIS().consIds.size() == 2);
     BOOST_TEST(iisfinder->getNCalls() == 1);
+}
+
+/**
+ * Counts how often it is called for pricing, but never adds a variable.
+ */
+class CountingPricer : public scip::ObjPricer {
+    int m_nCalls { 0 };
+
+public:
+    explicit CountingPricer(SCIP* scip)
+        : scip::ObjPricer(
+              scip,
+              "counting",
+              "counts how often it is called",
+              0, // priority
+              FALSE) // delay
+    {
+    }
+    [[nodiscard]] int getNCalls() const
+    {
+        return m_nCalls;
+    }
+    SCIP_DECL_PRICERREDCOST(scip_redcost)
+    override
+    {
+        ++m_nCalls;
+        *result = SCIP_SUCCESS;
+        return SCIP_OKAY;
+    }
+};
+
+BOOST_AUTO_TEST_CASE(UsePricer)
+{
+    Model model("Simple");
+    auto x1 = model.addVar("x_1", 1);
+    auto x2 = model.addVar("x_2", 1);
+    model.addConstr(x1 + x2 >= 1, "capacity");
+    // otherwise presolving solves the problem and no LP is solved
+    model.setParam(params::PRESOLVING::MAXROUNDS, 0);
+    const auto* pricer { model.includePricer<CountingPricer>() };
+    BOOST_REQUIRE(pricer != nullptr);
+    BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
+    model.solve();
+    BOOST_TEST(pricer->getNCalls() > 0);
+    BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1);
 }
 
 /**

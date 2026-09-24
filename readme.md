@@ -103,6 +103,9 @@ int main()
   * presolvers derived from
     [`scip::ObjPresol`](https://www.scipopt.org/doc/html/classscip_1_1ObjPresol.php)
     (`scippp::Model::includePresol`),
+  * pricers derived from
+    [`scip::ObjPricer`](https://www.scipopt.org/doc/html/classscip_1_1ObjPricer.php)
+    (`scippp::Model::includePricer`),
   * propagators derived from
     [`scip::ObjProp`](https://www.scipopt.org/doc/html/classscip_1_1ObjProp.php)
     (`scippp::Model::includeProp`),

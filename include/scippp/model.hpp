@@ -78,6 +78,13 @@ class Model {
         return result;
     }
 
+    /**
+     * Activates an included variable pricer, so that it is used when solving the model.
+     *
+     * @param pricer to activate.
+     */
+    void activatePricer(const scip::ObjPricer& pricer) const;
+
 public:
     /**
      * Creates an empty problem and sets the optimization goal to Sense::MINIMIZE.
@@ -921,6 +928,43 @@ public:
     IISfinder* includeIISfinder(Args&&... args) const
     {
         return constructAndInclude<IISfinder>(&SCIPincludeObjIISfinder, std::forward<Args>(args)...);
+    }
+
+    /**
+     * Includes and activates a custom variable pricer.
+     *
+     * The pricer is constructed by this method as scip::ObjPricer requires the %SCIP data structure in its
+     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
+     *
+     * Derive from scip::ObjPricer to add variables with negative reduced costs during the solving process, i.e., to
+     * implement column generation:
+     * @code
+     * class MyPricer : public scip::ObjPricer {
+     * public:
+     *     MyPricer(SCIP* scip, const std::vector<SCIP_CONS*>& conss);
+     *     ...
+     * };
+     * ...
+     * model.includePricer<MyPricer>(conss);
+     * model.solve();
+     * @endcode
+     *
+     * @since 1.5.0
+     * @tparam Pricer Type of the pricer, derived from scip::ObjPricer.
+     * @tparam Args Types of the additional constructor arguments.
+     * @param args passed to the constructor of \p Pricer after the %SCIP data structure.
+     * @return Non-owning pointer to the pricer, or \c nullptr if including failed.
+     * @attention Must be called before solve().
+     * @note Constraints added via addConstr() are not modifiable, i.e., priced variables cannot be added to them.
+     */
+    template <typename Pricer, typename... Args>
+    Pricer* includePricer(Args&&... args) const
+    {
+        auto* pricer { constructAndInclude<Pricer>(&SCIPincludeObjPricer, std::forward<Args>(args)...) };
+        if (pricer != nullptr) {
+            activatePricer(*pricer);
+        }
+        return pricer;
     }
 };
 }
