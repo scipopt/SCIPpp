@@ -4,6 +4,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - [Doc:Unreleased]
 
+### Added
+
+- [Issue29](https://github.com/scipopt/SCIPpp/issues/29) Custom message handlers derived from `scip::ObjMessagehdlr`
+  can be installed via `Model::setMessagehdlr` without accessing the raw SCIP object:
+  ```cpp
+  model.setMessagehdlr(std::make_unique<MyMessageHandler>());
+  ```
+
 ## [1.4.0] - 2025-12-18
 
 ### Added

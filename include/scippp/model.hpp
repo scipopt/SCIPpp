@@ -4,6 +4,8 @@
 #include <array>
 #include <filesystem>
 #include <functional>
+#include <memory>
+#include <objscip/objmessagehdlr.h>
 #include <optional>
 #include <scip/scip.h>
 #include <string>
@@ -356,5 +358,16 @@ public:
      * @return The generated %IIS.
      */
     [[nodiscard]] IIS generateIIS() const;
+
+    /**
+     * Installs a custom message handler, i.e., all info, warning, and dialog messages of %SCIP are passed to it.
+     *
+     * @since 1.5.0
+     * @param handler to install, must not be \c nullptr. %SCIP takes ownership and deletes it when it is no longer
+     *                used.
+     * @attention Must be called before solve(). Error messages are not passed to \p handler as %SCIP prints them via a
+     *            global error printing function.
+     */
+    void setMessagehdlr(std::unique_ptr<scip::ObjMessagehdlr> handler) const;
 };
 }

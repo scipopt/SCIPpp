@@ -155,6 +155,18 @@ model.solve();
 auto pb { model.getSolvingStatistic(statistics::PRIMALBOUND) };
 ```
 
+### Custom Message Handler
+
+Derive from `scip::ObjMessagehdlr` to process the output of SCIP, e.g., to write it to a logger, and install it via
+`Model::setMessagehdlr` before calling `solve()`. SCIP takes ownership of the handler.
+
+```cpp
+class MyMessageHandler : public scip::ObjMessagehdlr { ... };
+...
+model.setMessagehdlr(std::make_unique<MyMessageHandler>());
+model.solve();
+```
+
 ### Features Not Yet Supported
 
 For features not yet supported by SCIP++, one can access the underlying raw SCIP object via
