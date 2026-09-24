@@ -16,6 +16,7 @@
 #include <objscip/objeventhdlr.h>
 #include <objscip/objheur.h>
 #include <objscip/objmessagehdlr.h>
+#include <objscip/objnodesel.h>
 #include <objscip/objpresol.h>
 #include <objscip/objprop.h>
 #include <objscip/objsepa.h>
@@ -496,6 +497,61 @@ BOOST_AUTO_TEST_CASE(UseBranchingRule)
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
     BOOST_TEST(branchrule->getNCalls() > 0);
+}
+
+/**
+ * Selects nodes in depth-first order.
+ */
+class DepthFirstNodesel : public scip::ObjNodesel {
+    int m_nCalls { 0 };
+
+public:
+    explicit DepthFirstNodesel(SCIP* scip)
+        : scip::ObjNodesel(
+              scip,
+              "depthfirst",
+              "selects nodes in depth-first order",
+              1000000, // stdpriority, higher than the ones of the default node selectors to be used
+              0) // memsavepriority
+    {
+    }
+    [[nodiscard]] int getNCalls() const
+    {
+        return m_nCalls;
+    }
+    SCIP_DECL_NODESELSELECT(scip_select)
+    override
+    {
+        ++m_nCalls;
+        *selnode = SCIPgetPrioChild(scip);
+        if (*selnode == nullptr) {
+            *selnode = SCIPgetPrioSibling(scip);
+        }
+        if (*selnode == nullptr) {
+            *selnode = SCIPgetBestLeaf(scip);
+        }
+        return SCIP_OKAY;
+    }
+    SCIP_DECL_NODESELCOMP(scip_comp)
+    override
+    {
+        // deeper nodes first
+        return SCIPnodeGetDepth(node2) - SCIPnodeGetDepth(node1);
+    }
+};
+
+BOOST_AUTO_TEST_CASE(UseNodeSelector)
+{
+    Model model("Simple");
+    addFractionalProblem(model);
+    // otherwise the problem is solved at the root by separation or conflict analysis
+    model.setParam(params::SEPARATING::MAXROUNDSROOT, 0);
+    model.setParam(params::CONFLICT::ENABLE, false);
+    const auto* nodesel { model.includeNodesel<DepthFirstNodesel>() };
+    BOOST_REQUIRE(nodesel != nullptr);
+    BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
+    model.solve();
+    BOOST_TEST(nodesel->getNCalls() > 0);
 }
 
 /**

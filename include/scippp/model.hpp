@@ -732,5 +732,36 @@ public:
     {
         return constructAndInclude<Branchrule>(&SCIPincludeObjBranchrule, std::forward<Args>(args)...);
     }
+
+    /**
+     * Includes a custom node selector.
+     *
+     * The node selector is constructed by this method as scip::ObjNodesel requires the %SCIP data structure in its
+     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
+     *
+     * Derive from scip::ObjNodesel to decide which open node of the search tree is processed next:
+     * @code
+     * class MyNodeSelector : public scip::ObjNodesel {
+     * public:
+     *     explicit MyNodeSelector(SCIP* scip);
+     *     ...
+     * };
+     * ...
+     * model.includeNodesel<MyNodeSelector>();
+     * model.solve();
+     * @endcode
+     *
+     * @since 1.5.0
+     * @tparam Nodesel Type of the node selector, derived from scip::ObjNodesel.
+     * @tparam Args Types of the additional constructor arguments.
+     * @param args passed to the constructor of \p Nodesel after the %SCIP data structure.
+     * @return Non-owning pointer to the node selector, or \c nullptr if including failed.
+     * @attention Must be called before solve().
+     */
+    template <typename Nodesel, typename... Args>
+    Nodesel* includeNodesel(Args&&... args) const
+    {
+        return constructAndInclude<Nodesel>(&SCIPincludeObjNodesel, std::forward<Args>(args)...);
+    }
 };
 }

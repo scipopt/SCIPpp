@@ -88,6 +88,9 @@ int main()
   * primal heuristics derived from
     [`scip::ObjHeur`](https://www.scipopt.org/doc/html/classscip_1_1ObjHeur.php)
     (`scippp::Model::includeHeur`),
+  * node selectors derived from
+    [`scip::ObjNodesel`](https://www.scipopt.org/doc/html/classscip_1_1ObjNodesel.php)
+    (`scippp::Model::includeNodesel`),
   * presolvers derived from
     [`scip::ObjPresol`](https://www.scipopt.org/doc/html/classscip_1_1ObjPresol.php)
     (`scippp::Model::includePresol`),

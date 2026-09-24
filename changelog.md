@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - cut selectors derived from `scip::ObjCutsel` via `Model::includeCutsel`,
   - event handlers derived from `scip::ObjEventhdlr` via `Model::includeEventhdlr`,
   - primal heuristics derived from `scip::ObjHeur` via `Model::includeHeur`,
+  - node selectors derived from `scip::ObjNodesel` via `Model::includeNodesel`,
   - presolvers derived from `scip::ObjPresol` via `Model::includePresol`,
   - propagators derived from `scip::ObjProp` via `Model::includeProp`, and
   - separators derived from `scip::ObjSepa` via `Model::includeSepa`.
