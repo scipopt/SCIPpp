@@ -1,5 +1,7 @@
 #include "scippp/model.hpp"
 
+#include <scip/bendersdefcuts.h>
+
 namespace scippp {
 
 void Model::setMessagehdlr(std::unique_ptr<scip::ObjMessagehdlr> handler) const
@@ -18,6 +20,20 @@ void Model::setMessagehdlr(std::unique_ptr<scip::ObjMessagehdlr> handler) const
 void Model::activatePricer(const scip::ObjPricer& pricer) const
 {
     m_scipCallWrapper(SCIPactivatePricer(m_scip, SCIPfindPricer(m_scip, pricer.scip_name_)));
+}
+
+void Model::activateBenders(const scip::ObjBenders& benders, int nSubproblems) const
+{
+    auto* scipBenders { SCIPfindBenders(m_scip, benders.scip_name_) };
+    m_scipCallWrapper(SCIPincludeBendersDefaultCuts(m_scip, scipBenders));
+    m_scipCallWrapper(SCIPactivateBenders(m_scip, scipBenders, nSubproblems));
+    // otherwise the constraint handlers do not enforce the Benders' decomposition
+    m_scipCallWrapper(SCIPsetBoolParam(m_scip, "constraints/benders/active", TRUE));
+    m_scipCallWrapper(SCIPsetBoolParam(m_scip, "constraints/benderslp/active", TRUE));
+    if (!benders.iscloneable()) {
+        // SCIP crashes when copying the model to a sub-SCIP, e.g., in a heuristic, as it expects the copy to succeed
+        m_scipCallWrapper(SCIPsetBoolParam(m_scip, "benders/copybenders", FALSE));
+    }
 }
 
 }

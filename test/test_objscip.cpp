@@ -11,6 +11,7 @@
 #include "scippp/model.hpp"
 #include "scippp/parameters.hpp"
 #include "scippp/solving_statistics.hpp"
+#include <objscip/objbenders.h>
 #include <objscip/objbranchrule.h>
 #include <objscip/objconshdlr.h>
 #include <objscip/objcutsel.h>
@@ -816,6 +817,77 @@ BOOST_AUTO_TEST_CASE(UsePricer)
     model.solve();
     BOOST_TEST(pricer->getNCalls() > 0);
     BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1);
+}
+
+/**
+ * Decomposes min x + y s.t. y >= 2 - c x with binary x and continuous y >= 0 into the master problem min x, which is the
+ * model, and the subproblem min y s.t. y >= 2 - c x, y >= 0, where x is fixed to its value in the master problem. The
+ * decomposition computes the optimal value max(0, 2 - c x) of the subproblem itself, so there is no SCIP instance for it.
+ */
+class DemandBenders : public scip::ObjBenders {
+    SCIP_VAR* m_masterX;
+    double m_coverage;
+    int m_nSolves { 0 };
+
+public:
+    DemandBenders(SCIP* scip, SCIP_VAR* masterX, double coverage)
+        : scip::ObjBenders(
+              scip,
+              "demand",
+              "decomposes the demand problem",
+              1, // priority, positive to be higher than the one of the inactive default Benders' decomposition
+              TRUE, // cutlp
+              TRUE, // cutpseudo
+              TRUE, // cutrelax
+              FALSE) // shareauxvars
+        , m_masterX(masterX)
+        , m_coverage(coverage)
+    {
+    }
+    [[nodiscard]] int getNSolves() const
+    {
+        return m_nSolves;
+    }
+    SCIP_DECL_BENDERSCREATESUB(scip_createsub)
+    override
+    {
+        SCIP_CALL(SCIPaddBendersSubproblem(scip, benders, nullptr));
+        // required as the subproblem is solved by this decomposition
+        SCIPbendersSetSubproblemType(benders, probnumber, SCIP_BENDERSSUBTYPE_CONVEXCONT);
+        // the smallest optimal value of the subproblem, which is attained for x = 1
+        SCIPbendersUpdateSubproblemLowerbound(benders, probnumber, max(0.0, 2.0 - m_coverage));
+        return SCIP_OKAY;
+    }
+    SCIP_DECL_BENDERSSOLVESUBCONVEX(scip_solvesubconvex)
+    override
+    {
+        ++m_nSolves;
+        *objective = max(0.0, 2.0 - m_coverage * SCIPgetSolVal(scip, sol, m_masterX));
+        *result = SCIP_FEASIBLE;
+        return SCIP_OKAY;
+    }
+    SCIP_DECL_BENDERSGETVAR(scip_getvar)
+    override
+    {
+        // there is no SCIP instance for the subproblem, hence no variables to map
+        *mappedvar = nullptr;
+        return SCIP_OKAY;
+    }
+};
+
+BOOST_AUTO_TEST_CASE(UseBenders)
+{
+    Model model("Master");
+    auto x = model.addVar("x", 1, VarType::BINARY);
+    // without coverage, the subproblem has the constant optimal value 2, which is its lower bound, i.e., no cut is needed
+    const auto* benders { model.includeBenders<DemandBenders>(1, x.getVar(), 0.0) };
+    BOOST_REQUIRE(benders != nullptr);
+    BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
+    model.solve();
+    BOOST_TEST(model.getStatus() == SCIP_STATUS_OPTIMAL);
+    BOOST_TEST(benders->getNSolves() > 0);
+    BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 2.0, boost::test_tools::tolerance(1e-6));
+    BOOST_TEST(x.getSolValAsInt(model.getBestSol()) == 0);
 }
 
 /**

@@ -73,6 +73,9 @@ int main()
   [`scip::ObjMessagehdlr`](https://www.scipopt.org/doc/html/classscip_1_1ObjMessagehdlr.php)
   (`scippp::Model::setMessagehdlr`).
 * Include custom plugins:
+  * Benders' decompositions derived from
+    [`scip::ObjBenders`](https://www.scipopt.org/doc/html/classscip_1_1ObjBenders.php)
+    (`scippp::Model::includeBenders`),
   * branching rules derived from
     [`scip::ObjBranchrule`](https://www.scipopt.org/doc/html/classscip_1_1ObjBranchrule.php)
     (`scippp::Model::includeBranchrule`),

@@ -85,6 +85,15 @@ class Model {
      */
     void activatePricer(const scip::ObjPricer& pricer) const;
 
+    /**
+     * Includes the default Benders' cuts for an included Benders' decomposition and activates it together with the
+     * constraint handlers enforcing it, so that it is used when solving the model.
+     *
+     * @param benders Benders' decomposition to activate.
+     * @param nSubproblems number of subproblems of the Benders' decomposition.
+     */
+    void activateBenders(const scip::ObjBenders& benders, int nSubproblems) const;
+
 public:
     /**
      * Creates an empty problem and sets the optimization goal to Sense::MINIMIZE.
@@ -965,6 +974,54 @@ public:
             activatePricer(*pricer);
         }
         return pricer;
+    }
+
+    /**
+     * Includes and activates a custom Benders' decomposition together with %SCIP's default Benders' cuts.
+     *
+     * The Benders' decomposition is constructed by this method as scip::ObjBenders requires the %SCIP data structure
+     * in its constructor. %SCIP takes ownership and deletes it when the model is destructed.
+     *
+     * Derive from scip::ObjBenders to solve the model as master problem of a Benders' decomposition. The
+     * decomposition creates the subproblems, solves them, and maps the variables between the master problem and the
+     * subproblems:
+     * @code
+     * class MyBenders : public scip::ObjBenders {
+     * public:
+     *     MyBenders(SCIP* scip, const std::vector<Var>& masterVars);
+     *     ...
+     * };
+     * ...
+     * auto masterVars = model.addVars("x_", 42);
+     * model.includeBenders<MyBenders>(nSubproblems, masterVars);
+     * model.solve();
+     * @endcode
+     *
+     * Activating the Benders' decomposition also activates the constraint handlers \c benders and \c benderslp, which
+     * enforce it. If \p Benders is not cloneable, copying Benders' decompositions to sub-SCIPs is disabled via the
+     * parameter \c benders/copybenders, as %SCIP cannot copy it.
+     *
+     * @since 1.5.0
+     * @tparam Benders Type of the Benders' decomposition, derived from scip::ObjBenders.
+     * @tparam Args Types of the additional constructor arguments.
+     * @param nSubproblems number of subproblems of the Benders' decomposition.
+     * @param args passed to the constructor of \p Benders after the %SCIP data structure.
+     * @return Non-owning pointer to the Benders' decomposition, or \c nullptr if including failed.
+     * @attention Must be called before solve(). The priority of \p Benders has to be positive, as %SCIP expects
+     *            active Benders' decompositions to have higher priorities than the inactive default one.
+     * @attention scip::ObjBenders always provides the callbacks to solve subproblems, so %SCIP does not solve them
+     *            itself. Hence, \p Benders has to implement \c scip_solvesubconvex or \c scip_solvesub.
+     * @note The default Benders' cuts can be disabled via the parameters
+     *       <code>benders/\<name\>/benderscut/\<cut\>/enabled</code>.
+     */
+    template <typename Benders, typename... Args>
+    Benders* includeBenders(int nSubproblems, Args&&... args) const
+    {
+        auto* benders { constructAndInclude<Benders>(&SCIPincludeObjBenders, std::forward<Args>(args)...) };
+        if (benders != nullptr) {
+            activateBenders(*benders, nSubproblems);
+        }
+        return benders;
     }
 };
 }
