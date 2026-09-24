@@ -6,20 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- [PR44](https://github.com/scipopt/SCIPpp/pull/44), [Issue29](https://github.com/scipopt/SCIPpp/issues/29) Custom
-  message handlers derived from `scip::ObjMessagehdlr` can be installed via `Model::setMessagehdlr` without accessing
-  the raw SCIP object:
-  ```cpp
-  model.setMessagehdlr(std::make_unique<MyMessageHandler>());
-  ```
-- [PR44](https://github.com/scipopt/SCIPpp/pull/44) Custom event handlers derived from `scip::ObjEventhdlr` can be
-  included via `Model::includeEventhdlr` without accessing the raw SCIP object. It forwards its arguments to the
-  constructor of the handler after the SCIP data structure, and returns a non-owning pointer to the handler:
-  ```cpp
-  MyEventHandler* handler = model.includeEventhdlr<MyEventHandler>(arg1, arg2);
-  ```
-- [PR44](https://github.com/scipopt/SCIPpp/pull/44) Custom constraint handlers derived from `scip::ObjConshdlr` can be
-  included via `Model::includeConshdlr`, analogous to `Model::includeEventhdlr`.
+- [PR44](https://github.com/scipopt/SCIPpp/pull/44), [Issue29](https://github.com/scipopt/SCIPpp/issues/29) Support
+  of ObjSCIP without accessing the raw SCIP object:
+  - message handlers derived from `scip::ObjMessagehdlr` via `Model::setMessagehdlr`,
+  - constraint handlers derived from `scip::ObjConshdlr` via `Model::includeConshdlr`, and
+  - event handlers derived from `scip::ObjEventhdlr` via `Model::includeEventhdlr`.
 
 ### Changed
 
