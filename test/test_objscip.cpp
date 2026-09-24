@@ -24,6 +24,7 @@
 #include <objscip/objnodesel.h>
 #include <objscip/objpresol.h>
 #include <objscip/objpricer.h>
+#include <objscip/objprobdata.h>
 #include <objscip/objprop.h>
 #include <objscip/objreader.h>
 #include <objscip/objrelax.h>
@@ -948,6 +949,40 @@ BOOST_AUTO_TEST_CASE(UseBendersCut)
     BOOST_TEST(cut->getNCuts() > 0);
     BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1.0, boost::test_tools::tolerance(1e-6));
     BOOST_TEST(x.getSolValAsInt(model.getBestSol()) == 1);
+}
+
+/**
+ * Tracks whether it was deleted.
+ */
+class TrackingProbData : public scip::ObjProbData {
+    bool& m_deleted;
+
+public:
+    explicit TrackingProbData(bool& deleted)
+        : m_deleted(deleted)
+    {
+    }
+    ~TrackingProbData() override
+    {
+        m_deleted = true;
+    }
+};
+
+BOOST_AUTO_TEST_CASE(UseProblemData)
+{
+    bool deleted { false };
+    {
+        Model model("Simple", make_unique<TrackingProbData>(deleted));
+        BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
+        model.addVar("x", 1);
+        model.solve();
+        BOOST_TEST(model.getStatus() == SCIP_STATUS_OPTIMAL);
+        // plugins access the problem data via SCIP
+        BOOST_TEST(dynamic_cast<TrackingProbData*>(SCIPgetObjProbData(model.scip())) != nullptr);
+        BOOST_TEST(!deleted);
+    }
+    // SCIP deletes the problem data when the model is destructed
+    BOOST_TEST(deleted);
 }
 
 /**

@@ -94,6 +94,14 @@ class Model {
      */
     void activateBenders(const scip::ObjBenders& benders, int nSubproblems) const;
 
+    /**
+     * Prepares the %SCIP data structure without creating a problem in it.
+     *
+     * @param scip to use. If \c nullptr, a new %SCIP data structure will be created.
+     * @param includeDefaultPlugins if \c true, the default plugins are added to \p scip.
+     */
+    Model(SCIP* scip, bool includeDefaultPlugins);
+
 public:
     /**
      * Creates an empty problem and sets the optimization goal to Sense::MINIMIZE.
@@ -121,6 +129,29 @@ public:
      * @param includeDefaultPlugins if \c true, the default plugins are added to \p scip.
      */
     explicit Model(const std::string& name, SCIP* scip = nullptr, bool includeDefaultPlugins = true);
+
+    /**
+     * Creates an empty problem with custom problem data and sets the optimization goal to Sense::MINIMIZE.
+     *
+     * Derive from scip::ObjProbData to store problem-specific data, which plugins can access via SCIPgetObjProbData:
+     * @code
+     * class MyProblemData : public scip::ObjProbData { ... };
+     * ...
+     * Model model("Problem", std::make_unique<MyProblemData>());
+     * @endcode
+     *
+     * @since 1.5.0
+     * @param name for the problem.
+     * @param probData to store in the problem, must not be \c nullptr. %SCIP takes ownership and deletes it when the
+     *                 problem is freed.
+     * @param scip to create the problem in. If \c nullptr, a new %SCIP data structure will be created.
+     * @param includeDefaultPlugins if \c true, the default plugins are added to \p scip.
+     */
+    Model(
+        const std::string& name,
+        std::unique_ptr<scip::ObjProbData> probData,
+        SCIP* scip = nullptr,
+        bool includeDefaultPlugins = true);
 
     /**
      * Releases the variables and constraints.

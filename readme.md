@@ -53,7 +53,9 @@ int main()
 
 ## Features
 
-* Create a model with a new SCIP data structure or with an existing one, with or without SCIP's default plugins.
+* Create a model with a new SCIP data structure or with an existing one, with or without SCIP's default plugins, and
+  optionally with custom problem data derived from
+  [`scip::ObjProbData`](https://www.scipopt.org/doc/html/classscip_1_1ObjProbData.php) (`scippp::Model`).
 * Add variables one at a time, as a vector, or as an array for structured bindings (`scippp::Model::addVar`,
   `scippp::Model::addVars`). The objective coefficients can be given by any object providing an index operator.
 * Build linear expressions (`scippp::LinExpr`) and add linear inequalities and equations as constraints
@@ -100,9 +102,6 @@ int main()
   * IIS finders derived from
     [`scip::ObjIISfinder`](https://www.scipopt.org/doc/html/classscip_1_1ObjIISfinder.php)
     (`scippp::Model::includeIISfinder`),
-  * primal heuristics derived from
-    [`scip::ObjHeur`](https://www.scipopt.org/doc/html/classscip_1_1ObjHeur.php)
-    (`scippp::Model::includeHeur`),
   * node selectors derived from
     [`scip::ObjNodesel`](https://www.scipopt.org/doc/html/classscip_1_1ObjNodesel.php)
     (`scippp::Model::includeNodesel`),
@@ -112,6 +111,9 @@ int main()
   * pricers derived from
     [`scip::ObjPricer`](https://www.scipopt.org/doc/html/classscip_1_1ObjPricer.php)
     (`scippp::Model::includePricer`),
+  * primal heuristics derived from
+    [`scip::ObjHeur`](https://www.scipopt.org/doc/html/classscip_1_1ObjHeur.php)
+    (`scippp::Model::includeHeur`),
   * propagators derived from
     [`scip::ObjProp`](https://www.scipopt.org/doc/html/classscip_1_1ObjProp.php)
     (`scippp::Model::includeProp`),

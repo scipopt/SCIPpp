@@ -4,6 +4,22 @@
 
 namespace scippp {
 
+Model::Model(
+    const std::string& name,
+    std::unique_ptr<scip::ObjProbData> probData,
+    SCIP* scip,
+    bool withDefaultPlugins)
+    : Model(scip, withDefaultPlugins)
+{
+    assert(probData); // GCOVR_EXCL_LINE
+    const auto RETCODE { SCIPcreateObjProb(m_scip, name.c_str(), probData.get(), TRUE) };
+    // SCIP owns the problem data only on success, otherwise it is deleted when leaving this constructor.
+    if (RETCODE == SCIP_OKAY) {
+        probData.release();
+    }
+    m_scipCallWrapper(RETCODE);
+}
+
 void Model::setMessagehdlr(std::unique_ptr<scip::ObjMessagehdlr> handler) const
 {
     assert(handler); // GCOVR_EXCL_LINE

@@ -28,7 +28,7 @@ Var& Model::addVar(
     return m_vars.back();
 }
 
-Model::Model(const std::string& name, SCIP* scip, bool withDefaultPlugins)
+Model::Model(SCIP* scip, bool withDefaultPlugins)
 {
     m_scipCallWrapper = [this](SCIP_Retcode r) { m_lastReturnCode = r; };
     if (scip) {
@@ -40,6 +40,11 @@ Model::Model(const std::string& name, SCIP* scip, bool withDefaultPlugins)
     if (withDefaultPlugins) {
         m_scipCallWrapper(SCIPincludeDefaultPlugins(m_scip));
     }
+}
+
+Model::Model(const std::string& name, SCIP* scip, bool withDefaultPlugins)
+    : Model(scip, withDefaultPlugins)
+{
     m_scipCallWrapper(SCIPcreateProbBasic(m_scip, name.c_str()));
 }
 
