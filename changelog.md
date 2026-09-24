@@ -18,8 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - node selectors derived from `scip::ObjNodesel` via `Model::includeNodesel`,
   - presolvers derived from `scip::ObjPresol` via `Model::includePresol`,
   - propagators derived from `scip::ObjProp` via `Model::includeProp`,
-  - relaxators derived from `scip::ObjRelax` via `Model::includeRelax`, and
-  - separators derived from `scip::ObjSepa` via `Model::includeSepa`.
+  - relaxators derived from `scip::ObjRelax` via `Model::includeRelax`,
+  - separators derived from `scip::ObjSepa` via `Model::includeSepa`, and
+  - statistics tables derived from `scip::ObjTable` via `Model::includeTable`.
 
 ### Changed
 

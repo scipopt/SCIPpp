@@ -3,6 +3,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
+#include <cstdio>
 #include <fstream>
 #include <memory>
 #include <sstream>
@@ -22,6 +23,7 @@
 #include <objscip/objprop.h>
 #include <objscip/objrelax.h>
 #include <objscip/objsepa.h>
+#include <objscip/objtable.h>
 
 using namespace boost::algorithm;
 using namespace scippp;
@@ -639,6 +641,50 @@ BOOST_AUTO_TEST_CASE(UseDisplayColumn)
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
     BOOST_TEST(disp->getNCalls() > 0);
+}
+
+/**
+ * Prints how often it was printed.
+ */
+class CountingTable : public scip::ObjTable {
+    int m_nCalls { 0 };
+
+public:
+    explicit CountingTable(SCIP* scip)
+        : scip::ObjTable(
+              scip,
+              "counting",
+              "prints how often it was printed",
+              100000, // position, higher than the ones of the default statistics tables to be the last table
+              SCIP_STAGE_TRANSFORMED) // earlieststage
+    {
+    }
+    [[nodiscard]] int getNCalls() const
+    {
+        return m_nCalls;
+    }
+    SCIP_DECL_TABLEOUTPUT(scip_output)
+    override
+    {
+        ++m_nCalls;
+        SCIPinfoMessage(scip, file, "Counting           : %d\n", m_nCalls);
+        return SCIP_OKAY;
+    }
+};
+
+BOOST_AUTO_TEST_CASE(UseStatisticsTable)
+{
+    Model model("Simple");
+    const auto* table { model.includeTable<CountingTable>() };
+    BOOST_REQUIRE(table != nullptr);
+    BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
+    model.solve();
+    // SCIP++ does not print statistics, so we have to use the raw SCIP object
+    auto* file { tmpfile() };
+    BOOST_REQUIRE(file != nullptr);
+    BOOST_TEST(SCIPprintStatistics(model.scip(), file) == SCIP_OKAY);
+    fclose(file);
+    BOOST_TEST(table->getNCalls() == 1);
 }
 
 /**

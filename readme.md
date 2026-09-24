@@ -102,10 +102,13 @@ int main()
     (`scippp::Model::includeProp`),
   * relaxators derived from
     [`scip::ObjRelax`](https://www.scipopt.org/doc/html/classscip_1_1ObjRelax.php)
-    (`scippp::Model::includeRelax`), and
+    (`scippp::Model::includeRelax`),
   * separators derived from
     [`scip::ObjSepa`](https://www.scipopt.org/doc/html/classscip_1_1ObjSepa.php)
-    (`scippp::Model::includeSepa`).
+    (`scippp::Model::includeSepa`), and
+  * statistics tables derived from
+    [`scip::ObjTable`](https://www.scipopt.org/doc/html/classscip_1_1ObjTable.php)
+    (`scippp::Model::includeTable`).
 * Access the raw SCIP object for features not yet supported (`scippp::Model::scip`).
 
 ## Build
