@@ -1023,5 +1023,47 @@ public:
         }
         return benders;
     }
+
+    /**
+     * Includes a custom Benders' decomposition cut for a Benders' decomposition.
+     *
+     * The cut is constructed by this method as scip::ObjBenderscut requires the %SCIP data structure in its
+     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
+     *
+     * Derive from scip::ObjBenderscut to generate problem-specific cuts from the subproblems of a Benders'
+     * decomposition:
+     * @code
+     * class MyBendersCut : public scip::ObjBenderscut {
+     * public:
+     *     explicit MyBendersCut(SCIP* scip);
+     *     ...
+     * };
+     * ...
+     * auto* benders { model.includeBenders<MyBenders>(nSubproblems) };
+     * model.includeBenderscut<MyBendersCut>(*benders);
+     * model.solve();
+     * @endcode
+     *
+     * @since 1.5.0
+     * @tparam Benderscut Type of the cut, derived from scip::ObjBenderscut.
+     * @tparam Args Types of the additional constructor arguments.
+     * @param benders Benders' decomposition to generate the cuts for, see includeBenders().
+     * @param args passed to the constructor of \p Benderscut after the %SCIP data structure.
+     * @return Non-owning pointer to the cut, or \c nullptr if including failed.
+     * @attention Must be called before solve().
+     */
+    template <typename Benderscut, typename... Args>
+    Benderscut* includeBenderscut(scip::ObjBenders& benders, Args&&... args) const
+    {
+        // like constructAndInclude, but the include function additionally requires the Benders' decomposition
+        static_assert(
+            std::is_base_of_v<scip::ObjBenderscut, Benderscut>, "Benderscut must derive from scip::ObjBenderscut");
+        auto cut { std::make_unique<Benderscut>(m_scip, std::forward<Args>(args)...) };
+        const auto RETCODE { SCIPincludeObjBenderscut(m_scip, &benders, cut.get(), TRUE) };
+        // SCIP owns the cut only on success, otherwise it is deleted when leaving this method.
+        Benderscut* result { RETCODE == SCIP_OKAY ? cut.release() : nullptr };
+        m_scipCallWrapper(RETCODE);
+        return result;
+    }
 };
 }

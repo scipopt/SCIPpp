@@ -76,6 +76,9 @@ int main()
   * Benders' decompositions derived from
     [`scip::ObjBenders`](https://www.scipopt.org/doc/html/classscip_1_1ObjBenders.php)
     (`scippp::Model::includeBenders`),
+  * Benders' decomposition cuts derived from
+    [`scip::ObjBenderscut`](https://www.scipopt.org/doc/html/classscip_1_1ObjBenderscut.php)
+    (`scippp::Model::includeBenderscut`),
   * branching rules derived from
     [`scip::ObjBranchrule`](https://www.scipopt.org/doc/html/classscip_1_1ObjBranchrule.php)
     (`scippp::Model::includeBranchrule`),

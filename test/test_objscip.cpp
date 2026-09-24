@@ -12,6 +12,7 @@
 #include "scippp/parameters.hpp"
 #include "scippp/solving_statistics.hpp"
 #include <objscip/objbenders.h>
+#include <objscip/objbenderscut.h>
 #include <objscip/objbranchrule.h>
 #include <objscip/objconshdlr.h>
 #include <objscip/objcutsel.h>
@@ -28,6 +29,7 @@
 #include <objscip/objrelax.h>
 #include <objscip/objsepa.h>
 #include <objscip/objtable.h>
+#include <scip/cons_linear.h>
 
 using namespace boost::algorithm;
 using namespace scippp;
@@ -820,9 +822,10 @@ BOOST_AUTO_TEST_CASE(UsePricer)
 }
 
 /**
- * Decomposes min x + y s.t. y >= 2 - c x with binary x and continuous y >= 0 into the master problem min x, which is the
- * model, and the subproblem min y s.t. y >= 2 - c x, y >= 0, where x is fixed to its value in the master problem. The
- * decomposition computes the optimal value max(0, 2 - c x) of the subproblem itself, so there is no SCIP instance for it.
+ * Decomposes min x + y s.t. y >= 2 - c x with binary x and continuous y >= 0 into the master problem min x, which is
+ * the model, and the subproblem min y s.t. y >= 2 - c x, y >= 0, where x is fixed to its value in the master problem.
+ * The decomposition computes the optimal value max(0, 2 - c x) of the subproblem itself, so there is no SCIP instance
+ * for it.
  */
 class DemandBenders : public scip::ObjBenders {
     SCIP_VAR* m_masterX;
@@ -879,7 +882,7 @@ BOOST_AUTO_TEST_CASE(UseBenders)
 {
     Model model("Master");
     auto x = model.addVar("x", 1, VarType::BINARY);
-    // without coverage, the subproblem has the constant optimal value 2, which is its lower bound, i.e., no cut is needed
+    // without coverage, the subproblem has the constant optimal value 2, which is its lower bound, so no cut is needed
     const auto* benders { model.includeBenders<DemandBenders>(1, x.getVar(), 0.0) };
     BOOST_REQUIRE(benders != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
@@ -888,6 +891,63 @@ BOOST_AUTO_TEST_CASE(UseBenders)
     BOOST_TEST(benders->getNSolves() > 0);
     BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 2.0, boost::test_tools::tolerance(1e-6));
     BOOST_TEST(x.getSolValAsInt(model.getBestSol()) == 0);
+}
+
+/**
+ * Adds the optimality cut theta + c x >= 2 for the subproblem of DemandBenders, where theta is the auxiliary variable
+ * of the subproblem in the master problem.
+ */
+class DemandBenderscut : public scip::ObjBenderscut {
+    SCIP_VAR* m_masterX;
+    double m_coverage;
+    int m_nCuts { 0 };
+
+public:
+    DemandBenderscut(SCIP* scip, SCIP_VAR* masterX, double coverage)
+        : scip::ObjBenderscut(
+              scip,
+              "demand",
+              "adds the optimality cut of the demand subproblem",
+              1000000, // priority, higher than the ones of the default Benders' cuts to be called first
+              TRUE) // islpcut
+        , m_masterX(masterX)
+        , m_coverage(coverage)
+    {
+    }
+    [[nodiscard]] int getNCuts() const
+    {
+        return m_nCuts;
+    }
+    SCIP_DECL_BENDERSCUTEXEC(scip_exec)
+    override
+    {
+        SCIP_CONS* cons { nullptr };
+        SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, "demand", 0, nullptr, nullptr, 2.0, SCIPinfinity(scip)));
+        SCIP_CALL(SCIPaddCoefLinear(scip, cons, SCIPbendersGetAuxiliaryVar(benders, probnumber), 1.0));
+        SCIP_CALL(SCIPaddCoefLinear(scip, cons, SCIPvarGetTransVar(m_masterX), m_coverage));
+        SCIP_CALL(SCIPaddCons(scip, cons));
+        SCIP_CALL(SCIPreleaseCons(scip, &cons));
+        ++m_nCuts;
+        *result = SCIP_CONSADDED;
+        return SCIP_OKAY;
+    }
+};
+
+BOOST_AUTO_TEST_CASE(UseBendersCut)
+{
+    Model model("Master");
+    auto x = model.addVar("x", 1, VarType::BINARY);
+    // x = 1 costs 1 in the master problem, whereas x = 0 costs 2 in the subproblem
+    auto* benders { model.includeBenders<DemandBenders>(1, x.getVar(), 2.0) };
+    BOOST_REQUIRE(benders != nullptr);
+    const auto* cut { model.includeBenderscut<DemandBenderscut>(*benders, x.getVar(), 2.0) };
+    BOOST_REQUIRE(cut != nullptr);
+    BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
+    model.solve();
+    BOOST_TEST(model.getStatus() == SCIP_STATUS_OPTIMAL);
+    BOOST_TEST(cut->getNCuts() > 0);
+    BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1.0, boost::test_tools::tolerance(1e-6));
+    BOOST_TEST(x.getSolValAsInt(model.getBestSol()) == 1);
 }
 
 /**
