@@ -3,10 +3,10 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
-#include <cstdio>
 #include <fstream>
 #include <memory>
 #include <sstream>
+#include <stdexcept>
 
 #include "scippp/model.hpp"
 #include "scippp/parameters.hpp"
@@ -29,7 +29,6 @@
 #include <objscip/objreader.h>
 #include <objscip/objrelax.h>
 #include <objscip/objsepa.h>
-#include <objscip/objtable.h>
 #include <objscip/objvardata.h>
 #include <scip/cons_linear.h>
 
@@ -652,50 +651,6 @@ BOOST_AUTO_TEST_CASE(UseDisplayColumn)
 }
 
 /**
- * Prints how often it was printed.
- */
-class CountingTable : public scip::ObjTable {
-    int m_nCalls { 0 };
-
-public:
-    explicit CountingTable(SCIP* scip)
-        : scip::ObjTable(
-            scip,
-            "counting",
-            "prints how often it was printed",
-            100000, // position, higher than the ones of the default statistics tables to be the last table
-            SCIP_STAGE_TRANSFORMED) // earlieststage
-    {
-    }
-    [[nodiscard]] int getNCalls() const
-    {
-        return m_nCalls;
-    }
-    SCIP_DECL_TABLEOUTPUT(scip_output)
-    override
-    {
-        ++m_nCalls;
-        SCIPinfoMessage(scip, file, "Counting           : %d\n", m_nCalls);
-        return SCIP_OKAY;
-    }
-};
-
-BOOST_AUTO_TEST_CASE(UseStatisticsTable)
-{
-    Model model("Simple");
-    const auto* table { model.includeTable<CountingTable>() };
-    BOOST_REQUIRE(table != nullptr);
-    BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
-    model.solve();
-    // SCIP++ does not print statistics, so we have to use the raw SCIP object
-    auto* file { tmpfile() };
-    BOOST_REQUIRE(file != nullptr);
-    BOOST_TEST(SCIPprintStatistics(model.scip(), file) == SCIP_OKAY);
-    fclose(file);
-    BOOST_TEST(table->getNCalls() == 1);
-}
-
-/**
  * Writes the number of variables and constraints of a problem to files with extension cnt.
  */
 class CountReader : public scip::ObjReader {
@@ -823,6 +778,16 @@ BOOST_AUTO_TEST_CASE(UsePricer)
     BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1);
 }
 
+BOOST_AUTO_TEST_CASE(IncludePricerTwice)
+{
+    Model model("Simple");
+    BOOST_TEST(model.includePricer<CountingPricer>() != nullptr);
+    BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
+    // SCIP rejects a second pricer with the same name, the pricer is then deleted by SCIP++ without being activated
+    BOOST_TEST(model.includePricer<CountingPricer>() == nullptr);
+    BOOST_TEST(model.getLastReturnCode() == SCIP_INVALIDDATA);
+}
+
 /**
  * Decomposes min x + y s.t. y >= 2 - c x with binary x and continuous y >= 0 into the master problem min x, which is
  * the model, and the subproblem min y s.t. y >= 2 - c x, y >= 0, where x is fixed to its value in the master problem.
@@ -895,6 +860,73 @@ BOOST_AUTO_TEST_CASE(UseBenders)
     BOOST_TEST(x.getSolValAsInt(model.getBestSol()) == 0);
 }
 
+BOOST_AUTO_TEST_CASE(IncludeBendersTwice)
+{
+    Model model("Master");
+    auto x = model.addVar("x", 1, VarType::BINARY);
+    BOOST_TEST(model.includeBenders<DemandBenders>(1, x.getVar(), 0.0) != nullptr);
+    BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
+    // SCIP rejects a second Benders' decomposition with the same name, it is then deleted by SCIP++ without being
+    // activated
+    BOOST_TEST(model.includeBenders<DemandBenders>(1, x.getVar(), 0.0) == nullptr);
+    BOOST_TEST(model.getLastReturnCode() == SCIP_INVALIDDATA);
+}
+
+/**
+ * Can be copied to sub-SCIPs. It is never solved, hence it creates no subproblems.
+ */
+class CloneableBenders : public scip::ObjBenders {
+public:
+    explicit CloneableBenders(SCIP* scip)
+        : scip::ObjBenders(
+            scip,
+            "cloneable",
+            "can be copied to sub-SCIPs",
+            1, // priority, positive to be higher than the one of the inactive default Benders' decomposition
+            TRUE, // cutlp
+            TRUE, // cutpseudo
+            TRUE, // cutrelax
+            FALSE) // shareauxvars
+    {
+    }
+    SCIP_DECL_OBJCLONEABLECLONE(ObjCloneable* clone)
+    override
+    {
+        return new CloneableBenders(scip);
+    }
+    SCIP_DECL_OBJCLONEABLEISCLONEABLE(iscloneable)
+    override
+    {
+        return TRUE;
+    }
+    SCIP_DECL_BENDERSCREATESUB(scip_createsub)
+    override
+    {
+        return SCIP_OKAY;
+    }
+    SCIP_DECL_BENDERSGETVAR(scip_getvar)
+    override
+    {
+        *mappedvar = nullptr;
+        return SCIP_OKAY;
+    }
+};
+
+BOOST_AUTO_TEST_CASE(CopyBendersOnlyIfCloneable)
+{
+    SCIP_Bool copyBenders { FALSE };
+    Model cloneable("Master");
+    BOOST_REQUIRE(cloneable.includeBenders<CloneableBenders>(1) != nullptr);
+    BOOST_TEST(SCIPgetBoolParam(cloneable.scip(), "benders/copybenders", &copyBenders) == SCIP_OKAY);
+    BOOST_TEST(copyBenders);
+
+    Model notCloneable("Master");
+    auto x = notCloneable.addVar("x", 1, VarType::BINARY);
+    BOOST_REQUIRE(notCloneable.includeBenders<DemandBenders>(1, x.getVar(), 0.0) != nullptr);
+    BOOST_TEST(SCIPgetBoolParam(notCloneable.scip(), "benders/copybenders", &copyBenders) == SCIP_OKAY);
+    BOOST_TEST(!copyBenders);
+}
+
 /**
  * Adds the optimality cut theta + c x >= 2 for the subproblem of DemandBenders, where theta is the auxiliary variable
  * of the subproblem in the master problem.
@@ -950,6 +982,20 @@ BOOST_AUTO_TEST_CASE(UseBendersCut)
     BOOST_TEST(cut->getNCuts() > 0);
     BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1.0, boost::test_tools::tolerance(1e-6));
     BOOST_TEST(x.getSolValAsInt(model.getBestSol()) == 1);
+}
+
+BOOST_AUTO_TEST_CASE(IncludeBenderscutTwice)
+{
+    Model model("Master");
+    auto x = model.addVar("x", 1, VarType::BINARY);
+    auto* benders { model.includeBenders<DemandBenders>(1, x.getVar(), 2.0) };
+    BOOST_REQUIRE(benders != nullptr);
+    BOOST_TEST(model.includeBenderscut<DemandBenderscut>(*benders, x.getVar(), 2.0) != nullptr);
+    BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
+    // SCIP rejects a second cut with the same name for the same Benders' decomposition, the cut is then deleted by
+    // SCIP++
+    BOOST_TEST(model.includeBenderscut<DemandBenderscut>(*benders, x.getVar(), 2.0) == nullptr);
+    BOOST_TEST(model.getLastReturnCode() == SCIP_INVALIDDATA);
 }
 
 /**
@@ -1019,6 +1065,31 @@ BOOST_AUTO_TEST_CASE(UseVariableData)
         BOOST_TEST(!deleted);
     }
     // SCIP deletes the variable data when the model is destructed
+    BOOST_TEST(deleted);
+}
+
+BOOST_AUTO_TEST_CASE(AddVariableDataWithBounds)
+{
+    Model model("Simple");
+    auto& x = model.addVar("x", make_unique<scip::ObjVardata>(), 1, VarType::CONTINUOUS, 2.0, 3.0);
+    BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
+    BOOST_TEST(SCIPvarGetLbOriginal(x.getVar()) == 2.0);
+    BOOST_TEST(SCIPvarGetUbOriginal(x.getVar()) == 3.0);
+}
+
+BOOST_AUTO_TEST_CASE(AddVariableDataFails)
+{
+    bool deleted { false };
+    Model model("Simple");
+    // by default, SCIP++ continues after a failed call, but a variable that was not created cannot be added
+    model.setScipCallWrapper([](SCIP_Retcode retcode) {
+        if (retcode != SCIP_OKAY) {
+            throw runtime_error("SCIP call failed");
+        }
+    });
+    // SCIP rejects an infinite objective coefficient, the variable data is then deleted by SCIP++
+    BOOST_CHECK_THROW(
+        model.addVar("x", make_unique<TrackingVardata>(deleted), SCIPinfinity(model.scip())), runtime_error);
     BOOST_TEST(deleted);
 }
 

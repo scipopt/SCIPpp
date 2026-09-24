@@ -25,8 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - problem data derived from `scip::ObjProbData` via a new constructor of `Model`,
   - propagators derived from `scip::ObjProp` via `Model::includeProp`,
   - relaxators derived from `scip::ObjRelax` via `Model::includeRelax`,
-  - separators derived from `scip::ObjSepa` via `Model::includeSepa`,
-  - statistics tables derived from `scip::ObjTable` via `Model::includeTable`, and
+  - separators derived from `scip::ObjSepa` via `Model::includeSepa`, and
   - variable data derived from `scip::ObjVardata` via a new overload of `Model::addVar`.
 
 ### Changed

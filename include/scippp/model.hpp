@@ -6,7 +6,6 @@
 #include <functional>
 #include <memory>
 #include <objscip/objscip.h>
-#include <objscip/objtable.h> // not included by objscip.h
 #include <optional>
 #include <scip/scip.h>
 #include <string>
@@ -901,38 +900,6 @@ public:
     Disp* includeDisp(Args&&... args) const
     {
         return constructAndInclude<Disp>(&SCIPincludeObjDisp, std::forward<Args>(args)...);
-    }
-
-    /**
-     * Includes a custom statistics table.
-     *
-     * The statistics table is constructed by this method as scip::ObjTable requires the %SCIP data structure in its
-     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
-     *
-     * Derive from scip::ObjTable to add problem-specific information to the statistics %SCIP prints:
-     * @code
-     * class MyStatisticsTable : public scip::ObjTable {
-     * public:
-     *     explicit MyStatisticsTable(SCIP* scip);
-     *     ...
-     * };
-     * ...
-     * model.includeTable<MyStatisticsTable>();
-     * model.solve();
-     * @endcode
-     *
-     * @since 1.5.0
-     * @tparam Table Type of the statistics table, derived from scip::ObjTable.
-     * @tparam Args Types of the additional constructor arguments.
-     * @param args passed to the constructor of \p Table after the %SCIP data structure.
-     * @return Non-owning pointer to the statistics table, or \c nullptr if including failed.
-     * @attention Must be called before solve().
-     * @note SCIP++ does not print statistics, this requires %SCIP's %C %API, e.g., SCIPprintStatistics.
-     */
-    template <typename Table, typename... Args>
-    Table* includeTable(Args&&... args) const
-    {
-        return constructAndInclude<Table>(&SCIPincludeObjTable, std::forward<Args>(args)...);
     }
 
     /**

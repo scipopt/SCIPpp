@@ -123,13 +123,15 @@ int main()
     (`scippp::Model::includeRelax`),
   * separators derived from
     [`scip::ObjSepa`](https://www.scipopt.org/doc/html/classscip_1_1ObjSepa.php)
-    (`scippp::Model::includeSepa`),
-  * statistics tables derived from
-    [`scip::ObjTable`](https://www.scipopt.org/doc/html/classscip_1_1ObjTable.php)
-    (`scippp::Model::includeTable`), and
+    (`scippp::Model::includeSepa`), and
   * variable data derived from
     [`scip::ObjVardata`](https://www.scipopt.org/doc/html/classscip_1_1ObjVardata.php)
     (`scippp::Model::addVar`).
+
+  Statistics tables derived from
+  [`scip::ObjTable`](https://www.scipopt.org/doc/html/classscip_1_1ObjTable.php)
+  are not supported, as SCIP does not export `scip::ObjTable` from its shared library, see
+  [SCIP issue 222](https://github.com/scipopt/scip/issues/222).
 * Access the raw SCIP object for features not yet supported (`scippp::Model::scip`).
 
 ## Build
