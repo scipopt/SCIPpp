@@ -91,6 +91,9 @@ int main()
   * file readers derived from
     [`scip::ObjReader`](https://www.scipopt.org/doc/html/classscip_1_1ObjReader.php)
     (`scippp::Model::includeReader`),
+  * IIS finders derived from
+    [`scip::ObjIISfinder`](https://www.scipopt.org/doc/html/classscip_1_1ObjIISfinder.php)
+    (`scippp::Model::includeIISfinder`),
   * primal heuristics derived from
     [`scip::ObjHeur`](https://www.scipopt.org/doc/html/classscip_1_1ObjHeur.php)
     (`scippp::Model::includeHeur`),

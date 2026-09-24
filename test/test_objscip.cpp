@@ -17,6 +17,7 @@
 #include <objscip/objdisp.h>
 #include <objscip/objeventhdlr.h>
 #include <objscip/objheur.h>
+#include <objscip/objiisfinder.h>
 #include <objscip/objmessagehdlr.h>
 #include <objscip/objnodesel.h>
 #include <objscip/objpresol.h>
@@ -724,6 +725,51 @@ BOOST_AUTO_TEST_CASE(UseReader)
     file.close();
     filesystem::remove(FILE_NAME);
     BOOST_TEST(content.str() == "2 1\n");
+}
+
+/**
+ * Counts how often it is called and leaves the work to the other %IIS finders.
+ */
+class CountingIISfinder : public scip::ObjIISfinder {
+    int m_nCalls { 0 };
+
+public:
+    explicit CountingIISfinder(SCIP* scip)
+        : scip::ObjIISfinder(
+              scip,
+              "counting",
+              "counts how often it is called",
+              1000000) // priority, higher than the ones of the default IIS finders to be called first
+    {
+    }
+    [[nodiscard]] int getNCalls() const
+    {
+        return m_nCalls;
+    }
+    SCIP_DECL_IISFINDEREXEC(scip_exec)
+    override
+    {
+        ++m_nCalls;
+        *result = SCIP_DIDNOTRUN;
+        return SCIP_OKAY;
+    }
+};
+
+BOOST_AUTO_TEST_CASE(UseIISFinder)
+{
+    Model model("Simple");
+    const auto& [x1, x2] = model.addVars<2>("x_");
+    model.addConstr(x1 + x2 >= 2, "lower");
+    model.addConstr(x1 + x2 <= 1, "upper");
+    model.setParam(params::IIS::SILENT, true);
+    const auto* iisfinder { model.includeIISfinder<CountingIISfinder>() };
+    BOOST_REQUIRE(iisfinder != nullptr);
+    BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
+    model.solve();
+    BOOST_REQUIRE(model.getStatus() == SCIP_STATUS_INFEASIBLE);
+    // the default IIS finder still computes the IIS
+    BOOST_TEST(model.generateIIS().consIds.size() == 2);
+    BOOST_TEST(iisfinder->getNCalls() == 1);
 }
 
 /**

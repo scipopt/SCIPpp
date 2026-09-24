@@ -890,5 +890,37 @@ public:
     {
         return constructAndInclude<Reader>(&SCIPincludeObjReader, std::forward<Args>(args)...);
     }
+
+    /**
+     * Includes a custom %IIS finder.
+     *
+     * The %IIS finder is constructed by this method as scip::ObjIISfinder requires the %SCIP data structure in its
+     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
+     *
+     * Derive from scip::ObjIISfinder to compute an %IIS of an infeasible problem via generateIIS(), e.g., based on
+     * problem-specific knowledge:
+     * @code
+     * class MyIISFinder : public scip::ObjIISfinder {
+     * public:
+     *     explicit MyIISFinder(SCIP* scip);
+     *     ...
+     * };
+     * ...
+     * model.includeIISfinder<MyIISFinder>();
+     * model.solve();
+     * auto iis { model.generateIIS() };
+     * @endcode
+     *
+     * @since 1.5.0
+     * @tparam IISfinder Type of the %IIS finder, derived from scip::ObjIISfinder.
+     * @tparam Args Types of the additional constructor arguments.
+     * @param args passed to the constructor of \p IISfinder after the %SCIP data structure.
+     * @return Non-owning pointer to the %IIS finder, or \c nullptr if including failed.
+     */
+    template <typename IISfinder, typename... Args>
+    IISfinder* includeIISfinder(Args&&... args) const
+    {
+        return constructAndInclude<IISfinder>(&SCIPincludeObjIISfinder, std::forward<Args>(args)...);
+    }
 };
 }
