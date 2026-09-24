@@ -82,6 +82,14 @@ class Model {
      */
     bool includeObj(std::unique_ptr<scip::ObjEventhdlr> eventhdlr) const;
 
+    /**
+     * Includes a constraint handler, %SCIP takes ownership on success.
+     *
+     * @param conshdlr to include, it is deleted if including fails.
+     * @return \c true iff including succeeded.
+     */
+    bool includeObj(std::unique_ptr<scip::ObjConshdlr> conshdlr) const;
+
 public:
     /**
      * Creates an empty problem and sets the optimization goal to Sense::MINIMIZE.
@@ -507,6 +515,41 @@ public:
     Eventhdlr* includeEventhdlr(Args&&... args) const
     {
         return constructAndInclude<Eventhdlr, scip::ObjEventhdlr>(std::forward<Args>(args)...);
+    }
+
+    /**
+     * Includes a custom constraint handler.
+     *
+     * The handler is constructed by this method as scip::ObjConshdlr requires the %SCIP data structure in its
+     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
+     *
+     * Derive from scip::ObjConshdlr to enforce constraints that cannot be expressed linearly, e.g., lazily:
+     * @code
+     * class MyConstraintHandler : public scip::ObjConshdlr {
+     * public:
+     *     MyConstraintHandler(SCIP* scip, const std::vector<Var>& vars);
+     *     ...
+     * };
+     * ...
+     * auto vars = model.addVars("x_", 42);
+     * model.includeConshdlr<MyConstraintHandler>(vars);
+     * model.solve();
+     * @endcode
+     *
+     * @since 1.5.0
+     * @tparam Conshdlr Type of the constraint handler, derived from scip::ObjConshdlr.
+     * @tparam Args Types of the additional constructor arguments.
+     * @param args passed to the constructor of \p Conshdlr after the %SCIP data structure.
+     * @return Non-owning pointer to the handler, or \c nullptr if including failed.
+     * @attention Must be called before solve().
+     * @note SCIP++ cannot create constraints of a custom constraint handler. Thus, pass \c needscons = \c FALSE to the
+     *       constructor of scip::ObjConshdlr, so that the handler is called without constraints, and lock the
+     *       variables in \c scip_lock, which is then called with \c cons = \c nullptr.
+     */
+    template <typename Conshdlr, typename... Args>
+    Conshdlr* includeConshdlr(Args&&... args) const
+    {
+        return constructAndInclude<Conshdlr, scip::ObjConshdlr>(std::forward<Args>(args)...);
     }
 };
 }

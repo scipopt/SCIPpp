@@ -52,4 +52,9 @@ bool Model::includeObj(std::unique_ptr<scip::ObjEventhdlr> eventhdlr) const
     return includeObjPlugin(m_scip, m_scipCallWrapper, &SCIPincludeObjEventhdlr, std::move(eventhdlr));
 }
 
+bool Model::includeObj(std::unique_ptr<scip::ObjConshdlr> conshdlr) const
+{
+    return includeObjPlugin(m_scip, m_scipCallWrapper, &SCIPincludeObjConshdlr, std::move(conshdlr));
+}
+
 }

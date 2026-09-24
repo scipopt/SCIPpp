@@ -72,9 +72,13 @@ int main()
 * Install custom message handlers derived from
   [`scip::ObjMessagehdlr`](https://www.scipopt.org/doc/html/classscip_1_1ObjMessagehdlr.php)
   (`scippp::Model::setMessagehdlr`).
-* Include custom event handlers derived from
-  [`scip::ObjEventhdlr`](https://www.scipopt.org/doc/html/classscip_1_1ObjEventhdlr.php)
-  (`scippp::Model::includeEventhdlr`).
+* Include custom plugins:
+  * constraint handlers derived from
+    [`scip::ObjConshdlr`](https://www.scipopt.org/doc/html/classscip_1_1ObjConshdlr.php)
+    (`scippp::Model::includeConshdlr`), and
+  * event handlers derived from
+    [`scip::ObjEventhdlr`](https://www.scipopt.org/doc/html/classscip_1_1ObjEventhdlr.php)
+    (`scippp::Model::includeEventhdlr`).
 * Access the raw SCIP object for features not yet supported (`scippp::Model::scip`).
 
 ## Build

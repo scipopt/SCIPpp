@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ```cpp
   MyEventHandler* handler = model.includeEventhdlr<MyEventHandler>(arg1, arg2);
   ```
+- [PR44](https://github.com/scipopt/SCIPpp/pull/44) Custom constraint handlers derived from `scip::ObjConshdlr` can be
+  included via `Model::includeConshdlr`, analogous to `Model::includeEventhdlr`.
 
 ### Changed
 

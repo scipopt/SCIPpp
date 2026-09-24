@@ -6,6 +6,8 @@
 #include <sstream>
 
 #include "scippp/model.hpp"
+#include "scippp/solving_statistics.hpp"
+#include <objscip/objconshdlr.h>
 #include <objscip/objeventhdlr.h>
 #include <objscip/objmessagehdlr.h>
 
@@ -70,6 +72,94 @@ BOOST_AUTO_TEST_CASE(IncludeEventHandlerTwice)
     // SCIP rejects a second event handler with the same name, the handler is then deleted by SCIP++
     BOOST_TEST(model.includeEventhdlr<BestSolCounter>(nBestSols) == nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_INVALIDDATA);
+}
+
+/**
+ * Lazily enforces a non-negative variable to be zero, without any constraint.
+ */
+class ZeroVarConshdlr : public scip::ObjConshdlr {
+    SCIP_VAR* m_var;
+
+    [[nodiscard]] bool isViolated(SCIP* scip, SCIP_SOL* sol) const
+    {
+        return SCIPisFeasPositive(scip, SCIPgetSolVal(scip, sol, m_var));
+    }
+
+    SCIP_RETCODE enforce(SCIP* scip, SCIP_RESULT* result) const
+    {
+        *result = SCIP_FEASIBLE;
+        if (isViolated(scip, nullptr)) {
+            SCIP_Bool infeasible { FALSE };
+            SCIP_Bool tightened { FALSE };
+            SCIP_CALL(SCIPtightenVarUb(scip, SCIPvarGetTransVar(m_var), 0.0, FALSE, &infeasible, &tightened));
+            *result = infeasible ? SCIP_CUTOFF : SCIP_REDUCEDDOM;
+        }
+        return SCIP_OKAY;
+    }
+
+public:
+    ZeroVarConshdlr(SCIP* scip, SCIP_VAR* var)
+        : scip::ObjConshdlr(
+              scip,
+              "zerovar",
+              "enforces a variable to be zero",
+              0, // sepapriority
+              -1, // enfopriority, negative to be called for integral solutions only
+              -1, // checkpriority
+              -1, // sepafreq
+              -1, // propfreq
+              -1, // eagerfreq
+              0, // maxprerounds
+              FALSE, // delaysepa
+              FALSE, // delayprop
+              FALSE, // needscons
+              SCIP_PROPTIMING_BEFORELP,
+              SCIP_PRESOLTIMING_FAST)
+        , m_var(var)
+    {
+    }
+    SCIP_DECL_CONSTRANS(scip_trans)
+    override
+    {
+        // there are no constraints of this handler to transform
+        return SCIP_INVALIDCALL;
+    }
+    SCIP_DECL_CONSENFOLP(scip_enfolp)
+    override
+    {
+        return enforce(scip, result);
+    }
+    SCIP_DECL_CONSENFOPS(scip_enfops)
+    override
+    {
+        return enforce(scip, result);
+    }
+    SCIP_DECL_CONSCHECK(scip_check)
+    override
+    {
+        *result = isViolated(scip, sol) ? SCIP_INFEASIBLE : SCIP_FEASIBLE;
+        return SCIP_OKAY;
+    }
+    SCIP_DECL_CONSLOCK(scip_lock)
+    override
+    {
+        // called without constraint as this handler does not need constraints, increasing the variable may violate it
+        return SCIPaddVarLocksType(scip, SCIPvarGetTransVar(m_var), locktype, nlocksneg, nlockspos);
+    }
+};
+
+BOOST_AUTO_TEST_CASE(UseConstraintHandler)
+{
+    Model model("Simple");
+    auto x1 = model.addVar("x_1", 1, VarType::BINARY);
+    auto x2 = model.addVar("x_2", 1, VarType::BINARY);
+    model.setObjsense(Sense::MAXIMIZE);
+    BOOST_TEST(model.includeConshdlr<ZeroVarConshdlr>(x1.getVar()) != nullptr);
+    BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
+    model.solve();
+    BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1);
+    BOOST_TEST(x1.getSolValAsInt(model.getBestSol()) == 0);
+    BOOST_TEST(x2.getSolValAsInt(model.getBestSol()) == 1);
 }
 
 /**
