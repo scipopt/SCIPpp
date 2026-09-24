@@ -76,6 +76,9 @@ int main()
   * constraint handlers derived from
     [`scip::ObjConshdlr`](https://www.scipopt.org/doc/html/classscip_1_1ObjConshdlr.php)
     (`scippp::Model::includeConshdlr`),
+  * cut selectors derived from
+    [`scip::ObjCutsel`](https://www.scipopt.org/doc/html/classscip_1_1ObjCutsel.php)
+    (`scippp::Model::includeCutsel`),
   * event handlers derived from
     [`scip::ObjEventhdlr`](https://www.scipopt.org/doc/html/classscip_1_1ObjEventhdlr.php)
     (`scippp::Model::includeEventhdlr`),

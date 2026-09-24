@@ -668,5 +668,36 @@ public:
     {
         return constructAndInclude<Sepa>(&SCIPincludeObjSepa, std::forward<Args>(args)...);
     }
+
+    /**
+     * Includes a custom cut selector.
+     *
+     * The cut selector is constructed by this method as scip::ObjCutsel requires the %SCIP data structure in its
+     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
+     *
+     * Derive from scip::ObjCutsel to decide which of the separated cuts are added to the LP relaxation:
+     * @code
+     * class MyCutSelector : public scip::ObjCutsel {
+     * public:
+     *     MyCutSelector(SCIP* scip, double minEfficacy);
+     *     ...
+     * };
+     * ...
+     * model.includeCutsel<MyCutSelector>(0.1);
+     * model.solve();
+     * @endcode
+     *
+     * @since 1.5.0
+     * @tparam Cutsel Type of the cut selector, derived from scip::ObjCutsel.
+     * @tparam Args Types of the additional constructor arguments.
+     * @param args passed to the constructor of \p Cutsel after the %SCIP data structure.
+     * @return Non-owning pointer to the cut selector, or \c nullptr if including failed.
+     * @attention Must be called before solve().
+     */
+    template <typename Cutsel, typename... Args>
+    Cutsel* includeCutsel(Args&&... args) const
+    {
+        return constructAndInclude<Cutsel>(&SCIPincludeObjCutsel, std::forward<Args>(args)...);
+    }
 };
 }

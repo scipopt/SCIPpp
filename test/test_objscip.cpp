@@ -1,6 +1,7 @@
+#include <algorithm>
+#include <array>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
-#include <array>
 #include <boost/test/unit_test.hpp>
 #include <fstream>
 #include <memory>
@@ -10,6 +11,7 @@
 #include "scippp/parameters.hpp"
 #include "scippp/solving_statistics.hpp"
 #include <objscip/objconshdlr.h>
+#include <objscip/objcutsel.h>
 #include <objscip/objeventhdlr.h>
 #include <objscip/objheur.h>
 #include <objscip/objmessagehdlr.h>
@@ -400,6 +402,47 @@ BOOST_AUTO_TEST_CASE(UseSeparator)
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
     BOOST_TEST(sepa->getNCuts() > 0);
+}
+
+/**
+ * Selects all cuts, up to the maximal number of cuts to select.
+ */
+class AllCutsel : public scip::ObjCutsel {
+    int m_nCalls { 0 };
+
+public:
+    explicit AllCutsel(SCIP* scip)
+        : scip::ObjCutsel(
+              scip,
+              "all",
+              "selects all cuts",
+              1000000) // priority, higher than the ones of the default cut selectors to be used
+    {
+    }
+    [[nodiscard]] int getNCalls() const
+    {
+        return m_nCalls;
+    }
+    SCIP_DECL_CUTSELSELECT(scip_select)
+    override
+    {
+        ++m_nCalls;
+        *nselectedcuts = min(ncuts, maxnselectedcuts);
+        *result = SCIP_SUCCESS;
+        return SCIP_OKAY;
+    }
+};
+
+BOOST_AUTO_TEST_CASE(UseCutSelector)
+{
+    Model model("Simple");
+    auto [x1, x2] = addFractionalProblem(model);
+    BOOST_REQUIRE(model.includeSepa<CapacitySepa>(x1.getVar(), x2.getVar()) != nullptr);
+    const auto* cutsel { model.includeCutsel<AllCutsel>() };
+    BOOST_REQUIRE(cutsel != nullptr);
+    BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
+    model.solve();
+    BOOST_TEST(cutsel->getNCalls() > 0);
 }
 
 /**
