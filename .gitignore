@@ -13,3 +13,9 @@ CMakeUserPresets.json
 
 # CLion IDE files (seem to store local (non-shareable) settings since Nova is out)
 **/.idea
+
+# Claude Code: per-developer instructions, settings, worktrees and local agent memory (the rest of .claude is shared)
+CLAUDE.local.md
+.claude/settings.local.json
+.claude/worktrees/
+.claude/agent-memory-local/

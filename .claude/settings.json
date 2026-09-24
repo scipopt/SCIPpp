@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(cmake --build build/Debug:*)",
+      "Bash(cmake --build build/Release:*)",
+      "Bash(build/Debug/test/tests:*)",
+      "Bash(build/Release/test/tests:*)"
+    ],
+    "ask": [
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git rebase:*)",
+      "Bash(gh:*)"
+    ]
+  }
+}
