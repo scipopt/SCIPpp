@@ -570,5 +570,37 @@ public:
     {
         return constructAndInclude<Heur>(&SCIPincludeObjHeur, std::forward<Args>(args)...);
     }
+
+    /**
+     * Includes a custom presolver.
+     *
+     * The presolver is constructed by this method as scip::ObjPresol requires the %SCIP data structure in its
+     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
+     *
+     * Derive from scip::ObjPresol to reduce the problem before solving it, e.g., based on problem-specific knowledge:
+     * @code
+     * class MyPresolver : public scip::ObjPresol {
+     * public:
+     *     MyPresolver(SCIP* scip, const std::vector<Var>& vars);
+     *     ...
+     * };
+     * ...
+     * auto vars = model.addVars("x_", 42);
+     * model.includePresol<MyPresolver>(vars);
+     * model.solve();
+     * @endcode
+     *
+     * @since 1.5.0
+     * @tparam Presol Type of the presolver, derived from scip::ObjPresol.
+     * @tparam Args Types of the additional constructor arguments.
+     * @param args passed to the constructor of \p Presol after the %SCIP data structure.
+     * @return Non-owning pointer to the presolver, or \c nullptr if including failed.
+     * @attention Must be called before solve().
+     */
+    template <typename Presol, typename... Args>
+    Presol* includePresol(Args&&... args) const
+    {
+        return constructAndInclude<Presol>(&SCIPincludeObjPresol, std::forward<Args>(args)...);
+    }
 };
 }

@@ -78,10 +78,13 @@ int main()
     (`scippp::Model::includeConshdlr`),
   * event handlers derived from
     [`scip::ObjEventhdlr`](https://www.scipopt.org/doc/html/classscip_1_1ObjEventhdlr.php)
-    (`scippp::Model::includeEventhdlr`), and
+    (`scippp::Model::includeEventhdlr`),
   * primal heuristics derived from
     [`scip::ObjHeur`](https://www.scipopt.org/doc/html/classscip_1_1ObjHeur.php)
-    (`scippp::Model::includeHeur`).
+    (`scippp::Model::includeHeur`), and
+  * presolvers derived from
+    [`scip::ObjPresol`](https://www.scipopt.org/doc/html/classscip_1_1ObjPresol.php)
+    (`scippp::Model::includePresol`).
 * Access the raw SCIP object for features not yet supported (`scippp::Model::scip`).
 
 ## Build

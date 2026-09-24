@@ -11,6 +11,7 @@
 #include <objscip/objeventhdlr.h>
 #include <objscip/objheur.h>
 #include <objscip/objmessagehdlr.h>
+#include <objscip/objpresol.h>
 
 using namespace boost::algorithm;
 using namespace scippp;
@@ -222,6 +223,58 @@ BOOST_AUTO_TEST_CASE(UseHeuristic)
     // the heuristic is called first, so its solution is stored as there is no other solution yet
     BOOST_TEST(heur->getNFound() == 1);
     BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1);
+}
+
+/**
+ * Fixes a variable to zero, e.g., based on problem-specific knowledge.
+ */
+class ZeroVarPresol : public scip::ObjPresol {
+    SCIP_VAR* m_var;
+
+public:
+    ZeroVarPresol(SCIP* scip, SCIP_VAR* var)
+        : scip::ObjPresol(
+              scip,
+              "zerovar",
+              "fixes a variable to zero",
+              10000000, // priority, higher than the ones of the default presolvers to be called first
+              -1, // maxrounds
+              SCIP_PRESOLTIMING_FAST)
+        , m_var(var)
+    {
+    }
+    SCIP_DECL_PRESOLEXEC(scip_exec)
+    override
+    {
+        SCIP_Bool infeasible { FALSE };
+        SCIP_Bool fixed { FALSE };
+        SCIP_CALL(SCIPfixVar(scip, SCIPvarGetTransVar(m_var), 0.0, &infeasible, &fixed));
+        if (infeasible) {
+            *result = SCIP_CUTOFF;
+        } else if (fixed) {
+            ++(*nfixedvars);
+            *result = SCIP_SUCCESS;
+        } else {
+            *result = SCIP_DIDNOTFIND;
+        }
+        return SCIP_OKAY;
+    }
+};
+
+BOOST_AUTO_TEST_CASE(UsePresolver)
+{
+    Model model("Simple");
+    auto x1 = model.addVar("x_1", 2, VarType::BINARY);
+    auto x2 = model.addVar("x_2", 1, VarType::BINARY);
+    model.addConstr(x1 + x2 <= 1, "capacity");
+    model.setObjsense(Sense::MAXIMIZE);
+    BOOST_TEST(model.includePresol<ZeroVarPresol>(x1.getVar()) != nullptr);
+    BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
+    model.solve();
+    // without the presolver, x_1 = 1 would be optimal with objective 2
+    BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1);
+    BOOST_TEST(x1.getSolValAsInt(model.getBestSol()) == 0);
+    BOOST_TEST(x2.getSolValAsInt(model.getBestSol()) == 1);
 }
 
 /**

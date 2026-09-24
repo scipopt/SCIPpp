@@ -10,8 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   of ObjSCIP without accessing the raw SCIP object:
   - message handlers derived from `scip::ObjMessagehdlr` via `Model::setMessagehdlr`,
   - constraint handlers derived from `scip::ObjConshdlr` via `Model::includeConshdlr`,
-  - event handlers derived from `scip::ObjEventhdlr` via `Model::includeEventhdlr`, and
-  - primal heuristics derived from `scip::ObjHeur` via `Model::includeHeur`.
+  - event handlers derived from `scip::ObjEventhdlr` via `Model::includeEventhdlr`,
+  - primal heuristics derived from `scip::ObjHeur` via `Model::includeHeur`, and
+  - presolvers derived from `scip::ObjPresol` via `Model::includePresol`.
 
 ### Changed
 
