@@ -16,38 +16,60 @@ using namespace std;
 BOOST_AUTO_TEST_SUITE(ObjSCIP)
 
 /**
- * We check whether SCIP++ works with ObjSCIP
+ * Counts how often a new best solution is found.
  */
-class MyEventHandler : public scip::ObjEventhdlr {
+class BestSolCounter : public scip::ObjEventhdlr {
+    int& m_nBestSols;
+
 public:
-    MyEventHandler(SCIP* scip)
-        : scip::ObjEventhdlr(scip, "NAME", "DESC")
+    BestSolCounter(SCIP* scip, int& nBestSols)
+        : scip::ObjEventhdlr(scip, "bestsolcounter", "counts new best solutions")
+        , m_nBestSols(nBestSols)
     {
     }
     SCIP_DECL_EVENTINIT(scip_init)
     override
     {
-        clog << "MyEventHandler: Here I am" << endl;
-        return SCIP_OKAY;
+        return SCIPcatchEvent(scip, SCIP_EVENTTYPE_BESTSOLFOUND, eventhdlr, nullptr, nullptr);
+    }
+    SCIP_DECL_EVENTEXIT(scip_exit)
+    override
+    {
+        return SCIPdropEvent(scip, SCIP_EVENTTYPE_BESTSOLFOUND, eventhdlr, nullptr, -1);
     }
     SCIP_DECL_EVENTEXEC(scip_exec)
     override
     {
+        ++m_nBestSols;
         return SCIP_OKAY;
     }
 };
 
 BOOST_AUTO_TEST_CASE(UseEventHandler)
 {
+    int nBestSols { 0 };
     Model model("Simple");
     auto x1 = model.addVar("x_1", 1);
     auto x2 = model.addVar("x_2", 1);
     model.addConstr(x1 + x2 >= 1, "capacity");
     model.addConstr(x1 == x2, "equal");
-    SCIPincludeObjEventhdlr(model.scip(), new MyEventHandler(model.scip()), false);
+    model.includeEventhdlr<BestSolCounter>(nBestSols);
+    BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.setObjsense(Sense::MINIMIZE);
     model.solve();
     BOOST_TEST(model.getNSols() > 0);
+    BOOST_TEST(nBestSols > 0);
+}
+
+BOOST_AUTO_TEST_CASE(IncludeEventHandlerTwice)
+{
+    int nBestSols { 0 };
+    Model model("Simple");
+    model.includeEventhdlr<BestSolCounter>(nBestSols);
+    BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
+    // SCIP rejects a second event handler with the same name, the handler is then deleted by SCIP++
+    model.includeEventhdlr<BestSolCounter>(nBestSols);
+    BOOST_TEST(model.getLastReturnCode() == SCIP_INVALIDDATA);
 }
 
 /**

@@ -167,6 +167,25 @@ model.setMessagehdlr(std::make_unique<MyMessageHandler>());
 model.solve();
 ```
 
+### Custom Event Handler
+
+Derive from `scip::ObjEventhdlr` to react to events of SCIP, e.g., to track new best solutions, and include it via
+`Model::includeEventhdlr` before calling `solve()`. The handler is constructed by SCIP++ as its constructor requires
+the SCIP data structure as first argument; all arguments of `includeEventhdlr` are forwarded after it. SCIP takes
+ownership of the handler.
+
+```cpp
+class MyEventHandler : public scip::ObjEventhdlr {
+public:
+    MyEventHandler(SCIP* scip, int& counter);
+    ...
+};
+...
+int counter { 0 };
+model.includeEventhdlr<MyEventHandler>(counter);
+model.solve();
+```
+
 ### Features Not Yet Supported
 
 For features not yet supported by SCIP++, one can access the underlying raw SCIP object via

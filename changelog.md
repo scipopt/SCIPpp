@@ -6,10 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- [Issue29](https://github.com/scipopt/SCIPpp/issues/29) Custom message handlers derived from `scip::ObjMessagehdlr`
-  can be installed via `Model::setMessagehdlr` without accessing the raw SCIP object:
+- [PR44](https://github.com/scipopt/SCIPpp/pull/44), [Issue29](https://github.com/scipopt/SCIPpp/issues/29) Custom
+  message handlers derived from `scip::ObjMessagehdlr` can be installed via `Model::setMessagehdlr` without accessing
+  the raw SCIP object:
   ```cpp
   model.setMessagehdlr(std::make_unique<MyMessageHandler>());
+  ```
+- [PR44](https://github.com/scipopt/SCIPpp/pull/44) Custom event handlers derived from `scip::ObjEventhdlr` can be
+  included via `Model::includeEventhdlr` without accessing the raw SCIP object. It forwards its arguments to the
+  constructor of the handler after the SCIP data structure:
+  ```cpp
+  model.includeEventhdlr<MyEventHandler>(arg1, arg2);
   ```
 
 ## [1.4.0] - 2025-12-18

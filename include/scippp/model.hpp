@@ -5,11 +5,13 @@
 #include <filesystem>
 #include <functional>
 #include <memory>
+#include <objscip/objeventhdlr.h>
 #include <objscip/objmessagehdlr.h>
 #include <optional>
 #include <scip/scip.h>
 #include <string>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 #include "scippp/constant_coefficient.hpp"
@@ -369,5 +371,31 @@ public:
      *            global error printing function.
      */
     void setMessagehdlr(std::unique_ptr<scip::ObjMessagehdlr> handler) const;
+
+    /**
+     * Includes a custom event handler.
+     *
+     * The handler is constructed by this method as scip::ObjEventhdlr requires the %SCIP data structure in its
+     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
+     *
+     * @since 1.5.0
+     * @tparam Eventhdlr Type of the event handler, derived from scip::ObjEventhdlr.
+     * @tparam Args Types of the additional constructor arguments.
+     * @param args passed to the constructor of \p Eventhdlr after the %SCIP data structure.
+     * @attention Must be called before solve().
+     */
+    template <typename Eventhdlr, typename... Args>
+    void includeEventhdlr(Args&&... args) const
+    {
+        static_assert(
+            std::is_base_of_v<scip::ObjEventhdlr, Eventhdlr>, "Eventhdlr must derive from scip::ObjEventhdlr");
+        auto handler { std::make_unique<Eventhdlr>(m_scip, std::forward<Args>(args)...) };
+        const auto RETCODE { SCIPincludeObjEventhdlr(m_scip, handler.get(), TRUE) };
+        // SCIP owns the handler only on success, otherwise we still have to delete it.
+        if (RETCODE == SCIP_OKAY) {
+            handler.release();
+        }
+        m_scipCallWrapper(RETCODE);
+    }
 };
 }
