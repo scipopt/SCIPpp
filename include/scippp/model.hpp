@@ -635,5 +635,38 @@ public:
     {
         return constructAndInclude<Prop>(&SCIPincludeObjProp, std::forward<Args>(args)...);
     }
+
+    /**
+     * Includes a custom separator.
+     *
+     * The separator is constructed by this method as scip::ObjSepa requires the %SCIP data structure in its
+     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
+     *
+     * Derive from scip::ObjSepa to cut off fractional solutions of the LP relaxation, e.g., with problem-specific
+     * valid inequalities:
+     * @code
+     * class MySeparator : public scip::ObjSepa {
+     * public:
+     *     MySeparator(SCIP* scip, const std::vector<Var>& vars);
+     *     ...
+     * };
+     * ...
+     * auto vars = model.addVars("x_", 42);
+     * model.includeSepa<MySeparator>(vars);
+     * model.solve();
+     * @endcode
+     *
+     * @since 1.5.0
+     * @tparam Sepa Type of the separator, derived from scip::ObjSepa.
+     * @tparam Args Types of the additional constructor arguments.
+     * @param args passed to the constructor of \p Sepa after the %SCIP data structure.
+     * @return Non-owning pointer to the separator, or \c nullptr if including failed.
+     * @attention Must be called before solve().
+     */
+    template <typename Sepa, typename... Args>
+    Sepa* includeSepa(Args&&... args) const
+    {
+        return constructAndInclude<Sepa>(&SCIPincludeObjSepa, std::forward<Args>(args)...);
+    }
 };
 }

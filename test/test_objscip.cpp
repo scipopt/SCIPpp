@@ -1,5 +1,6 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
+#include <array>
 #include <boost/test/unit_test.hpp>
 #include <fstream>
 #include <memory>
@@ -14,6 +15,7 @@
 #include <objscip/objmessagehdlr.h>
 #include <objscip/objpresol.h>
 #include <objscip/objprop.h>
+#include <objscip/objsepa.h>
 
 using namespace boost::algorithm;
 using namespace scippp;
@@ -327,6 +329,77 @@ BOOST_AUTO_TEST_CASE(UsePropagator)
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
     BOOST_TEST(prop->getNCalls() > 0);
+}
+
+/**
+ * Adds max 1.1 x_1 + x_2 s.t. 2 x_1 + 3 x_2 <= 4 with binary variables, whose LP relaxation has the fractional
+ * solution x_1 = 1, x_2 = 2/3, while x_1 = 1, x_2 = 0 is optimal.
+ */
+array<Var, 2> addFractionalProblem(Model& model)
+{
+    auto x1 = model.addVar("x_1", 1.1, VarType::BINARY);
+    auto x2 = model.addVar("x_2", 1, VarType::BINARY);
+    model.addConstr(2 * x1 + 3 * x2 <= 4, "capacity");
+    model.setObjsense(Sense::MAXIMIZE);
+    // otherwise presolving or propagation solve the problem before the LP relaxation is solved
+    model.setParam(params::PRESOLVING::MAXROUNDS, 0);
+    model.setParam(params::PROPAGATING::MAXROUNDSROOT, 0);
+    return { x1, x2 };
+}
+
+/**
+ * Separates the cut x_1 + x_2 <= 1 at the root, which is valid for binary variables with 2 x_1 + 3 x_2 <= 4.
+ */
+class CapacitySepa : public scip::ObjSepa {
+    array<SCIP_VAR*, 2> m_vars;
+    int m_nCuts { 0 };
+
+public:
+    CapacitySepa(SCIP* scip, SCIP_VAR* x1, SCIP_VAR* x2)
+        : scip::ObjSepa(
+              scip,
+              "capacity",
+              "separates x_1 + x_2 <= 1",
+              1000000, // priority, higher than the ones of the default separators to be called first
+              0, // freq
+              1.0, // maxbounddist
+              FALSE, // usessubscip
+              FALSE) // delay
+        , m_vars { x1, x2 }
+    {
+    }
+    [[nodiscard]] int getNCuts() const
+    {
+        return m_nCuts;
+    }
+    SCIP_DECL_SEPAEXECLP(scip_execlp)
+    override
+    {
+        *result = SCIP_DIDNOTFIND;
+        SCIP_ROW* row { nullptr };
+        SCIP_CALL(SCIPcreateEmptyRowSepa(scip, &row, sepa, "capacity", -SCIPinfinity(scip), 1.0, FALSE, FALSE, TRUE));
+        for (auto* var : m_vars) {
+            SCIP_CALL(SCIPaddVarToRow(scip, row, SCIPvarGetTransVar(var), 1.0));
+        }
+        if (SCIPisCutEfficacious(scip, nullptr, row)) {
+            SCIP_Bool infeasible { FALSE };
+            SCIP_CALL(SCIPaddRow(scip, row, FALSE, &infeasible));
+            ++m_nCuts;
+            *result = infeasible ? SCIP_CUTOFF : SCIP_SEPARATED;
+        }
+        return SCIPreleaseRow(scip, &row);
+    }
+};
+
+BOOST_AUTO_TEST_CASE(UseSeparator)
+{
+    Model model("Simple");
+    auto [x1, x2] = addFractionalProblem(model);
+    const auto* sepa { model.includeSepa<CapacitySepa>(x1.getVar(), x2.getVar()) };
+    BOOST_REQUIRE(sepa != nullptr);
+    BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
+    model.solve();
+    BOOST_TEST(sepa->getNCuts() > 0);
 }
 
 /**

@@ -84,10 +84,13 @@ int main()
     (`scippp::Model::includeHeur`),
   * presolvers derived from
     [`scip::ObjPresol`](https://www.scipopt.org/doc/html/classscip_1_1ObjPresol.php)
-    (`scippp::Model::includePresol`), and
+    (`scippp::Model::includePresol`),
   * propagators derived from
     [`scip::ObjProp`](https://www.scipopt.org/doc/html/classscip_1_1ObjProp.php)
-    (`scippp::Model::includeProp`).
+    (`scippp::Model::includeProp`), and
+  * separators derived from
+    [`scip::ObjSepa`](https://www.scipopt.org/doc/html/classscip_1_1ObjSepa.php)
+    (`scippp::Model::includeSepa`).
 * Access the raw SCIP object for features not yet supported (`scippp::Model::scip`).
 
 ## Build

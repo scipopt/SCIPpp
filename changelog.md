@@ -12,8 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - constraint handlers derived from `scip::ObjConshdlr` via `Model::includeConshdlr`,
   - event handlers derived from `scip::ObjEventhdlr` via `Model::includeEventhdlr`,
   - primal heuristics derived from `scip::ObjHeur` via `Model::includeHeur`,
-  - presolvers derived from `scip::ObjPresol` via `Model::includePresol`, and
-  - propagators derived from `scip::ObjProp` via `Model::includeProp`.
+  - presolvers derived from `scip::ObjPresol` via `Model::includePresol`,
+  - propagators derived from `scip::ObjProp` via `Model::includeProp`, and
+  - separators derived from `scip::ObjSepa` via `Model::includeSepa`.
 
 ### Changed
 
