@@ -96,7 +96,10 @@ int main()
     (`scippp::Model::includePresol`),
   * propagators derived from
     [`scip::ObjProp`](https://www.scipopt.org/doc/html/classscip_1_1ObjProp.php)
-    (`scippp::Model::includeProp`), and
+    (`scippp::Model::includeProp`),
+  * relaxators derived from
+    [`scip::ObjRelax`](https://www.scipopt.org/doc/html/classscip_1_1ObjRelax.php)
+    (`scippp::Model::includeRelax`), and
   * separators derived from
     [`scip::ObjSepa`](https://www.scipopt.org/doc/html/classscip_1_1ObjSepa.php)
     (`scippp::Model::includeSepa`).

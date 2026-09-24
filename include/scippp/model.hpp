@@ -763,5 +763,37 @@ public:
     {
         return constructAndInclude<Nodesel>(&SCIPincludeObjNodesel, std::forward<Args>(args)...);
     }
+
+    /**
+     * Includes a custom relaxator.
+     *
+     * The relaxator is constructed by this method as scip::ObjRelax requires the %SCIP data structure in its
+     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
+     *
+     * Derive from scip::ObjRelax to solve problem-specific relaxations in addition to the LP relaxation:
+     * @code
+     * class MyRelaxator : public scip::ObjRelax {
+     * public:
+     *     MyRelaxator(SCIP* scip, const std::vector<Var>& vars);
+     *     ...
+     * };
+     * ...
+     * auto vars = model.addVars("x_", 42);
+     * model.includeRelax<MyRelaxator>(vars);
+     * model.solve();
+     * @endcode
+     *
+     * @since 1.5.0
+     * @tparam Relax Type of the relaxator, derived from scip::ObjRelax.
+     * @tparam Args Types of the additional constructor arguments.
+     * @param args passed to the constructor of \p Relax after the %SCIP data structure.
+     * @return Non-owning pointer to the relaxator, or \c nullptr if including failed.
+     * @attention Must be called before solve().
+     */
+    template <typename Relax, typename... Args>
+    Relax* includeRelax(Args&&... args) const
+    {
+        return constructAndInclude<Relax>(&SCIPincludeObjRelax, std::forward<Args>(args)...);
+    }
 };
 }

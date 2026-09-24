@@ -16,7 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - primal heuristics derived from `scip::ObjHeur` via `Model::includeHeur`,
   - node selectors derived from `scip::ObjNodesel` via `Model::includeNodesel`,
   - presolvers derived from `scip::ObjPresol` via `Model::includePresol`,
-  - propagators derived from `scip::ObjProp` via `Model::includeProp`, and
+  - propagators derived from `scip::ObjProp` via `Model::includeProp`,
+  - relaxators derived from `scip::ObjRelax` via `Model::includeRelax`, and
   - separators derived from `scip::ObjSepa` via `Model::includeSepa`.
 
 ### Changed

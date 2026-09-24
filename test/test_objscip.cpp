@@ -19,6 +19,7 @@
 #include <objscip/objnodesel.h>
 #include <objscip/objpresol.h>
 #include <objscip/objprop.h>
+#include <objscip/objrelax.h>
 #include <objscip/objsepa.h>
 
 using namespace boost::algorithm;
@@ -552,6 +553,47 @@ BOOST_AUTO_TEST_CASE(UseNodeSelector)
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
     BOOST_TEST(nodesel->getNCalls() > 0);
+}
+
+/**
+ * Counts how often it is called before the LP relaxation is solved.
+ */
+class CountingRelax : public scip::ObjRelax {
+    int m_nCalls { 0 };
+
+public:
+    explicit CountingRelax(SCIP* scip)
+        : scip::ObjRelax(
+              scip,
+              "counting",
+              "counts how often it is called",
+              0, // priority, non-negative to be called before the LP relaxation is solved
+              1, // freq
+              FALSE) // includeslp
+    {
+    }
+    [[nodiscard]] int getNCalls() const
+    {
+        return m_nCalls;
+    }
+    SCIP_DECL_RELAXEXEC(scip_exec)
+    override
+    {
+        ++m_nCalls;
+        *result = SCIP_DIDNOTRUN;
+        return SCIP_OKAY;
+    }
+};
+
+BOOST_AUTO_TEST_CASE(UseRelaxator)
+{
+    Model model("Simple");
+    addFractionalProblem(model);
+    const auto* relax { model.includeRelax<CountingRelax>() };
+    BOOST_REQUIRE(relax != nullptr);
+    BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
+    model.solve();
+    BOOST_TEST(relax->getNCalls() > 0);
 }
 
 /**
