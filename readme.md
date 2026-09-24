@@ -10,158 +10,129 @@ It automatically manages the memory, and provides a simple interface to create l
 
 ## Usage
 
-The documentation can be found at https://scipopt.github.io/SCIPpp/
+The documentation, including examples for all features, can be found at https://scipopt.github.io/SCIPpp/
 
-Here is a simple example where we create a new model, add two variables, add a linear inequality as constraint, and ask
-SCIP to solve the maximization problem.
+Here is an example where we create a new model for a knapsack problem, add binary variables with their values as
+coefficients in the objective function, add the capacity constraint built from a linear expression, ask SCIP to solve
+the maximization problem, and print the packed items.
 
 ```cpp
+#include <iostream>
 #include <scippp/model.hpp>
+#include <scippp/parameters.hpp>
+#include <vector>
+
 using namespace scippp;
-int main() {
-    Model model("Simple");
-    auto x1 = model.addVar("x_1", 1);
-    auto x2 = model.addVar("x_2", 1);
-    model.addConstr(3 * x1 + 2 * x2 <= 1, "capacity");
+
+int main()
+{
+    std::vector<int> weights { 3, 4, 3, 3, 3, 3, 4, 2, 4, 1 };
+    std::vector<int> values { 230, 134, 52, 60, 151, 95, 201, 245, 52, 55 };
+
+    Model model("Knapsack");
+    auto x { model.addVars("x_", weights.size(), values, VarType::BINARY) };
+    LinExpr weight;
+    for (size_t i { 0 }; i < weights.size(); ++i) {
+        weight += weights[i] * x[i];
+    }
+    model.addConstr(weight <= 14, "capacity");
     model.setObjsense(Sense::MAXIMIZE);
+    model.setParam(params::DISPLAY::VERBLEVEL, 0);
     model.solve();
+
+    if (model.getNSols() > 0) {
+        auto sol { model.getBestSol() };
+        for (size_t i { 0 }; i < x.size(); ++i) {
+            if (x[i].getSolValAsInt(sol) == 1) {
+                std::cout << "pack item " << i << "\n";
+            }
+        }
+    }
 }
 ```
 
-### Model Creation
+## Features
 
-A model can be created
+* Create a model with a new SCIP data structure or with an existing one, with or without SCIP's default plugins.
+* Add variables one at a time, as a vector, or as an array for structured bindings (`scippp::Model::addVar`,
+  `scippp::Model::addVars`). The objective coefficients can be given by any object providing an index operator.
+* Build linear expressions (`scippp::LinExpr`) and add linear inequalities and equations as constraints
+  (`scippp::Model::addConstr`).
+* Set the optimization goal (`scippp::Model::setObjsense`) and all SCIP parameters in a type-safe way
+  (`scippp::Model::setParam` with `scippp::params`).
+* Solve the model and query its status, the number of solutions, the best solution, and the values of the variables in
+  a solution (`scippp::Model::solve`, `scippp::Model::getStatus`, `scippp::Model::getNSols`,
+  `scippp::Model::getBestSol`, `scippp::Var::getSolVal`).
+* Add initial solutions to SCIP's solution pool (`scippp::InitialSolution`, `scippp::Model::addSolution`).
+* Query solving statistics in a type-safe way (`scippp::Model::getSolvingStatistic` with `scippp::statistics`).
+* Generate an Irreducible Infeasible Subsystem (`scippp::Model::generateIIS`).
+* Write the original problem to a file or to standard output (`scippp::Model::writeOrigProblem`).
+* Use SCIP's numerics (`scippp::Model::epsilon`, `scippp::Model::round`, `scippp::Model::isZero`,
+  `scippp::Model::infinity`).
+* Use ObjSCIP without accessing the raw SCIP object:
+  * Benders' decompositions derived from
+    [`scip::ObjBenders`](https://www.scipopt.org/doc/html/classscip_1_1ObjBenders.php)
+    (`scippp::Model::includeBenders`),
+  * Benders' decomposition cuts derived from
+    [`scip::ObjBenderscut`](https://www.scipopt.org/doc/html/classscip_1_1ObjBenderscut.php)
+    (`scippp::Model::includeBenderscut`),
+  * branching rules derived from
+    [`scip::ObjBranchrule`](https://www.scipopt.org/doc/html/classscip_1_1ObjBranchrule.php)
+    (`scippp::Model::includeBranchrule`),
+  * constraint handlers derived from
+    [`scip::ObjConshdlr`](https://www.scipopt.org/doc/html/classscip_1_1ObjConshdlr.php)
+    (`scippp::Model::includeConshdlr`),
+  * cut selectors derived from
+    [`scip::ObjCutsel`](https://www.scipopt.org/doc/html/classscip_1_1ObjCutsel.php)
+    (`scippp::Model::includeCutsel`),
+  * display columns derived from
+    [`scip::ObjDisp`](https://www.scipopt.org/doc/html/classscip_1_1ObjDisp.php)
+    (`scippp::Model::includeDisp`),
+  * event handlers derived from
+    [`scip::ObjEventhdlr`](https://www.scipopt.org/doc/html/classscip_1_1ObjEventhdlr.php)
+    (`scippp::Model::includeEventhdlr`),
+  * file readers derived from
+    [`scip::ObjReader`](https://www.scipopt.org/doc/html/classscip_1_1ObjReader.php)
+    (`scippp::Model::includeReader`),
+  * IIS finders derived from
+    [`scip::ObjIISfinder`](https://www.scipopt.org/doc/html/classscip_1_1ObjIISfinder.php)
+    (`scippp::Model::includeIISfinder`),
+  * message handlers derived from
+    [`scip::ObjMessagehdlr`](https://www.scipopt.org/doc/html/classscip_1_1ObjMessagehdlr.php)
+    (`scippp::Model::setMessagehdlr`),
+  * node selectors derived from
+    [`scip::ObjNodesel`](https://www.scipopt.org/doc/html/classscip_1_1ObjNodesel.php)
+    (`scippp::Model::includeNodesel`),
+  * presolvers derived from
+    [`scip::ObjPresol`](https://www.scipopt.org/doc/html/classscip_1_1ObjPresol.php)
+    (`scippp::Model::includePresol`),
+  * pricers derived from
+    [`scip::ObjPricer`](https://www.scipopt.org/doc/html/classscip_1_1ObjPricer.php)
+    (`scippp::Model::includePricer`),
+  * primal heuristics derived from
+    [`scip::ObjHeur`](https://www.scipopt.org/doc/html/classscip_1_1ObjHeur.php)
+    (`scippp::Model::includeHeur`),
+  * problem data derived from
+    [`scip::ObjProbData`](https://www.scipopt.org/doc/html/classscip_1_1ObjProbData.php)
+    (`scippp::Model`),
+  * propagators derived from
+    [`scip::ObjProp`](https://www.scipopt.org/doc/html/classscip_1_1ObjProp.php)
+    (`scippp::Model::includeProp`),
+  * relaxators derived from
+    [`scip::ObjRelax`](https://www.scipopt.org/doc/html/classscip_1_1ObjRelax.php)
+    (`scippp::Model::includeRelax`),
+  * separators derived from
+    [`scip::ObjSepa`](https://www.scipopt.org/doc/html/classscip_1_1ObjSepa.php)
+    (`scippp::Model::includeSepa`), and
+  * variable data derived from
+    [`scip::ObjVardata`](https://www.scipopt.org/doc/html/classscip_1_1ObjVardata.php)
+    (`scippp::Model::addVar`).
 
-* without an existing SCIP environment,
-* with an existing SCIP environment where all default plugins should be added to, and
-* with an existing SCIP environment where no additional plugins should be added to.
-
-```cpp
-Model m1("ModelWithoutExistingSCIPEnvironment");
-
-SCIP* scip2;
-SCIPcreate(&scip2);
-Model m2("ModelWithExistingSCIPEnvironmentWhereDefaultPluginsWillBeAdded", scip2);
-
-SCIP* scip3;
-SCIPcreate(&scip3);
-SCIPincludeDefaultPlugins(scip3);
-Model m3("ModelWithExistingSCIPEnvironmentWhereNoPluginsWillBeAdded", scip3, false);
-```
-
-### Adding Variables
-
-Variables can be added
-
-* one at a time,
-* multiple in a vector, and
-* multiple when the number is known at compile time.
-
-```cpp
-Model model("Example");
-
-auto x = model.addVar("x");
-auto vec = model.addVars("x_", 42);
-const auto& [x0, x1] = model.addVars<2>("x_");
-```
-
-When adding multiple variables simultaneously to the model, they all have a coefficient of zero in the objective
-function by default.
-This can be changed to one by `scippp::COEFF_ONE`:
-```cpp
-const auto& [x1, x2] = model.addVars<2>("x_", COEFF_ONE);
-```
-
-For the coefficient, any object providing an index operator can be used:
-```cpp
-double operator[](std::size_t index) const
-```
-
-### Adding Constraints
-
-Linear inequalities can be added to the model. They can be built from linear expressions:
-
-```cpp
-const auto& [x0, x1, x2, x3] = model.addVars<4>("x_");
-
-LinExpr sum1;
-sum1 += 42 * x0;
-sum1 += x1;
-model.addConstr(sum1 <= 0.5, "constraint1");
-
-LinExpr sum2 = x1 + x2;
-model.addConstr(sum2 == 1.25, "constraint2");
-
-model.addConstr(1 <= x2 + 2 * x3, "constraint3");
-```
-
-### Setting Parameters
-
-The namespace `scippp::params` contains all parameters shown https://www.scipopt.org/doc/html/PARAMETERS.php in the
-header `parameters.hpp`. They are strongly typed, so that no string can be set as the value for a parameter expecting an
-integer. Instead of using the predefined parameters, one can also use `scippp::params::Param<T>` directly.
-
-```cpp
-model.setParam(params::LIMITS::MAXSOL, 1);
-model.setParam(params::DISPLAY::VERBLEVEL, 0);
-model.setParam(params::Param<bool>("write/printzeros"), true);
-```
-
-The optimization goal can be changed by:
-```cpp
-model.setObjsense(Sense::MAXIMIZE);
-```
-
-### Accessing a Solution
-
-A model can be asked for the status and the number of solutions.
-A variable can be asked for its value in a given solution as
-
-* floating point number via `getSolVal(sol)`.
-* integer via `getSolValAsInt(sol)`.
-* long integer via `getSolValAsLongInt(sol)`, and
-* it can be checked for zero via `isZero(sol)`.
-
-```cpp
-const auto& [x0, x1] = model.addVars<2>("x_");
-model.solve();
-if (model.getNSols() > 0 && model.getStatus() == SCIP_STATUS_OPTIMAL) {
-    Solution sol { model.getBestSol() };
-    cout << "x0 + x1 =" << x0.getSolVal(sol) + x1.getSolVal(sol) << endl;
-}
-```
-
-### IO
-
-A model can be written to file via `Model::writeOrigProblem` if a `std::filesystem::directory_entry` is given as
-argument. If it is just a string representing a file extension, it is written to standard output.
-
-### Numerics
-
-The model exposes
-
-* `SCIPepsilon` via `epsilon()`,
-* `SCIPround` via `round(double)`, and
-* `SCIPisZero` via `isZero(double)`
-
-### Access Solving Statistics
-
-Use the `Statistics<T>` objects from the header [solving_statistics.hpp](include/scippp/solving_statistics.hpp) to
-access solving statistics in a type-safe way:
-
-```cpp
-...
-model.solve();
-auto pb { model.getSolvingStatistic(statistics::PRIMALBOUND) };
-```
-
-### Features Not Yet Supported
-
-For features not yet supported by SCIP++, one can access the underlying raw SCIP object via
-
-```cpp
-SCIP* scip = model.scip();
-```
+  Statistics tables derived from
+  [`scip::ObjTable`](https://www.scipopt.org/doc/html/classscip_1_1ObjTable.php)
+  are not supported, as SCIP does not export `scip::ObjTable` from its shared library, see
+  [SCIP issue 222](https://github.com/scipopt/scip/issues/222).
+* Access the raw SCIP object for features not yet supported (`scippp::Model::scip`).
 
 ## Build
 
