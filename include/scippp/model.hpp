@@ -56,39 +56,26 @@ class Model {
     std::function<void(SCIP_Retcode)> m_scipCallWrapper;
 
     /**
-     * Constructs a plugin and includes it.
+     * Constructs a plugin and includes it, %SCIP takes ownership on success.
      *
      * @tparam Plugin Type of the plugin, derived from \p Base.
      * @tparam Base objscip base class of the plugin.
      * @tparam Args Types of the additional constructor arguments.
+     * @param scipInclude %SCIP's include function for \p Base, e.g., SCIPincludeObjEventhdlr.
      * @param args passed to the constructor of \p Plugin after the %SCIP data structure.
      * @return Non-owning pointer to the plugin, or \c nullptr if including failed.
      */
     template <typename Plugin, typename Base, typename... Args>
-    Plugin* constructAndInclude(Args&&... args) const
+    Plugin* constructAndInclude(SCIP_RETCODE (*scipInclude)(SCIP*, Base*, SCIP_Bool), Args&&... args) const
     {
         static_assert(std::is_base_of_v<Base, Plugin>, "Plugin must derive from the objscip base class");
         auto plugin { std::make_unique<Plugin>(m_scip, std::forward<Args>(args)...) };
-        auto* result { plugin.get() };
-        // Converting to the base explicitly selects the matching overload, even if Plugin has multiple objscip bases.
-        return includeObj(std::unique_ptr<Base>(std::move(plugin))) ? result : nullptr;
+        const auto RETCODE { scipInclude(m_scip, plugin.get(), TRUE) };
+        // SCIP owns the plugin only on success, otherwise it is deleted when leaving this method.
+        Plugin* result { RETCODE == SCIP_OKAY ? plugin.release() : nullptr };
+        m_scipCallWrapper(RETCODE);
+        return result;
     }
-
-    /**
-     * Includes an event handler, %SCIP takes ownership on success.
-     *
-     * @param eventhdlr to include, it is deleted if including fails.
-     * @return \c true iff including succeeded.
-     */
-    bool includeObj(std::unique_ptr<scip::ObjEventhdlr> eventhdlr) const;
-
-    /**
-     * Includes a constraint handler, %SCIP takes ownership on success.
-     *
-     * @param conshdlr to include, it is deleted if including fails.
-     * @return \c true iff including succeeded.
-     */
-    bool includeObj(std::unique_ptr<scip::ObjConshdlr> conshdlr) const;
 
 public:
     /**
@@ -514,7 +501,7 @@ public:
     template <typename Eventhdlr, typename... Args>
     Eventhdlr* includeEventhdlr(Args&&... args) const
     {
-        return constructAndInclude<Eventhdlr, scip::ObjEventhdlr>(std::forward<Args>(args)...);
+        return constructAndInclude<Eventhdlr>(&SCIPincludeObjEventhdlr, std::forward<Args>(args)...);
     }
 
     /**
@@ -549,7 +536,7 @@ public:
     template <typename Conshdlr, typename... Args>
     Conshdlr* includeConshdlr(Args&&... args) const
     {
-        return constructAndInclude<Conshdlr, scip::ObjConshdlr>(std::forward<Args>(args)...);
+        return constructAndInclude<Conshdlr>(&SCIPincludeObjConshdlr, std::forward<Args>(args)...);
     }
 };
 }
