@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: turtlebrowser/get-conan@main
-      - name: Run Conan Install
+      - name: Detect Conan Profile
         run: |
           conan profile detect
           conan profile detect --name debug
@@ -23,7 +23,18 @@ jobs:
           pushd ~/.conan2/profiles
           sed -i 's/gnu17/17/g' *
           popd
-          conan install -of . -pr debug -o with_tests=True .
+          conan profile show > conan-profile.txt
+      - name: Cache Conan Packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.conan2/p
+          # The profile contains the compiler version, so a compiler update on the runner starts a fresh cache
+          key: conan-${{ github.job }}-${{ matrix.os || runner.os }}-${{ hashFiles('conanfile.py', 'conan-profile.txt') }}
+          restore-keys: conan-${{ github.job }}-${{ matrix.os || runner.os }}-
+      - name: Run Conan Install
+        run: |
+          conan install -of . -pr debug -o with_tests=True --build=missing .
+          conan cache clean "*"
       - name: Run CMake
         run: cmake --preset conan-debug -DUSE_COVERAGE=ON .
       - name: Compile
@@ -41,16 +52,31 @@ jobs:
           verbose: true # optional (default = false)
           fail_ci_if_error: true
   test_release_win:
-    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        # windows-2022 ships Visual Studio 2022, windows-2025-vs2026 ships Visual Studio 2026
+        os: [ windows-2022, windows-2025-vs2026 ]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
       - uses: turtlebrowser/get-conan@main
       - uses: ilammy/msvc-dev-cmd@v1
-      - name: Run Conan Install
+      - name: Detect Conan Profile
         run: |
           conan profile detect
           powershell -Command "(gc $(conan profile path default)) -replace 'compiler.cppstd=14', 'compiler.cppstd=17' | Out-File -encoding ASCII $(conan profile path default)"
-          conan install -of . -o with_tests=True .
+          conan profile show > conan-profile.txt
+      - name: Cache Conan Packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.conan2/p
+          key: conan-${{ github.job }}-${{ matrix.os || runner.os }}-${{ hashFiles('conanfile.py', 'conan-profile.txt') }}
+          restore-keys: conan-${{ github.job }}-${{ matrix.os || runner.os }}-
+      - name: Run Conan Install
+        run: |
+          conan install -of . -o with_tests=True --build=missing .
+          conan cache clean "*"
       - name: Run CMake
         run: cmake --preset conan-default .
       - name: Compile
@@ -77,18 +103,28 @@ jobs:
       - name: Run tests
         run: ./test/tests
   test_release_mac:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v3
       - name: Install Conan
         run: brew install conan
-      - name: Run Conan Install
+      - name: Detect Conan Profile
         run: |
           conan profile detect
           pushd ~/.conan2/profiles
           sed -i'' -e 's/gnu17/17/g' *
           popd
+          conan profile show > conan-profile.txt
+      - name: Cache Conan Packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.conan2/p
+          key: conan-${{ github.job }}-${{ matrix.os || runner.os }}-${{ hashFiles('conanfile.py', 'conan-profile.txt') }}
+          restore-keys: conan-${{ github.job }}-${{ matrix.os || runner.os }}-
+      - name: Run Conan Install
+        run: |
           conan install -of . -o with_tests=True --build=missing .
+          conan cache clean "*"
       - name: Run CMake
         run: cmake --preset conan-release .
       - name: Compile
@@ -103,13 +139,23 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: turtlebrowser/get-conan@main
-      - name: Run Conan Install
+      - name: Detect Conan Profile
         run: |
           conan profile detect
           pushd ~/.conan2/profiles
           sed -i'' -e 's/gnu17/17/g' *
           popd
+          conan profile show > conan-profile.txt
+      - name: Cache Conan Packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.conan2/p
+          key: conan-${{ github.job }}-${{ matrix.os || runner.os }}-${{ hashFiles('conanfile.py', 'conan-profile.txt') }}
+          restore-keys: conan-${{ github.job }}-${{ matrix.os || runner.os }}-
+      - name: Run Conan Install
+        run: |
           conan install -of . -o with_tests=True --build=missing .
+          conan cache clean "*"
       - name: Run CMake
         run: cmake --preset conan-release .
       - name: Compile
@@ -124,13 +170,23 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: turtlebrowser/get-conan@main
-      - name: Run Conan Install
+      - name: Detect Conan Profile
         run: |
           conan profile detect
           pushd ~/.conan2/profiles
           sed -i 's/gnu17/17/g' *
           popd
-          conan install -of . .
+          conan profile show > conan-profile.txt
+      - name: Cache Conan Packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.conan2/p
+          key: conan-${{ github.job }}-${{ matrix.os || runner.os }}-${{ hashFiles('conanfile.py', 'conan-profile.txt') }}
+          restore-keys: conan-${{ github.job }}-${{ matrix.os || runner.os }}-
+      - name: Run Conan Install
+        run: |
+          conan install -of . --build=missing .
+          conan cache clean "*"
       - name: Create CMake Compilation Database
         run: cmake --preset conan-release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .
       - name: Run Clang-Tidy
