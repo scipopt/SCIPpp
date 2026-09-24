@@ -122,21 +122,21 @@ class ZeroVarConshdlr : public scip::ObjConshdlr {
 public:
     ZeroVarConshdlr(SCIP* scip, SCIP_VAR* var)
         : scip::ObjConshdlr(
-              scip,
-              "zerovar",
-              "enforces a variable to be zero",
-              0, // sepapriority
-              -1, // enfopriority, negative to be called for integral solutions only
-              -1, // checkpriority
-              -1, // sepafreq
-              -1, // propfreq
-              -1, // eagerfreq
-              0, // maxprerounds
-              FALSE, // delaysepa
-              FALSE, // delayprop
-              FALSE, // needscons
-              SCIP_PROPTIMING_BEFORELP,
-              SCIP_PRESOLTIMING_FAST)
+            scip,
+            "zerovar",
+            "enforces a variable to be zero",
+            0, // sepapriority
+            -1, // enfopriority, negative to be called for integral solutions only
+            -1, // checkpriority
+            -1, // sepafreq
+            -1, // propfreq
+            -1, // eagerfreq
+            0, // maxprerounds
+            FALSE, // delaysepa
+            FALSE, // delayprop
+            FALSE, // needscons
+            SCIP_PROPTIMING_BEFORELP,
+            SCIP_PRESOLTIMING_FAST)
         , m_var(var)
     {
     }
@@ -194,16 +194,16 @@ class OneVarHeur : public scip::ObjHeur {
 public:
     OneVarHeur(SCIP* scip, SCIP_VAR* var)
         : scip::ObjHeur(
-              scip,
-              "onevar",
-              "proposes a solution where a given binary variable is one",
-              'O', // dispchar
-              20000, // priority, higher than the one of the trivial heuristic to be called first
-              1, // freq
-              0, // freqofs
-              -1, // maxdepth
-              SCIP_HEURTIMING_BEFOREPRESOL,
-              FALSE) // usessubscip
+            scip,
+            "onevar",
+            "proposes a solution where a given binary variable is one",
+            'O', // dispchar
+            20000, // priority, higher than the one of the trivial heuristic to be called first
+            1, // freq
+            0, // freqofs
+            -1, // maxdepth
+            SCIP_HEURTIMING_BEFOREPRESOL,
+            FALSE) // usessubscip
         , m_var(var)
     {
     }
@@ -254,12 +254,12 @@ class ZeroVarPresol : public scip::ObjPresol {
 public:
     ZeroVarPresol(SCIP* scip, SCIP_VAR* var)
         : scip::ObjPresol(
-              scip,
-              "zerovar",
-              "fixes a variable to zero",
-              10000000, // priority, higher than the ones of the default presolvers to be called first
-              -1, // maxrounds
-              SCIP_PRESOLTIMING_FAST)
+            scip,
+            "zerovar",
+            "fixes a variable to zero",
+            10000000, // priority, higher than the ones of the default presolvers to be called first
+            -1, // maxrounds
+            SCIP_PRESOLTIMING_FAST)
         , m_var(var)
     {
     }
@@ -306,16 +306,16 @@ class CountingProp : public scip::ObjProp {
 public:
     explicit CountingProp(SCIP* scip)
         : scip::ObjProp(
-              scip,
-              "counting",
-              "counts how often it is called",
-              0, // priority
-              1, // freq
-              FALSE, // delay
-              SCIP_PROPTIMING_BEFORELP,
-              0, // presolpriority
-              -1, // presolmaxrounds
-              SCIP_PRESOLTIMING_NONE)
+            scip,
+            "counting",
+            "counts how often it is called",
+            0, // priority
+            1, // freq
+            FALSE, // delay
+            SCIP_PROPTIMING_BEFORELP,
+            0, // presolpriority
+            -1, // presolmaxrounds
+            SCIP_PRESOLTIMING_NONE)
     {
     }
     [[nodiscard]] int getNCalls() const
@@ -373,14 +373,14 @@ class CapacitySepa : public scip::ObjSepa {
 public:
     CapacitySepa(SCIP* scip, SCIP_VAR* x1, SCIP_VAR* x2)
         : scip::ObjSepa(
-              scip,
-              "capacity",
-              "separates x_1 + x_2 <= 1",
-              1000000, // priority, higher than the ones of the default separators to be called first
-              0, // freq
-              1.0, // maxbounddist
-              FALSE, // usessubscip
-              FALSE) // delay
+            scip,
+            "capacity",
+            "separates x_1 + x_2 <= 1",
+            1000000, // priority, higher than the ones of the default separators to be called first
+            0, // freq
+            1.0, // maxbounddist
+            FALSE, // usessubscip
+            FALSE) // delay
         , m_vars { x1, x2 }
     {
     }
@@ -427,10 +427,10 @@ class AllCutsel : public scip::ObjCutsel {
 public:
     explicit AllCutsel(SCIP* scip)
         : scip::ObjCutsel(
-              scip,
-              "all",
-              "selects all cuts",
-              1000000) // priority, higher than the ones of the default cut selectors to be used
+            scip,
+            "all",
+            "selects all cuts",
+            1000000) // priority, higher than the ones of the default cut selectors to be used
     {
     }
     [[nodiscard]] int getNCalls() const
@@ -468,12 +468,12 @@ class FirstFracBranchrule : public scip::ObjBranchrule {
 public:
     explicit FirstFracBranchrule(SCIP* scip)
         : scip::ObjBranchrule(
-              scip,
-              "firstfrac",
-              "branches on the first fractional variable",
-              1000000, // priority, higher than the ones of the default branching rules to be used
-              -1, // maxdepth
-              1.0) // maxbounddist
+            scip,
+            "firstfrac",
+            "branches on the first fractional variable",
+            1000000, // priority, higher than the ones of the default branching rules to be used
+            -1, // maxdepth
+            1.0) // maxbounddist
     {
     }
     [[nodiscard]] int getNCalls() const
@@ -520,11 +520,11 @@ class DepthFirstNodesel : public scip::ObjNodesel {
 public:
     explicit DepthFirstNodesel(SCIP* scip)
         : scip::ObjNodesel(
-              scip,
-              "depthfirst",
-              "selects nodes in depth-first order",
-              1000000, // stdpriority, higher than the ones of the default node selectors to be used
-              0) // memsavepriority
+            scip,
+            "depthfirst",
+            "selects nodes in depth-first order",
+            1000000, // stdpriority, higher than the ones of the default node selectors to be used
+            0) // memsavepriority
     {
     }
     [[nodiscard]] int getNCalls() const
@@ -575,12 +575,12 @@ class CountingRelax : public scip::ObjRelax {
 public:
     explicit CountingRelax(SCIP* scip)
         : scip::ObjRelax(
-              scip,
-              "counting",
-              "counts how often it is called",
-              0, // priority, non-negative to be called before the LP relaxation is solved
-              1, // freq
-              FALSE) // includeslp
+            scip,
+            "counting",
+            "counts how often it is called",
+            0, // priority, non-negative to be called before the LP relaxation is solved
+            1, // freq
+            FALSE) // includeslp
     {
     }
     [[nodiscard]] int getNCalls() const
@@ -616,14 +616,14 @@ class CountingDisp : public scip::ObjDisp {
 public:
     explicit CountingDisp(SCIP* scip)
         : scip::ObjDisp(
-              scip,
-              "counting",
-              "displays how often it was displayed",
-              "calls", // header
-              5, // width
-              1000000, // priority, higher than the ones of the default display columns to be displayed
-              100000, // position, higher than the ones of the default display columns to be the last column
-              TRUE) // stripline
+            scip,
+            "counting",
+            "displays how often it was displayed",
+            "calls", // header
+            5, // width
+            1000000, // priority, higher than the ones of the default display columns to be displayed
+            100000, // position, higher than the ones of the default display columns to be the last column
+            TRUE) // stripline
     {
     }
     [[nodiscard]] int getNCalls() const
@@ -660,11 +660,11 @@ class CountingTable : public scip::ObjTable {
 public:
     explicit CountingTable(SCIP* scip)
         : scip::ObjTable(
-              scip,
-              "counting",
-              "prints how often it was printed",
-              100000, // position, higher than the ones of the default statistics tables to be the last table
-              SCIP_STAGE_TRANSFORMED) // earlieststage
+            scip,
+            "counting",
+            "prints how often it was printed",
+            100000, // position, higher than the ones of the default statistics tables to be the last table
+            SCIP_STAGE_TRANSFORMED) // earlieststage
     {
     }
     [[nodiscard]] int getNCalls() const
@@ -742,10 +742,10 @@ class CountingIISfinder : public scip::ObjIISfinder {
 public:
     explicit CountingIISfinder(SCIP* scip)
         : scip::ObjIISfinder(
-              scip,
-              "counting",
-              "counts how often it is called",
-              1000000) // priority, higher than the ones of the default IIS finders to be called first
+            scip,
+            "counting",
+            "counts how often it is called",
+            1000000) // priority, higher than the ones of the default IIS finders to be called first
     {
     }
     [[nodiscard]] int getNCalls() const
@@ -787,11 +787,11 @@ class CountingPricer : public scip::ObjPricer {
 public:
     explicit CountingPricer(SCIP* scip)
         : scip::ObjPricer(
-              scip,
-              "counting",
-              "counts how often it is called",
-              0, // priority
-              FALSE) // delay
+            scip,
+            "counting",
+            "counts how often it is called",
+            0, // priority
+            FALSE) // delay
     {
     }
     [[nodiscard]] int getNCalls() const
@@ -837,14 +837,14 @@ class DemandBenders : public scip::ObjBenders {
 public:
     DemandBenders(SCIP* scip, SCIP_VAR* masterX, double coverage)
         : scip::ObjBenders(
-              scip,
-              "demand",
-              "decomposes the demand problem",
-              1, // priority, positive to be higher than the one of the inactive default Benders' decomposition
-              TRUE, // cutlp
-              TRUE, // cutpseudo
-              TRUE, // cutrelax
-              FALSE) // shareauxvars
+            scip,
+            "demand",
+            "decomposes the demand problem",
+            1, // priority, positive to be higher than the one of the inactive default Benders' decomposition
+            TRUE, // cutlp
+            TRUE, // cutpseudo
+            TRUE, // cutrelax
+            FALSE) // shareauxvars
         , m_masterX(masterX)
         , m_coverage(coverage)
     {
@@ -907,11 +907,11 @@ class DemandBenderscut : public scip::ObjBenderscut {
 public:
     DemandBenderscut(SCIP* scip, SCIP_VAR* masterX, double coverage)
         : scip::ObjBenderscut(
-              scip,
-              "demand",
-              "adds the optimality cut of the demand subproblem",
-              1000000, // priority, higher than the ones of the default Benders' cuts to be called first
-              TRUE) // islpcut
+            scip,
+            "demand",
+            "adds the optimality cut of the demand subproblem",
+            1000000, // priority, higher than the ones of the default Benders' cuts to be called first
+            TRUE) // islpcut
         , m_masterX(masterX)
         , m_coverage(coverage)
     {
