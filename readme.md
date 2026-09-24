@@ -73,6 +73,9 @@ int main()
   [`scip::ObjMessagehdlr`](https://www.scipopt.org/doc/html/classscip_1_1ObjMessagehdlr.php)
   (`scippp::Model::setMessagehdlr`).
 * Include custom plugins:
+  * branching rules derived from
+    [`scip::ObjBranchrule`](https://www.scipopt.org/doc/html/classscip_1_1ObjBranchrule.php)
+    (`scippp::Model::includeBranchrule`),
   * constraint handlers derived from
     [`scip::ObjConshdlr`](https://www.scipopt.org/doc/html/classscip_1_1ObjConshdlr.php)
     (`scippp::Model::includeConshdlr`),

@@ -699,5 +699,38 @@ public:
     {
         return constructAndInclude<Cutsel>(&SCIPincludeObjCutsel, std::forward<Args>(args)...);
     }
+
+    /**
+     * Includes a custom branching rule.
+     *
+     * The branching rule is constructed by this method as scip::ObjBranchrule requires the %SCIP data structure in its
+     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
+     *
+     * Derive from scip::ObjBranchrule to decide how to split the search space, e.g., based on problem-specific
+     * knowledge:
+     * @code
+     * class MyBranchingRule : public scip::ObjBranchrule {
+     * public:
+     *     MyBranchingRule(SCIP* scip, const std::vector<Var>& vars);
+     *     ...
+     * };
+     * ...
+     * auto vars = model.addVars("x_", 42);
+     * model.includeBranchrule<MyBranchingRule>(vars);
+     * model.solve();
+     * @endcode
+     *
+     * @since 1.5.0
+     * @tparam Branchrule Type of the branching rule, derived from scip::ObjBranchrule.
+     * @tparam Args Types of the additional constructor arguments.
+     * @param args passed to the constructor of \p Branchrule after the %SCIP data structure.
+     * @return Non-owning pointer to the branching rule, or \c nullptr if including failed.
+     * @attention Must be called before solve().
+     */
+    template <typename Branchrule, typename... Args>
+    Branchrule* includeBranchrule(Args&&... args) const
+    {
+        return constructAndInclude<Branchrule>(&SCIPincludeObjBranchrule, std::forward<Args>(args)...);
+    }
 };
 }

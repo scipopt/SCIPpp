@@ -10,6 +10,7 @@
 #include "scippp/model.hpp"
 #include "scippp/parameters.hpp"
 #include "scippp/solving_statistics.hpp"
+#include <objscip/objbranchrule.h>
 #include <objscip/objconshdlr.h>
 #include <objscip/objcutsel.h>
 #include <objscip/objeventhdlr.h>
@@ -443,6 +444,58 @@ BOOST_AUTO_TEST_CASE(UseCutSelector)
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
     BOOST_TEST(cutsel->getNCalls() > 0);
+}
+
+/**
+ * Branches on the first fractional variable of the LP solution.
+ */
+class FirstFracBranchrule : public scip::ObjBranchrule {
+    int m_nCalls { 0 };
+
+public:
+    explicit FirstFracBranchrule(SCIP* scip)
+        : scip::ObjBranchrule(
+              scip,
+              "firstfrac",
+              "branches on the first fractional variable",
+              1000000, // priority, higher than the ones of the default branching rules to be used
+              -1, // maxdepth
+              1.0) // maxbounddist
+    {
+    }
+    [[nodiscard]] int getNCalls() const
+    {
+        return m_nCalls;
+    }
+    SCIP_DECL_BRANCHEXECLP(scip_execlp)
+    override
+    {
+        ++m_nCalls;
+        SCIP_VAR** cands { nullptr };
+        int nCands { 0 };
+        SCIP_CALL(SCIPgetLPBranchCands(scip, &cands, nullptr, nullptr, &nCands, nullptr, nullptr));
+        if (nCands == 0) {
+            *result = SCIP_DIDNOTRUN;
+            return SCIP_OKAY;
+        }
+        SCIP_CALL(SCIPbranchVar(scip, cands[0], nullptr, nullptr, nullptr));
+        *result = SCIP_BRANCHED;
+        return SCIP_OKAY;
+    }
+};
+
+BOOST_AUTO_TEST_CASE(UseBranchingRule)
+{
+    Model model("Simple");
+    addFractionalProblem(model);
+    // otherwise the problem is solved at the root by separation or conflict analysis
+    model.setParam(params::SEPARATING::MAXROUNDSROOT, 0);
+    model.setParam(params::CONFLICT::ENABLE, false);
+    const auto* branchrule { model.includeBranchrule<FirstFracBranchrule>() };
+    BOOST_REQUIRE(branchrule != nullptr);
+    BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
+    model.solve();
+    BOOST_TEST(branchrule->getNCalls() > 0);
 }
 
 /**

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [PR44](https://github.com/scipopt/SCIPpp/pull/44), [Issue29](https://github.com/scipopt/SCIPpp/issues/29) Support
   of ObjSCIP without accessing the raw SCIP object:
   - message handlers derived from `scip::ObjMessagehdlr` via `Model::setMessagehdlr`,
+  - branching rules derived from `scip::ObjBranchrule` via `Model::includeBranchrule`,
   - constraint handlers derived from `scip::ObjConshdlr` via `Model::includeConshdlr`,
   - cut selectors derived from `scip::ObjCutsel` via `Model::includeCutsel`,
   - event handlers derived from `scip::ObjEventhdlr` via `Model::includeEventhdlr`,
