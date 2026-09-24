@@ -538,5 +538,37 @@ public:
     {
         return constructAndInclude<Conshdlr>(&SCIPincludeObjConshdlr, std::forward<Args>(args)...);
     }
+
+    /**
+     * Includes a custom primal heuristic.
+     *
+     * The heuristic is constructed by this method as scip::ObjHeur requires the %SCIP data structure in its
+     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
+     *
+     * Derive from scip::ObjHeur to construct solutions from problem-specific knowledge:
+     * @code
+     * class MyHeuristic : public scip::ObjHeur {
+     * public:
+     *     MyHeuristic(SCIP* scip, const std::vector<Var>& vars);
+     *     ...
+     * };
+     * ...
+     * auto vars = model.addVars("x_", 42);
+     * model.includeHeur<MyHeuristic>(vars);
+     * model.solve();
+     * @endcode
+     *
+     * @since 1.5.0
+     * @tparam Heur Type of the heuristic, derived from scip::ObjHeur.
+     * @tparam Args Types of the additional constructor arguments.
+     * @param args passed to the constructor of \p Heur after the %SCIP data structure.
+     * @return Non-owning pointer to the heuristic, or \c nullptr if including failed.
+     * @attention Must be called before solve().
+     */
+    template <typename Heur, typename... Args>
+    Heur* includeHeur(Args&&... args) const
+    {
+        return constructAndInclude<Heur>(&SCIPincludeObjHeur, std::forward<Args>(args)...);
+    }
 };
 }

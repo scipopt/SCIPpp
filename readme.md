@@ -75,10 +75,13 @@ int main()
 * Include custom plugins:
   * constraint handlers derived from
     [`scip::ObjConshdlr`](https://www.scipopt.org/doc/html/classscip_1_1ObjConshdlr.php)
-    (`scippp::Model::includeConshdlr`), and
+    (`scippp::Model::includeConshdlr`),
   * event handlers derived from
     [`scip::ObjEventhdlr`](https://www.scipopt.org/doc/html/classscip_1_1ObjEventhdlr.php)
-    (`scippp::Model::includeEventhdlr`).
+    (`scippp::Model::includeEventhdlr`), and
+  * primal heuristics derived from
+    [`scip::ObjHeur`](https://www.scipopt.org/doc/html/classscip_1_1ObjHeur.php)
+    (`scippp::Model::includeHeur`).
 * Access the raw SCIP object for features not yet supported (`scippp::Model::scip`).
 
 ## Build

@@ -9,8 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [PR44](https://github.com/scipopt/SCIPpp/pull/44), [Issue29](https://github.com/scipopt/SCIPpp/issues/29) Support
   of ObjSCIP without accessing the raw SCIP object:
   - message handlers derived from `scip::ObjMessagehdlr` via `Model::setMessagehdlr`,
-  - constraint handlers derived from `scip::ObjConshdlr` via `Model::includeConshdlr`, and
-  - event handlers derived from `scip::ObjEventhdlr` via `Model::includeEventhdlr`.
+  - constraint handlers derived from `scip::ObjConshdlr` via `Model::includeConshdlr`,
+  - event handlers derived from `scip::ObjEventhdlr` via `Model::includeEventhdlr`, and
+  - primal heuristics derived from `scip::ObjHeur` via `Model::includeHeur`.
 
 ### Changed
 

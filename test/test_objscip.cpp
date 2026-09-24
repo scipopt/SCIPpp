@@ -9,6 +9,7 @@
 #include "scippp/solving_statistics.hpp"
 #include <objscip/objconshdlr.h>
 #include <objscip/objeventhdlr.h>
+#include <objscip/objheur.h>
 #include <objscip/objmessagehdlr.h>
 
 using namespace boost::algorithm;
@@ -160,6 +161,67 @@ BOOST_AUTO_TEST_CASE(UseConstraintHandler)
     BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1);
     BOOST_TEST(x1.getSolValAsInt(model.getBestSol()) == 0);
     BOOST_TEST(x2.getSolValAsInt(model.getBestSol()) == 1);
+}
+
+/**
+ * Proposes the solution where a given binary variable is one and all others are zero, before presolving.
+ */
+class OneVarHeur : public scip::ObjHeur {
+    SCIP_VAR* m_var;
+    int m_nFound { 0 };
+
+public:
+    OneVarHeur(SCIP* scip, SCIP_VAR* var)
+        : scip::ObjHeur(
+              scip,
+              "onevar",
+              "proposes a solution where a given binary variable is one",
+              'O', // dispchar
+              20000, // priority, higher than the one of the trivial heuristic to be called first
+              1, // freq
+              0, // freqofs
+              -1, // maxdepth
+              SCIP_HEURTIMING_BEFOREPRESOL,
+              FALSE) // usessubscip
+        , m_var(var)
+    {
+    }
+    [[nodiscard]] int getNFound() const
+    {
+        return m_nFound;
+    }
+    SCIP_DECL_HEUREXEC(scip_exec)
+    override
+    {
+        SCIP_SOL* sol { nullptr };
+        SCIP_CALL(SCIPcreateSol(scip, &sol, heur));
+        SCIP_CALL(SCIPsetSolVal(scip, sol, SCIPvarGetTransVar(m_var), 1.0));
+        SCIP_Bool stored { FALSE };
+        SCIP_CALL(SCIPtrySolFree(scip, &sol, FALSE, FALSE, TRUE, TRUE, TRUE, &stored));
+        if (stored) {
+            ++m_nFound;
+            *result = SCIP_FOUNDSOL;
+        } else {
+            *result = SCIP_DIDNOTFIND;
+        }
+        return SCIP_OKAY;
+    }
+};
+
+BOOST_AUTO_TEST_CASE(UseHeuristic)
+{
+    Model model("Simple");
+    auto x1 = model.addVar("x_1", 1, VarType::BINARY);
+    auto x2 = model.addVar("x_2", 1, VarType::BINARY);
+    model.addConstr(x1 + x2 <= 1, "capacity");
+    model.setObjsense(Sense::MAXIMIZE);
+    const auto* heur { model.includeHeur<OneVarHeur>(x1.getVar()) };
+    BOOST_REQUIRE(heur != nullptr);
+    BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
+    model.solve();
+    // the heuristic is called first, so its solution is stored as there is no other solution yet
+    BOOST_TEST(heur->getNFound() == 1);
+    BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1);
 }
 
 /**
