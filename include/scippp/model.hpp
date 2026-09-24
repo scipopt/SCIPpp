@@ -795,5 +795,36 @@ public:
     {
         return constructAndInclude<Relax>(&SCIPincludeObjRelax, std::forward<Args>(args)...);
     }
+
+    /**
+     * Includes a custom display column.
+     *
+     * The display column is constructed by this method as scip::ObjDisp requires the %SCIP data structure in its
+     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
+     *
+     * Derive from scip::ObjDisp to show additional information in the lines %SCIP prints during the solving process:
+     * @code
+     * class MyDisplayColumn : public scip::ObjDisp {
+     * public:
+     *     explicit MyDisplayColumn(SCIP* scip);
+     *     ...
+     * };
+     * ...
+     * model.includeDisp<MyDisplayColumn>();
+     * model.solve();
+     * @endcode
+     *
+     * @since 1.5.0
+     * @tparam Disp Type of the display column, derived from scip::ObjDisp.
+     * @tparam Args Types of the additional constructor arguments.
+     * @param args passed to the constructor of \p Disp after the %SCIP data structure.
+     * @return Non-owning pointer to the display column, or \c nullptr if including failed.
+     * @attention Must be called before solve().
+     */
+    template <typename Disp, typename... Args>
+    Disp* includeDisp(Args&&... args) const
+    {
+        return constructAndInclude<Disp>(&SCIPincludeObjDisp, std::forward<Args>(args)...);
+    }
 };
 }

@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - branching rules derived from `scip::ObjBranchrule` via `Model::includeBranchrule`,
   - constraint handlers derived from `scip::ObjConshdlr` via `Model::includeConshdlr`,
   - cut selectors derived from `scip::ObjCutsel` via `Model::includeCutsel`,
+  - display columns derived from `scip::ObjDisp` via `Model::includeDisp`,
   - event handlers derived from `scip::ObjEventhdlr` via `Model::includeEventhdlr`,
   - primal heuristics derived from `scip::ObjHeur` via `Model::includeHeur`,
   - node selectors derived from `scip::ObjNodesel` via `Model::includeNodesel`,

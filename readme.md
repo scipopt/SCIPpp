@@ -82,6 +82,9 @@ int main()
   * cut selectors derived from
     [`scip::ObjCutsel`](https://www.scipopt.org/doc/html/classscip_1_1ObjCutsel.php)
     (`scippp::Model::includeCutsel`),
+  * display columns derived from
+    [`scip::ObjDisp`](https://www.scipopt.org/doc/html/classscip_1_1ObjDisp.php)
+    (`scippp::Model::includeDisp`),
   * event handlers derived from
     [`scip::ObjEventhdlr`](https://www.scipopt.org/doc/html/classscip_1_1ObjEventhdlr.php)
     (`scippp::Model::includeEventhdlr`),

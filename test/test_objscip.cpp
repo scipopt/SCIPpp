@@ -13,6 +13,7 @@
 #include <objscip/objbranchrule.h>
 #include <objscip/objconshdlr.h>
 #include <objscip/objcutsel.h>
+#include <objscip/objdisp.h>
 #include <objscip/objeventhdlr.h>
 #include <objscip/objheur.h>
 #include <objscip/objmessagehdlr.h>
@@ -594,6 +595,50 @@ BOOST_AUTO_TEST_CASE(UseRelaxator)
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
     BOOST_TEST(relax->getNCalls() > 0);
+}
+
+/**
+ * Displays how often it was displayed.
+ */
+class CountingDisp : public scip::ObjDisp {
+    int m_nCalls { 0 };
+
+public:
+    explicit CountingDisp(SCIP* scip)
+        : scip::ObjDisp(
+              scip,
+              "counting",
+              "displays how often it was displayed",
+              "calls", // header
+              5, // width
+              1000000, // priority, higher than the ones of the default display columns to be displayed
+              100000, // position, higher than the ones of the default display columns to be the last column
+              TRUE) // stripline
+    {
+    }
+    [[nodiscard]] int getNCalls() const
+    {
+        return m_nCalls;
+    }
+    SCIP_DECL_DISPOUTPUT(scip_output)
+    override
+    {
+        ++m_nCalls;
+        SCIPinfoMessage(scip, file, "%5d", m_nCalls);
+        return SCIP_OKAY;
+    }
+};
+
+BOOST_AUTO_TEST_CASE(UseDisplayColumn)
+{
+    Model model("Simple");
+    // nodes have to be processed, otherwise no display line is printed
+    addFractionalProblem(model);
+    const auto* disp { model.includeDisp<CountingDisp>() };
+    BOOST_REQUIRE(disp != nullptr);
+    BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
+    model.solve();
+    BOOST_TEST(disp->getNCalls() > 0);
 }
 
 /**
