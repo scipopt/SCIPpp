@@ -8,9 +8,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [PR44](https://github.com/scipopt/SCIPpp/pull/44), [Issue29](https://github.com/scipopt/SCIPpp/issues/29) Support
   of ObjSCIP without accessing the raw SCIP object:
-  - message handlers derived from `scip::ObjMessagehdlr` via `Model::setMessagehdlr`,
-  - problem data derived from `scip::ObjProbData` via a new constructor of `Model`,
-  - variable data derived from `scip::ObjVardata` via a new overload of `Model::addVar`,
   - Benders' decompositions derived from `scip::ObjBenders` via `Model::includeBenders`,
   - Benders' decomposition cuts derived from `scip::ObjBenderscut` via `Model::includeBenderscut`,
   - branching rules derived from `scip::ObjBranchrule` via `Model::includeBranchrule`,
@@ -20,14 +17,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - event handlers derived from `scip::ObjEventhdlr` via `Model::includeEventhdlr`,
   - file readers derived from `scip::ObjReader` via `Model::includeReader`,
   - IIS finders derived from `scip::ObjIISfinder` via `Model::includeIISfinder`,
+  - message handlers derived from `scip::ObjMessagehdlr` via `Model::setMessagehdlr`,
   - node selectors derived from `scip::ObjNodesel` via `Model::includeNodesel`,
   - presolvers derived from `scip::ObjPresol` via `Model::includePresol`,
   - pricers derived from `scip::ObjPricer` via `Model::includePricer`,
   - primal heuristics derived from `scip::ObjHeur` via `Model::includeHeur`,
+  - problem data derived from `scip::ObjProbData` via a new constructor of `Model`,
   - propagators derived from `scip::ObjProp` via `Model::includeProp`,
   - relaxators derived from `scip::ObjRelax` via `Model::includeRelax`,
-  - separators derived from `scip::ObjSepa` via `Model::includeSepa`, and
-  - statistics tables derived from `scip::ObjTable` via `Model::includeTable`.
+  - separators derived from `scip::ObjSepa` via `Model::includeSepa`,
+  - statistics tables derived from `scip::ObjTable` via `Model::includeTable`, and
+  - variable data derived from `scip::ObjVardata` via a new overload of `Model::addVar`.
 
 ### Changed
 

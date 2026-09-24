@@ -53,13 +53,9 @@ int main()
 
 ## Features
 
-* Create a model with a new SCIP data structure or with an existing one, with or without SCIP's default plugins, and
-  optionally with custom problem data derived from
-  [`scip::ObjProbData`](https://www.scipopt.org/doc/html/classscip_1_1ObjProbData.php) (`scippp::Model`).
+* Create a model with a new SCIP data structure or with an existing one, with or without SCIP's default plugins.
 * Add variables one at a time, as a vector, or as an array for structured bindings (`scippp::Model::addVar`,
-  `scippp::Model::addVars`). The objective coefficients can be given by any object providing an index operator. A
-  single variable can carry custom variable data derived from
-  [`scip::ObjVardata`](https://www.scipopt.org/doc/html/classscip_1_1ObjVardata.php).
+  `scippp::Model::addVars`). The objective coefficients can be given by any object providing an index operator.
 * Build linear expressions (`scippp::LinExpr`) and add linear inequalities and equations as constraints
   (`scippp::Model::addConstr`).
 * Set the optimization goal (`scippp::Model::setObjsense`) and all SCIP parameters in a type-safe way
@@ -73,10 +69,7 @@ int main()
 * Write the original problem to a file or to standard output (`scippp::Model::writeOrigProblem`).
 * Use SCIP's numerics (`scippp::Model::epsilon`, `scippp::Model::round`, `scippp::Model::isZero`,
   `scippp::Model::infinity`).
-* Install custom message handlers derived from
-  [`scip::ObjMessagehdlr`](https://www.scipopt.org/doc/html/classscip_1_1ObjMessagehdlr.php)
-  (`scippp::Model::setMessagehdlr`).
-* Include custom plugins:
+* Use ObjSCIP without accessing the raw SCIP object:
   * Benders' decompositions derived from
     [`scip::ObjBenders`](https://www.scipopt.org/doc/html/classscip_1_1ObjBenders.php)
     (`scippp::Model::includeBenders`),
@@ -104,6 +97,9 @@ int main()
   * IIS finders derived from
     [`scip::ObjIISfinder`](https://www.scipopt.org/doc/html/classscip_1_1ObjIISfinder.php)
     (`scippp::Model::includeIISfinder`),
+  * message handlers derived from
+    [`scip::ObjMessagehdlr`](https://www.scipopt.org/doc/html/classscip_1_1ObjMessagehdlr.php)
+    (`scippp::Model::setMessagehdlr`),
   * node selectors derived from
     [`scip::ObjNodesel`](https://www.scipopt.org/doc/html/classscip_1_1ObjNodesel.php)
     (`scippp::Model::includeNodesel`),
@@ -116,6 +112,9 @@ int main()
   * primal heuristics derived from
     [`scip::ObjHeur`](https://www.scipopt.org/doc/html/classscip_1_1ObjHeur.php)
     (`scippp::Model::includeHeur`),
+  * problem data derived from
+    [`scip::ObjProbData`](https://www.scipopt.org/doc/html/classscip_1_1ObjProbData.php)
+    (`scippp::Model`),
   * propagators derived from
     [`scip::ObjProp`](https://www.scipopt.org/doc/html/classscip_1_1ObjProp.php)
     (`scippp::Model::includeProp`),
@@ -124,10 +123,13 @@ int main()
     (`scippp::Model::includeRelax`),
   * separators derived from
     [`scip::ObjSepa`](https://www.scipopt.org/doc/html/classscip_1_1ObjSepa.php)
-    (`scippp::Model::includeSepa`), and
+    (`scippp::Model::includeSepa`),
   * statistics tables derived from
     [`scip::ObjTable`](https://www.scipopt.org/doc/html/classscip_1_1ObjTable.php)
-    (`scippp::Model::includeTable`).
+    (`scippp::Model::includeTable`), and
+  * variable data derived from
+    [`scip::ObjVardata`](https://www.scipopt.org/doc/html/classscip_1_1ObjVardata.php)
+    (`scippp::Model::addVar`).
 * Access the raw SCIP object for features not yet supported (`scippp::Model::scip`).
 
 ## Build
