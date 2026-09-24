@@ -191,6 +191,34 @@ public:
         std::optional<SCIP_Real> ub = 1.0);
 
     /**
+     * Adds a variable with custom variable data to the model.
+     *
+     * Derive from scip::ObjVardata to store variable-specific data, which plugins can access via SCIPgetObjVardata:
+     * @code
+     * class MyVariableData : public scip::ObjVardata { ... };
+     * ...
+     * auto& x = model.addVar("x", std::make_unique<MyVariableData>(), 1.0, VarType::BINARY);
+     * @endcode
+     *
+     * @since 1.5.0
+     * @param name of the variable when the model is written.
+     * @param vardata to store in the variable, must not be \c nullptr. %SCIP takes ownership and deletes it when the
+     *                variable is freed.
+     * @param coeff Coefficient in the objective function.
+     * @param varType variable type.
+     * @param lb lower bound. \c std::nullopt is interpreted as -infinity.
+     * @param ub upper bound. \c std::nullopt is interpreted as infinity.
+     * @return Reference to the newly created variable.
+     */
+    Var& addVar(
+        const std::string& name,
+        std::unique_ptr<scip::ObjVardata> vardata,
+        SCIP_Real coeff = 0.0,
+        VarType varType = VarType::CONTINUOUS,
+        std::optional<SCIP_Real> lb = 0.0,
+        std::optional<SCIP_Real> ub = 1.0);
+
+    /**
      * Adds multiple variables to the model.
      *
      * By default, all variables have a coefficient of zero in the objective function. Use scippp::COEFF_ONE for a

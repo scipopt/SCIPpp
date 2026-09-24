@@ -30,6 +30,7 @@
 #include <objscip/objrelax.h>
 #include <objscip/objsepa.h>
 #include <objscip/objtable.h>
+#include <objscip/objvardata.h>
 #include <scip/cons_linear.h>
 
 using namespace boost::algorithm;
@@ -982,6 +983,42 @@ BOOST_AUTO_TEST_CASE(UseProblemData)
         BOOST_TEST(!deleted);
     }
     // SCIP deletes the problem data when the model is destructed
+    BOOST_TEST(deleted);
+}
+
+/**
+ * Tracks whether it was deleted.
+ */
+class TrackingVardata : public scip::ObjVardata {
+    bool& m_deleted;
+
+public:
+    explicit TrackingVardata(bool& deleted)
+        : m_deleted(deleted)
+    {
+    }
+    ~TrackingVardata() override
+    {
+        m_deleted = true;
+    }
+};
+
+BOOST_AUTO_TEST_CASE(UseVariableData)
+{
+    bool deleted { false };
+    {
+        Model model("Simple");
+        auto& x = model.addVar("x", make_unique<TrackingVardata>(deleted), 1, VarType::BINARY);
+        BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
+        model.addConstr(x >= 1, "lower");
+        model.solve();
+        BOOST_TEST(model.getStatus() == SCIP_STATUS_OPTIMAL);
+        BOOST_TEST(x.getSolValAsInt(model.getBestSol()) == 1);
+        // plugins access the variable data via SCIP
+        BOOST_TEST(dynamic_cast<TrackingVardata*>(SCIPgetObjVardata(model.scip(), x.getVar())) != nullptr);
+        BOOST_TEST(!deleted);
+    }
+    // SCIP deletes the variable data when the model is destructed
     BOOST_TEST(deleted);
 }
 

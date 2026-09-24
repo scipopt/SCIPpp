@@ -20,6 +20,39 @@ Model::Model(
     m_scipCallWrapper(RETCODE);
 }
 
+Var& Model::addVar(
+    const std::string& name,
+    std::unique_ptr<scip::ObjVardata> vardata,
+    SCIP_Real coeff,
+    VarType varType,
+    std::optional<SCIP_Real> lb,
+    std::optional<SCIP_Real> ub)
+{
+    assert(vardata); // GCOVR_EXCL_LINE
+    SCIP_VAR* var { nullptr };
+    const auto RETCODE { SCIPcreateObjVar(
+        m_scip, /* SCIP environment */
+        &var, /* reference to the variable */
+        name.c_str(), /* name of the variable */
+        lb != std::nullopt ? lb.value() : -SCIPinfinity(m_scip), /* lower bound of the variable */
+        ub != std::nullopt ? ub.value() : SCIPinfinity(m_scip), /* upper bound of the variable */
+        coeff, /* obj. coefficient. */
+        static_cast<SCIP_Vartype>(varType), /* variable type */
+        TRUE, /* initial */
+        FALSE, /* removable */
+        vardata.get(), /* variable data */
+        TRUE /* delete the variable data when the variable is freed */
+        ) };
+    // SCIP owns the variable data only on success, otherwise it is deleted when leaving this method.
+    if (RETCODE == SCIP_OKAY) {
+        vardata.release();
+    }
+    m_scipCallWrapper(RETCODE);
+    m_scipCallWrapper(SCIPaddVar(m_scip, var));
+    m_vars.emplace_back(Var { var });
+    return m_vars.back();
+}
+
 void Model::setMessagehdlr(std::unique_ptr<scip::ObjMessagehdlr> handler) const
 {
     assert(handler); // GCOVR_EXCL_LINE

@@ -57,7 +57,9 @@ int main()
   optionally with custom problem data derived from
   [`scip::ObjProbData`](https://www.scipopt.org/doc/html/classscip_1_1ObjProbData.php) (`scippp::Model`).
 * Add variables one at a time, as a vector, or as an array for structured bindings (`scippp::Model::addVar`,
-  `scippp::Model::addVars`). The objective coefficients can be given by any object providing an index operator.
+  `scippp::Model::addVars`). The objective coefficients can be given by any object providing an index operator. A
+  single variable can carry custom variable data derived from
+  [`scip::ObjVardata`](https://www.scipopt.org/doc/html/classscip_1_1ObjVardata.php).
 * Build linear expressions (`scippp::LinExpr`) and add linear inequalities and equations as constraints
   (`scippp::Model::addConstr`).
 * Set the optimization goal (`scippp::Model::setObjsense`) and all SCIP parameters in a type-safe way
