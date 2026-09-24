@@ -602,5 +602,38 @@ public:
     {
         return constructAndInclude<Presol>(&SCIPincludeObjPresol, std::forward<Args>(args)...);
     }
+
+    /**
+     * Includes a custom propagator.
+     *
+     * The propagator is constructed by this method as scip::ObjProp requires the %SCIP data structure in its
+     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
+     *
+     * Derive from scip::ObjProp to tighten the domains of variables during the search, e.g., based on
+     * problem-specific knowledge:
+     * @code
+     * class MyPropagator : public scip::ObjProp {
+     * public:
+     *     MyPropagator(SCIP* scip, const std::vector<Var>& vars);
+     *     ...
+     * };
+     * ...
+     * auto vars = model.addVars("x_", 42);
+     * model.includeProp<MyPropagator>(vars);
+     * model.solve();
+     * @endcode
+     *
+     * @since 1.5.0
+     * @tparam Prop Type of the propagator, derived from scip::ObjProp.
+     * @tparam Args Types of the additional constructor arguments.
+     * @param args passed to the constructor of \p Prop after the %SCIP data structure.
+     * @return Non-owning pointer to the propagator, or \c nullptr if including failed.
+     * @attention Must be called before solve().
+     */
+    template <typename Prop, typename... Args>
+    Prop* includeProp(Args&&... args) const
+    {
+        return constructAndInclude<Prop>(&SCIPincludeObjProp, std::forward<Args>(args)...);
+    }
 };
 }

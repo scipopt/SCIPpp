@@ -6,12 +6,14 @@
 #include <sstream>
 
 #include "scippp/model.hpp"
+#include "scippp/parameters.hpp"
 #include "scippp/solving_statistics.hpp"
 #include <objscip/objconshdlr.h>
 #include <objscip/objeventhdlr.h>
 #include <objscip/objheur.h>
 #include <objscip/objmessagehdlr.h>
 #include <objscip/objpresol.h>
+#include <objscip/objprop.h>
 
 using namespace boost::algorithm;
 using namespace scippp;
@@ -275,6 +277,56 @@ BOOST_AUTO_TEST_CASE(UsePresolver)
     BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1);
     BOOST_TEST(x1.getSolValAsInt(model.getBestSol()) == 0);
     BOOST_TEST(x2.getSolValAsInt(model.getBestSol()) == 1);
+}
+
+/**
+ * Counts how often it is called for domain propagation.
+ */
+class CountingProp : public scip::ObjProp {
+    int m_nCalls { 0 };
+
+public:
+    explicit CountingProp(SCIP* scip)
+        : scip::ObjProp(
+              scip,
+              "counting",
+              "counts how often it is called",
+              0, // priority
+              1, // freq
+              FALSE, // delay
+              SCIP_PROPTIMING_BEFORELP,
+              0, // presolpriority
+              -1, // presolmaxrounds
+              SCIP_PRESOLTIMING_NONE)
+    {
+    }
+    [[nodiscard]] int getNCalls() const
+    {
+        return m_nCalls;
+    }
+    SCIP_DECL_PROPEXEC(scip_exec)
+    override
+    {
+        ++m_nCalls;
+        *result = SCIP_DIDNOTFIND;
+        return SCIP_OKAY;
+    }
+};
+
+BOOST_AUTO_TEST_CASE(UsePropagator)
+{
+    Model model("Simple");
+    auto x1 = model.addVar("x_1", 2, VarType::BINARY);
+    auto x2 = model.addVar("x_2", 1, VarType::BINARY);
+    model.addConstr(x1 + x2 <= 1, "capacity");
+    model.setObjsense(Sense::MAXIMIZE);
+    // otherwise presolving solves the problem and no node is processed
+    model.setParam(params::PRESOLVING::MAXROUNDS, 0);
+    const auto* prop { model.includeProp<CountingProp>() };
+    BOOST_REQUIRE(prop != nullptr);
+    BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
+    model.solve();
+    BOOST_TEST(prop->getNCalls() > 0);
 }
 
 /**
