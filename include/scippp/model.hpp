@@ -62,6 +62,21 @@ public:
      *
      * By default, all calls to the underlying %C %API are wrapped and the last return code is stored.
      *
+     * A model can be created without an existing %SCIP data structure, or with an existing one where the default
+     * plugins are added to or not:
+     * @code
+     * Model m1("ModelWithoutExistingSCIPEnvironment");
+     *
+     * SCIP* scip2 { nullptr };
+     * SCIPcreate(&scip2);
+     * Model m2("ModelWithExistingSCIPEnvironmentWhereDefaultPluginsWillBeAdded", scip2);
+     *
+     * SCIP* scip3 { nullptr };
+     * SCIPcreate(&scip3);
+     * SCIPincludeDefaultPlugins(scip3);
+     * Model m3("ModelWithExistingSCIPEnvironmentWhereNoPluginsWillBeAdded", scip3, false);
+     * @endcode
+     *
      * @since 1.0.0
      * @param name for the problem.
      * @param scip to create the problem in. If \c nullptr, a new %SCIP data structure will be created.
@@ -108,6 +123,16 @@ public:
 
     /**
      * Adds multiple variables to the model.
+     *
+     * By default, all variables have a coefficient of zero in the objective function. Use scippp::COEFF_ONE for a
+     * coefficient of one, or any object providing <code>double operator[](std::size_t index) const</code>:
+     * @code
+     * auto x = model.addVars("x_", 42);
+     * auto y = model.addVars("y_", 42, COEFF_ONE);
+     * std::vector<double> costs { 1.5, 2, 3 };
+     * auto z = model.addVars("z_", costs.size(), costs, VarType::INTEGER);
+     * @endcode
+     *
      * @since 1.0.0
      * @tparam CoeffType Type of the object holding the coefficients. They are accessed via \c [i] where i goes from 0
      *                   to \p numVars - 1.
@@ -140,7 +165,10 @@ public:
      * Adds multiple variables to the model.
      *
      * This method can be used when the number of variables to add is known at compile time. The result can be used in a
-     * structured binding.
+     * structured binding:
+     * @code
+     * const auto& [x0, x1] = model.addVars<2>("x_", COEFF_ONE);
+     * @endcode
      *
      * @since 1.0.0
      * @tparam NumVars Number of variables to add.
@@ -169,6 +197,22 @@ public:
 
     /**
      * Adds a constraint to the model.
+     *
+     * Linear inequalities are built from linear expressions, see LinExpr:
+     * @code
+     * const auto& [x0, x1, x2, x3] = model.addVars<4>("x_");
+     *
+     * LinExpr sum1;
+     * sum1 += 42 * x0;
+     * sum1 += x1;
+     * model.addConstr(sum1 <= 0.5, "constraint1");
+     *
+     * LinExpr sum2 = x1 + x2;
+     * model.addConstr(sum2 == 1.25, "constraint2");
+     *
+     * model.addConstr(1 <= x2 + 2 * x3, "constraint3");
+     * @endcode
+     *
      * @since 1.0.0
      * @param ineq linear inequality to add.
      * @param name for the constraint when the model is written.
@@ -228,6 +272,13 @@ public:
     /**
      * Query statistics about the solving process.
      *
+     * Use the scippp::statistics::Statistic objects from the header solving_statistics.hpp to access the statistics in
+     * a type-safe way:
+     * @code
+     * model.solve();
+     * auto pb { model.getSolvingStatistic(statistics::PRIMALBOUND) };
+     * @endcode
+     *
      * @tparam T Type of the statistics value.
      * @since 1.2.0
      * @param statistic Statistics value to access.
@@ -248,6 +299,18 @@ public:
 
     /**
      * Returns the best feasible primal solution found so far or best solution candidate.
+     *
+     * The values of the variables in the solution are accessed via Var::getSolVal, Var::getSolValAsInt,
+     * Var::getSolValAsLongInt, and Var::isZero:
+     * @code
+     * const auto& [x0, x1] = model.addVars<2>("x_");
+     * model.solve();
+     * if (model.getNSols() > 0 && model.getStatus() == SCIP_STATUS_OPTIMAL) {
+     *     Solution sol { model.getBestSol() };
+     *     std::cout << "x0 + x1 = " << x0.getSolVal(sol) + x1.getSolVal(sol) << std::endl;
+     * }
+     * @endcode
+     *
      * @since 1.0.0
      * @return best feasible primal solution.
      */
@@ -266,7 +329,15 @@ public:
     /**
      * Sets a parameter.
      *
-     * See the namespace scippp::params for a list of parameters, or create new ones using params::Param.
+     * The namespace scippp::params in the header parameters.hpp contains all parameters listed at
+     * https://www.scipopt.org/doc/html/PARAMETERS.php. They are strongly typed, so that, e.g., no string can be set as
+     * the value for a parameter expecting an integer. Instead of using the predefined parameters, one can also create
+     * new ones using params::Param:
+     * @code
+     * model.setParam(params::LIMITS::MAXSOL, 1);
+     * model.setParam(params::DISPLAY::VERBLEVEL, 0);
+     * model.setParam(params::Param<bool>("write/printzeros"), true);
+     * @endcode
      *
      * @since 1.0.0
      * @tparam T Type of the value.
@@ -364,6 +435,14 @@ public:
     /**
      * Installs a custom message handler, i.e., all info, warning, and dialog messages of %SCIP are passed to it.
      *
+     * Derive from scip::ObjMessagehdlr to process the output of %SCIP, e.g., to write it to a logger:
+     * @code
+     * class MyMessageHandler : public scip::ObjMessagehdlr { ... };
+     * ...
+     * model.setMessagehdlr(std::make_unique<MyMessageHandler>());
+     * model.solve();
+     * @endcode
+     *
      * @since 1.5.0
      * @param handler to install, must not be \c nullptr. %SCIP takes ownership and deletes it when it is no longer
      *                used.
@@ -377,6 +456,19 @@ public:
      *
      * The handler is constructed by this method as scip::ObjEventhdlr requires the %SCIP data structure in its
      * constructor. %SCIP takes ownership and deletes it when the model is destructed.
+     *
+     * Derive from scip::ObjEventhdlr to react to events of %SCIP, e.g., to track new best solutions:
+     * @code
+     * class MyEventHandler : public scip::ObjEventhdlr {
+     * public:
+     *     MyEventHandler(SCIP* scip, int& counter);
+     *     ...
+     * };
+     * ...
+     * int counter { 0 };
+     * model.includeEventhdlr<MyEventHandler>(counter);
+     * model.solve();
+     * @endcode
      *
      * @since 1.5.0
      * @tparam Eventhdlr Type of the event handler, derived from scip::ObjEventhdlr.
