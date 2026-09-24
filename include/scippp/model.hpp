@@ -859,5 +859,36 @@ public:
     {
         return constructAndInclude<Table>(&SCIPincludeObjTable, std::forward<Args>(args)...);
     }
+
+    /**
+     * Includes a custom file reader.
+     *
+     * The file reader is constructed by this method as scip::ObjReader requires the %SCIP data structure in its
+     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
+     *
+     * Derive from scip::ObjReader to write the problem in a custom file format via writeOrigProblem(), which selects
+     * the file reader by the extension of the file name:
+     * @code
+     * class MyFileReader : public scip::ObjReader {
+     * public:
+     *     explicit MyFileReader(SCIP* scip); // passes "myext" as extension to scip::ObjReader
+     *     ...
+     * };
+     * ...
+     * model.includeReader<MyFileReader>();
+     * model.writeOrigProblem(std::filesystem::directory_entry("problem.myext"));
+     * @endcode
+     *
+     * @since 1.5.0
+     * @tparam Reader Type of the file reader, derived from scip::ObjReader.
+     * @tparam Args Types of the additional constructor arguments.
+     * @param args passed to the constructor of \p Reader after the %SCIP data structure.
+     * @return Non-owning pointer to the file reader, or \c nullptr if including failed.
+     */
+    template <typename Reader, typename... Args>
+    Reader* includeReader(Args&&... args) const
+    {
+        return constructAndInclude<Reader>(&SCIPincludeObjReader, std::forward<Args>(args)...);
+    }
 };
 }

@@ -21,6 +21,7 @@
 #include <objscip/objnodesel.h>
 #include <objscip/objpresol.h>
 #include <objscip/objprop.h>
+#include <objscip/objreader.h>
 #include <objscip/objrelax.h>
 #include <objscip/objsepa.h>
 #include <objscip/objtable.h>
@@ -685,6 +686,44 @@ BOOST_AUTO_TEST_CASE(UseStatisticsTable)
     BOOST_TEST(SCIPprintStatistics(model.scip(), file) == SCIP_OKAY);
     fclose(file);
     BOOST_TEST(table->getNCalls() == 1);
+}
+
+/**
+ * Writes the number of variables and constraints of a problem to files with extension cnt.
+ */
+class CountReader : public scip::ObjReader {
+public:
+    explicit CountReader(SCIP* scip)
+        : scip::ObjReader(scip, "count", "writes the number of variables and constraints", "cnt")
+    {
+    }
+    SCIP_DECL_READERWRITE(scip_write)
+    override
+    {
+        SCIPinfoMessage(scip, file, "%d %d\n", nvars, nconss);
+        *result = SCIP_SUCCESS;
+        return SCIP_OKAY;
+    }
+};
+
+BOOST_AUTO_TEST_CASE(UseReader)
+{
+    Model model("Simple");
+    auto x1 = model.addVar("x_1", 1);
+    auto x2 = model.addVar("x_2", 1);
+    model.addConstr(x1 + x2 >= 1, "capacity");
+    BOOST_TEST(model.includeReader<CountReader>() != nullptr);
+    BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
+    const auto FILE_NAME { filesystem::temp_directory_path()
+        / boost::filesystem::unique_path("%%%%-%%%%-%%%%-%%%%.cnt").string() };
+    model.writeOrigProblem(filesystem::directory_entry(FILE_NAME));
+    BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
+    ifstream file(FILE_NAME);
+    ostringstream content;
+    content << file.rdbuf();
+    file.close();
+    filesystem::remove(FILE_NAME);
+    BOOST_TEST(content.str() == "2 1\n");
 }
 
 /**

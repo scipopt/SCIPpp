@@ -88,6 +88,9 @@ int main()
   * event handlers derived from
     [`scip::ObjEventhdlr`](https://www.scipopt.org/doc/html/classscip_1_1ObjEventhdlr.php)
     (`scippp::Model::includeEventhdlr`),
+  * file readers derived from
+    [`scip::ObjReader`](https://www.scipopt.org/doc/html/classscip_1_1ObjReader.php)
+    (`scippp::Model::includeReader`),
   * primal heuristics derived from
     [`scip::ObjHeur`](https://www.scipopt.org/doc/html/classscip_1_1ObjHeur.php)
     (`scippp::Model::includeHeur`),
