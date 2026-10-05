@@ -54,85 +54,52 @@ int main()
 ## Features
 
 * Create a model with a new SCIP data structure or with an existing one, with or without SCIP's default plugins.
-* Add variables one at a time, as a vector, or as an array for structured bindings (`scippp::Model::addVar`,
-  `scippp::Model::addVars`). The objective coefficients can be given by any object providing an index operator.
-* Build linear expressions (`scippp::LinExpr`) and add linear inequalities and equations as constraints
-  (`scippp::Model::addConstr`).
-* Set the optimization goal (`scippp::Model::setObjsense`) and all SCIP parameters in a type-safe way
-  (`scippp::Model::setParam` with `scippp::params`).
+* Add variables one at a time, as a vector, or as an array for structured bindings (`Model::addVar`,
+  `Model::addVars`). The objective coefficients can be given by any object providing an index operator.
+* Build linear expressions (`LinExpr`) and add linear inequalities and equations as constraints
+  (`Model::addConstr`).
+* Set the optimization goal (`Model::setObjsense`) and all SCIP parameters in a type-safe way
+  (`Model::setParam` with `scippp::params`).
 * Solve the model and query its status, the number of solutions, the best solution, and the values of the variables in
-  a solution (`scippp::Model::solve`, `scippp::Model::getStatus`, `scippp::Model::getNSols`,
-  `scippp::Model::getBestSol`, `scippp::Var::getSolVal`).
-* Add initial solutions to SCIP's solution pool (`scippp::InitialSolution`, `scippp::Model::addSolution`).
-* Query solving statistics in a type-safe way (`scippp::Model::getSolvingStatistic` with `scippp::statistics`).
-* Generate an Irreducible Infeasible Subsystem (`scippp::Model::generateIIS`).
-* Write the original problem to a file or to standard output (`scippp::Model::writeOrigProblem`).
-* Use SCIP's numerics (`scippp::Model::epsilon`, `scippp::Model::round`, `scippp::Model::isZero`,
-  `scippp::Model::infinity`).
-* Use ObjSCIP without accessing the raw SCIP object:
-  * Benders' decompositions derived from
-    [`scip::ObjBenders`](https://www.scipopt.org/doc/html/classscip_1_1ObjBenders.php)
-    (`scippp::Model::includeBenders`),
-  * Benders' decomposition cuts derived from
-    [`scip::ObjBenderscut`](https://www.scipopt.org/doc/html/classscip_1_1ObjBenderscut.php)
-    (`scippp::Model::includeBenderscut`),
-  * branching rules derived from
-    [`scip::ObjBranchrule`](https://www.scipopt.org/doc/html/classscip_1_1ObjBranchrule.php)
-    (`scippp::Model::includeBranchrule`),
-  * constraint handlers derived from
-    [`scip::ObjConshdlr`](https://www.scipopt.org/doc/html/classscip_1_1ObjConshdlr.php)
-    (`scippp::Model::includeConshdlr`),
-  * cut selectors derived from
-    [`scip::ObjCutsel`](https://www.scipopt.org/doc/html/classscip_1_1ObjCutsel.php)
-    (`scippp::Model::includeCutsel`),
-  * display columns derived from
-    [`scip::ObjDisp`](https://www.scipopt.org/doc/html/classscip_1_1ObjDisp.php)
-    (`scippp::Model::includeDisp`),
-  * event handlers derived from
-    [`scip::ObjEventhdlr`](https://www.scipopt.org/doc/html/classscip_1_1ObjEventhdlr.php)
-    (`scippp::Model::includeEventhdlr`),
-  * file readers derived from
-    [`scip::ObjReader`](https://www.scipopt.org/doc/html/classscip_1_1ObjReader.php)
-    (`scippp::Model::includeReader`),
-  * IIS finders derived from
-    [`scip::ObjIISfinder`](https://www.scipopt.org/doc/html/classscip_1_1ObjIISfinder.php)
-    (`scippp::Model::includeIISfinder`),
-  * message handlers derived from
-    [`scip::ObjMessagehdlr`](https://www.scipopt.org/doc/html/classscip_1_1ObjMessagehdlr.php)
-    (`scippp::Model::setMessagehdlr`),
-  * node selectors derived from
-    [`scip::ObjNodesel`](https://www.scipopt.org/doc/html/classscip_1_1ObjNodesel.php)
-    (`scippp::Model::includeNodesel`),
-  * presolvers derived from
-    [`scip::ObjPresol`](https://www.scipopt.org/doc/html/classscip_1_1ObjPresol.php)
-    (`scippp::Model::includePresol`),
-  * pricers derived from
-    [`scip::ObjPricer`](https://www.scipopt.org/doc/html/classscip_1_1ObjPricer.php)
-    (`scippp::Model::includePricer`),
-  * primal heuristics derived from
-    [`scip::ObjHeur`](https://www.scipopt.org/doc/html/classscip_1_1ObjHeur.php)
-    (`scippp::Model::includeHeur`),
-  * problem data derived from
-    [`scip::ObjProbData`](https://www.scipopt.org/doc/html/classscip_1_1ObjProbData.php)
-    (`scippp::Model`),
-  * propagators derived from
-    [`scip::ObjProp`](https://www.scipopt.org/doc/html/classscip_1_1ObjProp.php)
-    (`scippp::Model::includeProp`),
-  * relaxators derived from
-    [`scip::ObjRelax`](https://www.scipopt.org/doc/html/classscip_1_1ObjRelax.php)
-    (`scippp::Model::includeRelax`),
-  * separators derived from
-    [`scip::ObjSepa`](https://www.scipopt.org/doc/html/classscip_1_1ObjSepa.php)
-    (`scippp::Model::includeSepa`), and
-  * variable data derived from
-    [`scip::ObjVardata`](https://www.scipopt.org/doc/html/classscip_1_1ObjVardata.php)
-    (`scippp::Model::addVar`).
+  a solution (`Model::solve`, `Model::getStatus`, `Model::getNSols`,
+  `Model::getBestSol`, `Var::getSolVal`).
+* Add initial solutions to SCIP's solution pool (`InitialSolution`, `Model::addSolution`).
+* Query solving statistics in a type-safe way (`Model::getSolvingStatistic` with `scippp::statistics`).
+* Generate an Irreducible Infeasible Subsystem (`Model::generateIIS`).
+* Write the original problem to a file or to standard output (`Model::writeOrigProblem`).
+* Use SCIP's numerics (`Model::epsilon`, `Model::round`, `Model::isZero`,
+  `Model::infinity`).
+* Use ObjSCIP:
+  * `Model::include` includes plugins derived from
+    [`ObjBranchrule`](https://www.scipopt.org/doc/html/classscip_1_1ObjBranchrule.php),
+    [`ObjConshdlr`](https://www.scipopt.org/doc/html/classscip_1_1ObjConshdlr.php),
+    [`ObjCutsel`](https://www.scipopt.org/doc/html/classscip_1_1ObjCutsel.php),
+    [`ObjDisp`](https://www.scipopt.org/doc/html/classscip_1_1ObjDisp.php),
+    [`ObjEventhdlr`](https://www.scipopt.org/doc/html/classscip_1_1ObjEventhdlr.php),
+    [`ObjHeur`](https://www.scipopt.org/doc/html/classscip_1_1ObjHeur.php),
+    [`ObjIISfinder`](https://www.scipopt.org/doc/html/classscip_1_1ObjIISfinder.php),
+    [`ObjNodesel`](https://www.scipopt.org/doc/html/classscip_1_1ObjNodesel.php),
+    [`ObjPresol`](https://www.scipopt.org/doc/html/classscip_1_1ObjPresol.php),
+    [`ObjPricer`](https://www.scipopt.org/doc/html/classscip_1_1ObjPricer.php),
+    [`ObjProp`](https://www.scipopt.org/doc/html/classscip_1_1ObjProp.php),
+    [`ObjReader`](https://www.scipopt.org/doc/html/classscip_1_1ObjReader.php),
+    [`ObjRelax`](https://www.scipopt.org/doc/html/classscip_1_1ObjRelax.php), and
+    [`ObjSepa`](https://www.scipopt.org/doc/html/classscip_1_1ObjSepa.php),
+  * `Model::includeBenders` and `Model::includeBenderscut` include Benders' decompositions and cuts
+    derived from [`ObjBenders`](https://www.scipopt.org/doc/html/classscip_1_1ObjBenders.php) and
+    [`ObjBenderscut`](https://www.scipopt.org/doc/html/classscip_1_1ObjBenderscut.php),
+  * `Model::setMessagehdlr` installs message handlers derived from
+    [`ObjMessagehdlr`](https://www.scipopt.org/doc/html/classscip_1_1ObjMessagehdlr.php),
+  * a constructor of `Model` takes problem data derived from
+    [`ObjProbData`](https://www.scipopt.org/doc/html/classscip_1_1ObjProbData.php), and
+  * `Model::addVar` takes variable data derived from
+    [`ObjVardata`](https://www.scipopt.org/doc/html/classscip_1_1ObjVardata.php).
 
   Statistics tables derived from
-  [`scip::ObjTable`](https://www.scipopt.org/doc/html/classscip_1_1ObjTable.php)
-  are not supported, as SCIP does not export `scip::ObjTable` from its shared library, see
+  [`ObjTable`](https://www.scipopt.org/doc/html/classscip_1_1ObjTable.php)
+  are not supported, as SCIP does not export `ObjTable` from its shared library, see
   [SCIP issue 222](https://github.com/scipopt/scip/issues/222).
-* Access the raw SCIP object for features not yet supported (`scippp::Model::scip`).
+* Access the raw SCIP object for features not yet supported (`Model::scip`).
 
 ## Build
 

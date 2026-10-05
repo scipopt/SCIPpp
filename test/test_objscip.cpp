@@ -5,32 +5,14 @@
 #include <boost/test/unit_test.hpp>
 #include <fstream>
 #include <memory>
+#include <objscip/objscip.h>
+#include <scip/cons_linear.h>
 #include <sstream>
 #include <stdexcept>
 
 #include "scippp/model.hpp"
 #include "scippp/parameters.hpp"
 #include "scippp/solving_statistics.hpp"
-#include <objscip/objbenders.h>
-#include <objscip/objbenderscut.h>
-#include <objscip/objbranchrule.h>
-#include <objscip/objconshdlr.h>
-#include <objscip/objcutsel.h>
-#include <objscip/objdisp.h>
-#include <objscip/objeventhdlr.h>
-#include <objscip/objheur.h>
-#include <objscip/objiisfinder.h>
-#include <objscip/objmessagehdlr.h>
-#include <objscip/objnodesel.h>
-#include <objscip/objpresol.h>
-#include <objscip/objpricer.h>
-#include <objscip/objprobdata.h>
-#include <objscip/objprop.h>
-#include <objscip/objreader.h>
-#include <objscip/objrelax.h>
-#include <objscip/objsepa.h>
-#include <objscip/objvardata.h>
-#include <scip/cons_linear.h>
 
 using namespace boost::algorithm;
 using namespace scippp;
@@ -76,7 +58,7 @@ BOOST_AUTO_TEST_CASE(UseEventHandler)
     auto x2 = model.addVar("x_2", 1);
     model.addConstr(x1 + x2 >= 1, "capacity");
     model.addConstr(x1 == x2, "equal");
-    BOOST_TEST(model.includeEventhdlr<BestSolCounter>(nBestSols) != nullptr);
+    BOOST_TEST(model.include<BestSolCounter>(nBestSols) != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.setObjsense(Sense::MINIMIZE);
     model.solve();
@@ -88,10 +70,10 @@ BOOST_AUTO_TEST_CASE(IncludeEventHandlerTwice)
 {
     int nBestSols { 0 };
     Model model("Simple");
-    BOOST_TEST(model.includeEventhdlr<BestSolCounter>(nBestSols) != nullptr);
+    BOOST_TEST(model.include<BestSolCounter>(nBestSols) != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     // SCIP rejects a second event handler with the same name, the handler is then deleted by SCIP++
-    BOOST_TEST(model.includeEventhdlr<BestSolCounter>(nBestSols) == nullptr);
+    BOOST_TEST(model.include<BestSolCounter>(nBestSols) == nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_INVALIDDATA);
 }
 
@@ -175,7 +157,7 @@ BOOST_AUTO_TEST_CASE(UseConstraintHandler)
     auto x1 = model.addVar("x_1", 1, VarType::BINARY);
     auto x2 = model.addVar("x_2", 1, VarType::BINARY);
     model.setObjsense(Sense::MAXIMIZE);
-    BOOST_TEST(model.includeConshdlr<ZeroVarConshdlr>(x1.getVar()) != nullptr);
+    BOOST_TEST(model.include<ZeroVarConshdlr>(x1.getVar()) != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
     BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1);
@@ -235,7 +217,7 @@ BOOST_AUTO_TEST_CASE(UseHeuristic)
     auto x2 = model.addVar("x_2", 1, VarType::BINARY);
     model.addConstr(x1 + x2 <= 1, "capacity");
     model.setObjsense(Sense::MAXIMIZE);
-    const auto* heur { model.includeHeur<OneVarHeur>(x1.getVar()) };
+    const auto* heur { model.include<OneVarHeur>(x1.getVar()) };
     BOOST_REQUIRE(heur != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
@@ -287,7 +269,7 @@ BOOST_AUTO_TEST_CASE(UsePresolver)
     auto x2 = model.addVar("x_2", 1, VarType::BINARY);
     model.addConstr(x1 + x2 <= 1, "capacity");
     model.setObjsense(Sense::MAXIMIZE);
-    BOOST_TEST(model.includePresol<ZeroVarPresol>(x1.getVar()) != nullptr);
+    BOOST_TEST(model.include<ZeroVarPresol>(x1.getVar()) != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
     // without the presolver, x_1 = 1 would be optimal with objective 2
@@ -339,7 +321,7 @@ BOOST_AUTO_TEST_CASE(UsePropagator)
     model.setObjsense(Sense::MAXIMIZE);
     // otherwise presolving solves the problem and no node is processed
     model.setParam(params::PRESOLVING::MAXROUNDS, 0);
-    const auto* prop { model.includeProp<CountingProp>() };
+    const auto* prop { model.include<CountingProp>() };
     BOOST_REQUIRE(prop != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
@@ -410,7 +392,7 @@ BOOST_AUTO_TEST_CASE(UseSeparator)
 {
     Model model("Simple");
     auto [x1, x2] = addFractionalProblem(model);
-    const auto* sepa { model.includeSepa<CapacitySepa>(x1.getVar(), x2.getVar()) };
+    const auto* sepa { model.include<CapacitySepa>(x1.getVar(), x2.getVar()) };
     BOOST_REQUIRE(sepa != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
@@ -450,8 +432,8 @@ BOOST_AUTO_TEST_CASE(UseCutSelector)
 {
     Model model("Simple");
     auto [x1, x2] = addFractionalProblem(model);
-    BOOST_REQUIRE(model.includeSepa<CapacitySepa>(x1.getVar(), x2.getVar()) != nullptr);
-    const auto* cutsel { model.includeCutsel<AllCutsel>() };
+    BOOST_REQUIRE(model.include<CapacitySepa>(x1.getVar(), x2.getVar()) != nullptr);
+    const auto* cutsel { model.include<AllCutsel>() };
     BOOST_REQUIRE(cutsel != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
@@ -503,7 +485,7 @@ BOOST_AUTO_TEST_CASE(UseBranchingRule)
     // otherwise the problem is solved at the root by separation or conflict analysis
     model.setParam(params::SEPARATING::MAXROUNDSROOT, 0);
     model.setParam(params::CONFLICT::ENABLE, false);
-    const auto* branchrule { model.includeBranchrule<FirstFracBranchrule>() };
+    const auto* branchrule { model.include<FirstFracBranchrule>() };
     BOOST_REQUIRE(branchrule != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
@@ -558,7 +540,7 @@ BOOST_AUTO_TEST_CASE(UseNodeSelector)
     // otherwise the problem is solved at the root by separation or conflict analysis
     model.setParam(params::SEPARATING::MAXROUNDSROOT, 0);
     model.setParam(params::CONFLICT::ENABLE, false);
-    const auto* nodesel { model.includeNodesel<DepthFirstNodesel>() };
+    const auto* nodesel { model.include<DepthFirstNodesel>() };
     BOOST_REQUIRE(nodesel != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
@@ -599,7 +581,7 @@ BOOST_AUTO_TEST_CASE(UseRelaxator)
 {
     Model model("Simple");
     addFractionalProblem(model);
-    const auto* relax { model.includeRelax<CountingRelax>() };
+    const auto* relax { model.include<CountingRelax>() };
     BOOST_REQUIRE(relax != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
@@ -643,7 +625,7 @@ BOOST_AUTO_TEST_CASE(UseDisplayColumn)
     Model model("Simple");
     // nodes have to be processed, otherwise no display line is printed
     addFractionalProblem(model);
-    const auto* disp { model.includeDisp<CountingDisp>() };
+    const auto* disp { model.include<CountingDisp>() };
     BOOST_REQUIRE(disp != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
@@ -674,7 +656,7 @@ BOOST_AUTO_TEST_CASE(UseReader)
     auto x1 = model.addVar("x_1", 1);
     auto x2 = model.addVar("x_2", 1);
     model.addConstr(x1 + x2 >= 1, "capacity");
-    BOOST_TEST(model.includeReader<CountReader>() != nullptr);
+    BOOST_TEST(model.include<CountReader>() != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     const auto FILE_NAME { filesystem::temp_directory_path()
         / boost::filesystem::unique_path("%%%%-%%%%-%%%%-%%%%.cnt").string() };
@@ -723,7 +705,7 @@ BOOST_AUTO_TEST_CASE(UseIISFinder)
     model.addConstr(x1 + x2 >= 2, "lower");
     model.addConstr(x1 + x2 <= 1, "upper");
     model.setParam(params::IIS::SILENT, true);
-    const auto* iisfinder { model.includeIISfinder<CountingIISfinder>() };
+    const auto* iisfinder { model.include<CountingIISfinder>() };
     BOOST_REQUIRE(iisfinder != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
@@ -770,7 +752,7 @@ BOOST_AUTO_TEST_CASE(UsePricer)
     model.addConstr(x1 + x2 >= 1, "capacity");
     // otherwise presolving solves the problem and no LP is solved
     model.setParam(params::PRESOLVING::MAXROUNDS, 0);
-    const auto* pricer { model.includePricer<CountingPricer>() };
+    const auto* pricer { model.include<CountingPricer>() };
     BOOST_REQUIRE(pricer != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
@@ -781,10 +763,10 @@ BOOST_AUTO_TEST_CASE(UsePricer)
 BOOST_AUTO_TEST_CASE(IncludePricerTwice)
 {
     Model model("Simple");
-    BOOST_TEST(model.includePricer<CountingPricer>() != nullptr);
+    BOOST_TEST(model.include<CountingPricer>() != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     // SCIP rejects a second pricer with the same name, the pricer is then deleted by SCIP++ without being activated
-    BOOST_TEST(model.includePricer<CountingPricer>() == nullptr);
+    BOOST_TEST(model.include<CountingPricer>() == nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_INVALIDDATA);
 }
 

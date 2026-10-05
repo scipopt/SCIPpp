@@ -548,79 +548,32 @@ public:
     void setMessagehdlr(std::unique_ptr<scip::ObjMessagehdlr> handler) const;
 
     /**
-     * Includes a custom event handler.
+     * Includes a custom plugin, e.g., an event handler, a primal heuristic, or a separator.
      *
-     * The handler is constructed by this method as scip::ObjEventhdlr requires the %SCIP data structure in its
-     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
+     * The plugin is constructed by this method as the objscip base classes require the %SCIP data structure in their
+     * constructors. %SCIP takes ownership and deletes it when the model is destructed. The kind of the plugin is
+     * determined by its objscip base class, which has to be exactly one of
+     * - scip::ObjBranchrule for branching rules, which decide how to split the search space,
+     * - scip::ObjConshdlr for constraint handlers, which enforce constraints that cannot be expressed linearly,
+     * - scip::ObjCutsel for cut selectors, which decide which of the separated cuts are added to the LP relaxation,
+     * - scip::ObjDisp for display columns, which show additional information in the lines %SCIP prints during the
+     *   solving process,
+     * - scip::ObjEventhdlr for event handlers, which react to events of %SCIP, e.g., new best solutions,
+     * - scip::ObjHeur for primal heuristics, which construct solutions from problem-specific knowledge,
+     * - scip::ObjIISfinder for %IIS finders, which compute an %IIS of an infeasible problem via generateIIS(),
+     * - scip::ObjNodesel for node selectors, which decide which open node of the search tree is processed next,
+     * - scip::ObjPresol for presolvers, which reduce the problem before solving it,
+     * - scip::ObjPricer for variable pricers, which add variables with negative reduced costs during the solving
+     *   process, i.e., implement column generation. The pricer is activated after including it,
+     * - scip::ObjProp for propagators, which tighten the domains of variables during the search,
+     * - scip::ObjReader for file readers, which write the problem in a custom file format via writeOrigProblem(),
+     *   selected by the extension of the file name,
+     * - scip::ObjRelax for relaxators, which solve problem-specific relaxations in addition to the LP relaxation, or
+     * - scip::ObjSepa for separators, which cut off fractional solutions of the LP relaxation, e.g., with
+     *   problem-specific valid inequalities.
      *
-     * Derive from scip::ObjEventhdlr to react to events of %SCIP, e.g., to track new best solutions:
-     * @code
-     * class MyEventHandler : public scip::ObjEventhdlr {
-     * public:
-     *     MyEventHandler(SCIP* scip, int& counter);
-     *     ...
-     * };
-     * ...
-     * int counter { 0 };
-     * model.includeEventhdlr<MyEventHandler>(counter);
-     * model.solve();
-     * @endcode
+     * Benders' decompositions and their cuts need additional arguments, see includeBenders() and includeBenderscut().
      *
-     * @since 1.5.0
-     * @tparam Eventhdlr Type of the event handler, derived from scip::ObjEventhdlr.
-     * @tparam Args Types of the additional constructor arguments.
-     * @param args passed to the constructor of \p Eventhdlr after the %SCIP data structure.
-     * @return Non-owning pointer to the handler, or \c nullptr if including failed.
-     * @attention Must be called before solve().
-     */
-    template <typename Eventhdlr, typename... Args>
-    Eventhdlr* includeEventhdlr(Args&&... args) const
-    {
-        return constructAndInclude<Eventhdlr>(&SCIPincludeObjEventhdlr, std::forward<Args>(args)...);
-    }
-
-    /**
-     * Includes a custom constraint handler.
-     *
-     * The handler is constructed by this method as scip::ObjConshdlr requires the %SCIP data structure in its
-     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
-     *
-     * Derive from scip::ObjConshdlr to enforce constraints that cannot be expressed linearly, e.g., lazily:
-     * @code
-     * class MyConstraintHandler : public scip::ObjConshdlr {
-     * public:
-     *     MyConstraintHandler(SCIP* scip, const std::vector<Var>& vars);
-     *     ...
-     * };
-     * ...
-     * auto vars = model.addVars("x_", 42);
-     * model.includeConshdlr<MyConstraintHandler>(vars);
-     * model.solve();
-     * @endcode
-     *
-     * @since 1.5.0
-     * @tparam Conshdlr Type of the constraint handler, derived from scip::ObjConshdlr.
-     * @tparam Args Types of the additional constructor arguments.
-     * @param args passed to the constructor of \p Conshdlr after the %SCIP data structure.
-     * @return Non-owning pointer to the handler, or \c nullptr if including failed.
-     * @attention Must be called before solve().
-     * @note SCIP++ cannot create constraints of a custom constraint handler. Thus, pass \c needscons = \c FALSE to the
-     *       constructor of scip::ObjConshdlr, so that the handler is called without constraints, and lock the
-     *       variables in \c scip_lock, which is then called with \c cons = \c nullptr.
-     */
-    template <typename Conshdlr, typename... Args>
-    Conshdlr* includeConshdlr(Args&&... args) const
-    {
-        return constructAndInclude<Conshdlr>(&SCIPincludeObjConshdlr, std::forward<Args>(args)...);
-    }
-
-    /**
-     * Includes a custom primal heuristic.
-     *
-     * The heuristic is constructed by this method as scip::ObjHeur requires the %SCIP data structure in its
-     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
-     *
-     * Derive from scip::ObjHeur to construct solutions from problem-specific knowledge:
      * @code
      * class MyHeuristic : public scip::ObjHeur {
      * public:
@@ -629,377 +582,70 @@ public:
      * };
      * ...
      * auto vars = model.addVars("x_", 42);
-     * model.includeHeur<MyHeuristic>(vars);
+     * model.include<MyHeuristic>(vars);
      * model.solve();
      * @endcode
      *
      * @since 1.5.0
-     * @tparam Heur Type of the heuristic, derived from scip::ObjHeur.
+     * @tparam Plugin Type of the plugin, derived from exactly one of the objscip base classes listed above.
      * @tparam Args Types of the additional constructor arguments.
-     * @param args passed to the constructor of \p Heur after the %SCIP data structure.
-     * @return Non-owning pointer to the heuristic, or \c nullptr if including failed.
+     * @param args passed to the constructor of \p Plugin after the %SCIP data structure.
+     * @return Non-owning pointer to the plugin, or \c nullptr if including failed.
      * @attention Must be called before solve().
-     */
-    template <typename Heur, typename... Args>
-    Heur* includeHeur(Args&&... args) const
-    {
-        return constructAndInclude<Heur>(&SCIPincludeObjHeur, std::forward<Args>(args)...);
-    }
-
-    /**
-     * Includes a custom presolver.
-     *
-     * The presolver is constructed by this method as scip::ObjPresol requires the %SCIP data structure in its
-     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
-     *
-     * Derive from scip::ObjPresol to reduce the problem before solving it, e.g., based on problem-specific knowledge:
-     * @code
-     * class MyPresolver : public scip::ObjPresol {
-     * public:
-     *     MyPresolver(SCIP* scip, const std::vector<Var>& vars);
-     *     ...
-     * };
-     * ...
-     * auto vars = model.addVars("x_", 42);
-     * model.includePresol<MyPresolver>(vars);
-     * model.solve();
-     * @endcode
-     *
-     * @since 1.5.0
-     * @tparam Presol Type of the presolver, derived from scip::ObjPresol.
-     * @tparam Args Types of the additional constructor arguments.
-     * @param args passed to the constructor of \p Presol after the %SCIP data structure.
-     * @return Non-owning pointer to the presolver, or \c nullptr if including failed.
-     * @attention Must be called before solve().
-     */
-    template <typename Presol, typename... Args>
-    Presol* includePresol(Args&&... args) const
-    {
-        return constructAndInclude<Presol>(&SCIPincludeObjPresol, std::forward<Args>(args)...);
-    }
-
-    /**
-     * Includes a custom propagator.
-     *
-     * The propagator is constructed by this method as scip::ObjProp requires the %SCIP data structure in its
-     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
-     *
-     * Derive from scip::ObjProp to tighten the domains of variables during the search, e.g., based on
-     * problem-specific knowledge:
-     * @code
-     * class MyPropagator : public scip::ObjProp {
-     * public:
-     *     MyPropagator(SCIP* scip, const std::vector<Var>& vars);
-     *     ...
-     * };
-     * ...
-     * auto vars = model.addVars("x_", 42);
-     * model.includeProp<MyPropagator>(vars);
-     * model.solve();
-     * @endcode
-     *
-     * @since 1.5.0
-     * @tparam Prop Type of the propagator, derived from scip::ObjProp.
-     * @tparam Args Types of the additional constructor arguments.
-     * @param args passed to the constructor of \p Prop after the %SCIP data structure.
-     * @return Non-owning pointer to the propagator, or \c nullptr if including failed.
-     * @attention Must be called before solve().
-     */
-    template <typename Prop, typename... Args>
-    Prop* includeProp(Args&&... args) const
-    {
-        return constructAndInclude<Prop>(&SCIPincludeObjProp, std::forward<Args>(args)...);
-    }
-
-    /**
-     * Includes a custom separator.
-     *
-     * The separator is constructed by this method as scip::ObjSepa requires the %SCIP data structure in its
-     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
-     *
-     * Derive from scip::ObjSepa to cut off fractional solutions of the LP relaxation, e.g., with problem-specific
-     * valid inequalities:
-     * @code
-     * class MySeparator : public scip::ObjSepa {
-     * public:
-     *     MySeparator(SCIP* scip, const std::vector<Var>& vars);
-     *     ...
-     * };
-     * ...
-     * auto vars = model.addVars("x_", 42);
-     * model.includeSepa<MySeparator>(vars);
-     * model.solve();
-     * @endcode
-     *
-     * @since 1.5.0
-     * @tparam Sepa Type of the separator, derived from scip::ObjSepa.
-     * @tparam Args Types of the additional constructor arguments.
-     * @param args passed to the constructor of \p Sepa after the %SCIP data structure.
-     * @return Non-owning pointer to the separator, or \c nullptr if including failed.
-     * @attention Must be called before solve().
-     */
-    template <typename Sepa, typename... Args>
-    Sepa* includeSepa(Args&&... args) const
-    {
-        return constructAndInclude<Sepa>(&SCIPincludeObjSepa, std::forward<Args>(args)...);
-    }
-
-    /**
-     * Includes a custom cut selector.
-     *
-     * The cut selector is constructed by this method as scip::ObjCutsel requires the %SCIP data structure in its
-     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
-     *
-     * Derive from scip::ObjCutsel to decide which of the separated cuts are added to the LP relaxation:
-     * @code
-     * class MyCutSelector : public scip::ObjCutsel {
-     * public:
-     *     MyCutSelector(SCIP* scip, double minEfficacy);
-     *     ...
-     * };
-     * ...
-     * model.includeCutsel<MyCutSelector>(0.1);
-     * model.solve();
-     * @endcode
-     *
-     * @since 1.5.0
-     * @tparam Cutsel Type of the cut selector, derived from scip::ObjCutsel.
-     * @tparam Args Types of the additional constructor arguments.
-     * @param args passed to the constructor of \p Cutsel after the %SCIP data structure.
-     * @return Non-owning pointer to the cut selector, or \c nullptr if including failed.
-     * @attention Must be called before solve().
-     */
-    template <typename Cutsel, typename... Args>
-    Cutsel* includeCutsel(Args&&... args) const
-    {
-        return constructAndInclude<Cutsel>(&SCIPincludeObjCutsel, std::forward<Args>(args)...);
-    }
-
-    /**
-     * Includes a custom branching rule.
-     *
-     * The branching rule is constructed by this method as scip::ObjBranchrule requires the %SCIP data structure in its
-     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
-     *
-     * Derive from scip::ObjBranchrule to decide how to split the search space, e.g., based on problem-specific
-     * knowledge:
-     * @code
-     * class MyBranchingRule : public scip::ObjBranchrule {
-     * public:
-     *     MyBranchingRule(SCIP* scip, const std::vector<Var>& vars);
-     *     ...
-     * };
-     * ...
-     * auto vars = model.addVars("x_", 42);
-     * model.includeBranchrule<MyBranchingRule>(vars);
-     * model.solve();
-     * @endcode
-     *
-     * @since 1.5.0
-     * @tparam Branchrule Type of the branching rule, derived from scip::ObjBranchrule.
-     * @tparam Args Types of the additional constructor arguments.
-     * @param args passed to the constructor of \p Branchrule after the %SCIP data structure.
-     * @return Non-owning pointer to the branching rule, or \c nullptr if including failed.
-     * @attention Must be called before solve().
-     */
-    template <typename Branchrule, typename... Args>
-    Branchrule* includeBranchrule(Args&&... args) const
-    {
-        return constructAndInclude<Branchrule>(&SCIPincludeObjBranchrule, std::forward<Args>(args)...);
-    }
-
-    /**
-     * Includes a custom node selector.
-     *
-     * The node selector is constructed by this method as scip::ObjNodesel requires the %SCIP data structure in its
-     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
-     *
-     * Derive from scip::ObjNodesel to decide which open node of the search tree is processed next:
-     * @code
-     * class MyNodeSelector : public scip::ObjNodesel {
-     * public:
-     *     explicit MyNodeSelector(SCIP* scip);
-     *     ...
-     * };
-     * ...
-     * model.includeNodesel<MyNodeSelector>();
-     * model.solve();
-     * @endcode
-     *
-     * @since 1.5.0
-     * @tparam Nodesel Type of the node selector, derived from scip::ObjNodesel.
-     * @tparam Args Types of the additional constructor arguments.
-     * @param args passed to the constructor of \p Nodesel after the %SCIP data structure.
-     * @return Non-owning pointer to the node selector, or \c nullptr if including failed.
-     * @attention Must be called before solve().
-     */
-    template <typename Nodesel, typename... Args>
-    Nodesel* includeNodesel(Args&&... args) const
-    {
-        return constructAndInclude<Nodesel>(&SCIPincludeObjNodesel, std::forward<Args>(args)...);
-    }
-
-    /**
-     * Includes a custom relaxator.
-     *
-     * The relaxator is constructed by this method as scip::ObjRelax requires the %SCIP data structure in its
-     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
-     *
-     * Derive from scip::ObjRelax to solve problem-specific relaxations in addition to the LP relaxation:
-     * @code
-     * class MyRelaxator : public scip::ObjRelax {
-     * public:
-     *     MyRelaxator(SCIP* scip, const std::vector<Var>& vars);
-     *     ...
-     * };
-     * ...
-     * auto vars = model.addVars("x_", 42);
-     * model.includeRelax<MyRelaxator>(vars);
-     * model.solve();
-     * @endcode
-     *
-     * @since 1.5.0
-     * @tparam Relax Type of the relaxator, derived from scip::ObjRelax.
-     * @tparam Args Types of the additional constructor arguments.
-     * @param args passed to the constructor of \p Relax after the %SCIP data structure.
-     * @return Non-owning pointer to the relaxator, or \c nullptr if including failed.
-     * @attention Must be called before solve().
-     */
-    template <typename Relax, typename... Args>
-    Relax* includeRelax(Args&&... args) const
-    {
-        return constructAndInclude<Relax>(&SCIPincludeObjRelax, std::forward<Args>(args)...);
-    }
-
-    /**
-     * Includes a custom display column.
-     *
-     * The display column is constructed by this method as scip::ObjDisp requires the %SCIP data structure in its
-     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
-     *
-     * Derive from scip::ObjDisp to show additional information in the lines %SCIP prints during the solving process:
-     * @code
-     * class MyDisplayColumn : public scip::ObjDisp {
-     * public:
-     *     explicit MyDisplayColumn(SCIP* scip);
-     *     ...
-     * };
-     * ...
-     * model.includeDisp<MyDisplayColumn>();
-     * model.solve();
-     * @endcode
-     *
-     * @since 1.5.0
-     * @tparam Disp Type of the display column, derived from scip::ObjDisp.
-     * @tparam Args Types of the additional constructor arguments.
-     * @param args passed to the constructor of \p Disp after the %SCIP data structure.
-     * @return Non-owning pointer to the display column, or \c nullptr if including failed.
-     * @attention Must be called before solve().
-     */
-    template <typename Disp, typename... Args>
-    Disp* includeDisp(Args&&... args) const
-    {
-        return constructAndInclude<Disp>(&SCIPincludeObjDisp, std::forward<Args>(args)...);
-    }
-
-    /**
-     * Includes a custom file reader.
-     *
-     * The file reader is constructed by this method as scip::ObjReader requires the %SCIP data structure in its
-     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
-     *
-     * Derive from scip::ObjReader to write the problem in a custom file format via writeOrigProblem(), which selects
-     * the file reader by the extension of the file name:
-     * @code
-     * class MyFileReader : public scip::ObjReader {
-     * public:
-     *     explicit MyFileReader(SCIP* scip); // passes "myext" as extension to scip::ObjReader
-     *     ...
-     * };
-     * ...
-     * model.includeReader<MyFileReader>();
-     * model.writeOrigProblem(std::filesystem::directory_entry("problem.myext"));
-     * @endcode
-     *
-     * @since 1.5.0
-     * @tparam Reader Type of the file reader, derived from scip::ObjReader.
-     * @tparam Args Types of the additional constructor arguments.
-     * @param args passed to the constructor of \p Reader after the %SCIP data structure.
-     * @return Non-owning pointer to the file reader, or \c nullptr if including failed.
-     */
-    template <typename Reader, typename... Args>
-    Reader* includeReader(Args&&... args) const
-    {
-        return constructAndInclude<Reader>(&SCIPincludeObjReader, std::forward<Args>(args)...);
-    }
-
-    /**
-     * Includes a custom %IIS finder.
-     *
-     * The %IIS finder is constructed by this method as scip::ObjIISfinder requires the %SCIP data structure in its
-     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
-     *
-     * Derive from scip::ObjIISfinder to compute an %IIS of an infeasible problem via generateIIS(), e.g., based on
-     * problem-specific knowledge:
-     * @code
-     * class MyIISFinder : public scip::ObjIISfinder {
-     * public:
-     *     explicit MyIISFinder(SCIP* scip);
-     *     ...
-     * };
-     * ...
-     * model.includeIISfinder<MyIISFinder>();
-     * model.solve();
-     * auto iis { model.generateIIS() };
-     * @endcode
-     *
-     * @since 1.5.0
-     * @tparam IISfinder Type of the %IIS finder, derived from scip::ObjIISfinder.
-     * @tparam Args Types of the additional constructor arguments.
-     * @param args passed to the constructor of \p IISfinder after the %SCIP data structure.
-     * @return Non-owning pointer to the %IIS finder, or \c nullptr if including failed.
-     */
-    template <typename IISfinder, typename... Args>
-    IISfinder* includeIISfinder(Args&&... args) const
-    {
-        return constructAndInclude<IISfinder>(&SCIPincludeObjIISfinder, std::forward<Args>(args)...);
-    }
-
-    /**
-     * Includes and activates a custom variable pricer.
-     *
-     * The pricer is constructed by this method as scip::ObjPricer requires the %SCIP data structure in its
-     * constructor. %SCIP takes ownership and deletes it when the model is destructed.
-     *
-     * Derive from scip::ObjPricer to add variables with negative reduced costs during the solving process, i.e., to
-     * implement column generation:
-     * @code
-     * class MyPricer : public scip::ObjPricer {
-     * public:
-     *     MyPricer(SCIP* scip, const std::vector<SCIP_CONS*>& conss);
-     *     ...
-     * };
-     * ...
-     * model.includePricer<MyPricer>(conss);
-     * model.solve();
-     * @endcode
-     *
-     * @since 1.5.0
-     * @tparam Pricer Type of the pricer, derived from scip::ObjPricer.
-     * @tparam Args Types of the additional constructor arguments.
-     * @param args passed to the constructor of \p Pricer after the %SCIP data structure.
-     * @return Non-owning pointer to the pricer, or \c nullptr if including failed.
-     * @attention Must be called before solve().
+     * @note SCIP++ cannot create constraints of a custom constraint handler. Thus, pass \c needscons = \c FALSE to the
+     *       constructor of scip::ObjConshdlr, so that the handler is called without constraints, and lock the
+     *       variables in \c scip_lock, which is then called with \c cons = \c nullptr.
      * @note Constraints added via addConstr() are not modifiable, i.e., priced variables cannot be added to them.
      */
-    template <typename Pricer, typename... Args>
-    Pricer* includePricer(Args&&... args) const
+    template <typename Plugin, typename... Args>
+    Plugin* include(Args&&... args) const
     {
-        auto* pricer { constructAndInclude<Pricer>(&SCIPincludeObjPricer, std::forward<Args>(args)...) };
-        if (pricer != nullptr) {
-            activatePricer(*pricer);
+        static_assert(!std::is_base_of_v<scip::ObjBenders, Plugin>, "Use includeBenders() for Benders' decompositions");
+        static_assert(!std::is_base_of_v<scip::ObjBenderscut, Plugin>, "Use includeBenderscut() for Benders' cuts");
+        // a plugin with several base classes would be included as only one of them, depending on the order below
+        constexpr int N_BASES { std::is_base_of_v<scip::ObjBranchrule, Plugin>
+            + std::is_base_of_v<scip::ObjConshdlr, Plugin>
+            + std::is_base_of_v<scip::ObjCutsel, Plugin> + std::is_base_of_v<scip::ObjDisp, Plugin>
+            + std::is_base_of_v<scip::ObjEventhdlr, Plugin> + std::is_base_of_v<scip::ObjHeur, Plugin>
+            + std::is_base_of_v<scip::ObjIISfinder, Plugin> + std::is_base_of_v<scip::ObjNodesel, Plugin>
+            + std::is_base_of_v<scip::ObjPresol, Plugin> + std::is_base_of_v<scip::ObjPricer, Plugin>
+            + std::is_base_of_v<scip::ObjProp, Plugin> + std::is_base_of_v<scip::ObjReader, Plugin>
+            + std::is_base_of_v<scip::ObjRelax, Plugin> + std::is_base_of_v<scip::ObjSepa, Plugin> };
+        static_assert(N_BASES == 1, "Plugin must derive from exactly one supported objscip base class");
+        if constexpr (std::is_base_of_v<scip::ObjBranchrule, Plugin>) {
+            return constructAndInclude<Plugin>(&SCIPincludeObjBranchrule, std::forward<Args>(args)...);
+        } else if constexpr (std::is_base_of_v<scip::ObjConshdlr, Plugin>) {
+            return constructAndInclude<Plugin>(&SCIPincludeObjConshdlr, std::forward<Args>(args)...);
+        } else if constexpr (std::is_base_of_v<scip::ObjCutsel, Plugin>) {
+            return constructAndInclude<Plugin>(&SCIPincludeObjCutsel, std::forward<Args>(args)...);
+        } else if constexpr (std::is_base_of_v<scip::ObjDisp, Plugin>) {
+            return constructAndInclude<Plugin>(&SCIPincludeObjDisp, std::forward<Args>(args)...);
+        } else if constexpr (std::is_base_of_v<scip::ObjEventhdlr, Plugin>) {
+            return constructAndInclude<Plugin>(&SCIPincludeObjEventhdlr, std::forward<Args>(args)...);
+        } else if constexpr (std::is_base_of_v<scip::ObjHeur, Plugin>) {
+            return constructAndInclude<Plugin>(&SCIPincludeObjHeur, std::forward<Args>(args)...);
+        } else if constexpr (std::is_base_of_v<scip::ObjIISfinder, Plugin>) {
+            return constructAndInclude<Plugin>(&SCIPincludeObjIISfinder, std::forward<Args>(args)...);
+        } else if constexpr (std::is_base_of_v<scip::ObjNodesel, Plugin>) {
+            return constructAndInclude<Plugin>(&SCIPincludeObjNodesel, std::forward<Args>(args)...);
+        } else if constexpr (std::is_base_of_v<scip::ObjPresol, Plugin>) {
+            return constructAndInclude<Plugin>(&SCIPincludeObjPresol, std::forward<Args>(args)...);
+        } else if constexpr (std::is_base_of_v<scip::ObjPricer, Plugin>) {
+            auto* pricer { constructAndInclude<Plugin>(&SCIPincludeObjPricer, std::forward<Args>(args)...) };
+            if (pricer != nullptr) {
+                activatePricer(*pricer);
+            }
+            return pricer;
+        } else if constexpr (std::is_base_of_v<scip::ObjProp, Plugin>) {
+            return constructAndInclude<Plugin>(&SCIPincludeObjProp, std::forward<Args>(args)...);
+        } else if constexpr (std::is_base_of_v<scip::ObjReader, Plugin>) {
+            return constructAndInclude<Plugin>(&SCIPincludeObjReader, std::forward<Args>(args)...);
+        } else if constexpr (std::is_base_of_v<scip::ObjRelax, Plugin>) {
+            return constructAndInclude<Plugin>(&SCIPincludeObjRelax, std::forward<Args>(args)...);
+        } else {
+            // the only remaining base class, constructAndInclude checks it
+            return constructAndInclude<Plugin>(&SCIPincludeObjSepa, std::forward<Args>(args)...);
         }
-        return pricer;
     }
 
     /**

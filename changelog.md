@@ -8,25 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [PR44](https://github.com/scipopt/SCIPpp/pull/44), [Issue29](https://github.com/scipopt/SCIPpp/issues/29) Support
   of ObjSCIP without accessing the raw SCIP object:
-  - Benders' decompositions derived from `scip::ObjBenders` via `Model::includeBenders`,
-  - Benders' decomposition cuts derived from `scip::ObjBenderscut` via `Model::includeBenderscut`,
-  - branching rules derived from `scip::ObjBranchrule` via `Model::includeBranchrule`,
-  - constraint handlers derived from `scip::ObjConshdlr` via `Model::includeConshdlr`,
-  - cut selectors derived from `scip::ObjCutsel` via `Model::includeCutsel`,
-  - display columns derived from `scip::ObjDisp` via `Model::includeDisp`,
-  - event handlers derived from `scip::ObjEventhdlr` via `Model::includeEventhdlr`,
-  - file readers derived from `scip::ObjReader` via `Model::includeReader`,
-  - IIS finders derived from `scip::ObjIISfinder` via `Model::includeIISfinder`,
-  - message handlers derived from `scip::ObjMessagehdlr` via `Model::setMessagehdlr`,
-  - node selectors derived from `scip::ObjNodesel` via `Model::includeNodesel`,
-  - presolvers derived from `scip::ObjPresol` via `Model::includePresol`,
-  - pricers derived from `scip::ObjPricer` via `Model::includePricer`,
-  - primal heuristics derived from `scip::ObjHeur` via `Model::includeHeur`,
-  - problem data derived from `scip::ObjProbData` via a new constructor of `Model`,
-  - propagators derived from `scip::ObjProp` via `Model::includeProp`,
-  - relaxators derived from `scip::ObjRelax` via `Model::includeRelax`,
-  - separators derived from `scip::ObjSepa` via `Model::includeSepa`, and
-  - variable data derived from `scip::ObjVardata` via a new overload of `Model::addVar`.
+  - `Model::include` includes plugins derived from `ObjBranchrule`, `ObjConshdlr`, `ObjCutsel`,
+    `ObjDisp`, `ObjEventhdlr`, `ObjHeur`, `ObjIISfinder`, `ObjNodesel`,
+    `ObjPresol`, `ObjPricer`, `ObjProp`, `ObjReader`, `ObjRelax`, and `ObjSepa`,
+  - `Model::includeBenders` and `Model::includeBenderscut` include Benders' decompositions and cuts derived from
+    `ObjBenders` and `ObjBenderscut`,
+  - `Model::setMessagehdlr` installs message handlers derived from `ObjMessagehdlr`,
+  - a new constructor of `Model` takes problem data derived from `ObjProbData`, and
+  - a new overload of `Model::addVar` takes variable data derived from `ObjVardata`.
 
 ### Changed
 
