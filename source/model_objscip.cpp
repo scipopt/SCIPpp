@@ -14,7 +14,9 @@ Model::Model(
     assert(probData); // GCOVR_EXCL_LINE
     const auto RETCODE { SCIPcreateObjProb(m_scip, name.c_str(), probData.get(), TRUE) };
     // SCIP owns the problem data only on success, otherwise it is deleted when leaving this constructor.
-    if (RETCODE == SCIP_OKAY) {
+    // SCIPcreateObjProb only fails in an invalid stage, when out of memory, or when freeing a previous problem fails,
+    // which a test cannot provoke without leaving the SCIP object in a corrupted state.
+    if (RETCODE == SCIP_OKAY) { // GCOVR_EXCL_BR_LINE
         probData.release();
     }
     m_scipCallWrapper(RETCODE);
@@ -30,6 +32,9 @@ Var& Model::addVar(
 {
     assert(vardata); // GCOVR_EXCL_LINE
     SCIP_VAR* var { nullptr };
+    // Both cases of the bounds are tested, the only untaken branches GCC reports here are exception edges of the calls.
+    // They are still counted as partially covered by gcovr despite --exclude-throw-branches.
+    // GCOVR_EXCL_BR_START
     const auto RETCODE { SCIPcreateObjVar(
         m_scip, /* SCIP environment */
         &var, /* reference to the variable */
@@ -43,6 +48,7 @@ Var& Model::addVar(
         vardata.get(), /* variable data */
         TRUE /* delete the variable data when the variable is freed */
         ) };
+    // GCOVR_EXCL_BR_STOP
     // SCIP owns the variable data only on success, otherwise it is deleted when leaving this method.
     if (RETCODE == SCIP_OKAY) {
         vardata.release();
