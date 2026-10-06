@@ -45,10 +45,23 @@ jobs:
         run: pip install gcovr
       - name: Extract Coverage
         run: gcovr -r . -e ./test --object-directory=./build/Debug/CMakeFiles --exclude-unreachable-branches --exclude-throw-branches -b --sonarqube coverage.xml --xml cobertura.xml
-      - uses: codecov/codecov-action@v3
+      - name: Upload Coverage
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./boosttest.xml,./coverage.xml,./cobertura.xml
+          files: ./coverage.xml,./cobertura.xml
+          disable_search: true
+          verbose: true # optional (default = false)
+          fail_ci_if_error: true
+      # Codecov treats JUnit test results as a separate report type, so they need their own upload
+      - name: Upload Test Results
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v7
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./boosttest.xml
+          disable_search: true
+          report_type: test_results
           verbose: true # optional (default = false)
           fail_ci_if_error: true
   test_release_win:

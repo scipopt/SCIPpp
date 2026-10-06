@@ -4,6 +4,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - [Doc:Unreleased]
 
+### Added
+
+- [PR44](https://github.com/scipopt/SCIPpp/pull/44), [Issue29](https://github.com/scipopt/SCIPpp/issues/29) Support
+  of ObjSCIP without accessing the raw SCIP object:
+  - `Model::include` includes plugins derived from `ObjBranchrule`, `ObjConshdlr`, `ObjCutsel`,
+    `ObjDisp`, `ObjEventhdlr`, `ObjHeur`, `ObjIISfinder`, `ObjNodesel`,
+    `ObjPresol`, `ObjPricer`, `ObjProp`, `ObjReader`, `ObjRelax`, and `ObjSepa`,
+  - `Model::includeBenders` and `Model::includeBenderscut` include Benders' decompositions and cuts derived from
+    `ObjBenders` and `ObjBenderscut`,
+  - `Model::setMessagehdlr` installs message handlers derived from `ObjMessagehdlr`,
+  - a new constructor of `Model` takes problem data derived from `ObjProbData`, and
+  - a new overload of `Model::addVar` takes variable data derived from `ObjVardata`.
+
 ### Changed
 
 - [PR45](https://github.com/scipopt/SCIPpp/pull/45) Update to SCIP 10.1.0.
