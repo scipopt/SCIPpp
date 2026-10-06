@@ -20,8 +20,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - [PR45](https://github.com/scipopt/SCIPpp/pull/45) Update to SCIP 10.1.0.
-- [PR44](https://github.com/scipopt/SCIPpp/pull/44) The readme lists the supported features only. How to use them is
-  documented, including examples, in the Doxygen documentation.
 
 ## [1.4.0] - 2025-12-18
 
