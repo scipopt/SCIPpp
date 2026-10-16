@@ -24,12 +24,11 @@ BOOST_AUTO_TEST_SUITE(ObjSCIP)
  * Counts how often a new best solution is found.
  */
 class BestSolCounter : public scip::ObjEventhdlr {
-    int& m_nBestSols;
-
 public:
-    BestSolCounter(SCIP* scip, int& nBestSols)
+    int nBestSols { 0 };
+
+    explicit BestSolCounter(SCIP* scip)
         : scip::ObjEventhdlr(scip, "bestsolcounter", "counts new best solutions")
-        , m_nBestSols(nBestSols)
     {
     }
     SCIP_DECL_EVENTINIT(scip_init)
@@ -45,35 +44,34 @@ public:
     SCIP_DECL_EVENTEXEC(scip_exec)
     override
     {
-        ++m_nBestSols;
+        ++nBestSols;
         return SCIP_OKAY;
     }
 };
 
 BOOST_AUTO_TEST_CASE(UseEventHandler)
 {
-    int nBestSols { 0 };
     Model model("Simple");
     auto x1 = model.addVar("x_1", 1);
     auto x2 = model.addVar("x_2", 1);
     model.addConstr(x1 + x2 >= 1, "capacity");
     model.addConstr(x1 == x2, "equal");
-    BOOST_TEST(model.include<BestSolCounter>(nBestSols) != nullptr);
+    const auto* counter { model.include<BestSolCounter>() };
+    BOOST_REQUIRE(counter != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.setObjsense(Sense::MINIMIZE);
     model.solve();
     BOOST_TEST(model.getNSols() > 0);
-    BOOST_TEST(nBestSols > 0);
+    BOOST_TEST(counter->nBestSols > 0);
 }
 
 BOOST_AUTO_TEST_CASE(IncludeEventHandlerTwice)
 {
-    int nBestSols { 0 };
     Model model("Simple");
-    BOOST_TEST(model.include<BestSolCounter>(nBestSols) != nullptr);
+    BOOST_TEST(model.include<BestSolCounter>() != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     // SCIP rejects a second event handler with the same name, the handler is then deleted by SCIP++
-    BOOST_TEST(model.include<BestSolCounter>(nBestSols) == nullptr);
+    BOOST_TEST(model.include<BestSolCounter>() == nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_INVALIDDATA);
 }
 
@@ -170,9 +168,10 @@ BOOST_AUTO_TEST_CASE(UseConstraintHandler)
  */
 class OneVarHeur : public scip::ObjHeur {
     SCIP_VAR* m_var;
-    int m_nFound { 0 };
 
 public:
+    int nFound { 0 };
+
     OneVarHeur(SCIP* scip, SCIP_VAR* var)
         : scip::ObjHeur(
             scip,
@@ -188,10 +187,6 @@ public:
         , m_var(var)
     {
     }
-    [[nodiscard]] int getNFound() const
-    {
-        return m_nFound;
-    }
     SCIP_DECL_HEUREXEC(scip_exec)
     override
     {
@@ -201,7 +196,7 @@ public:
         SCIP_Bool stored { FALSE };
         SCIP_CALL(SCIPtrySolFree(scip, &sol, FALSE, FALSE, TRUE, TRUE, TRUE, &stored));
         if (stored) {
-            ++m_nFound;
+            ++nFound;
             *result = SCIP_FOUNDSOL;
         } else {
             *result = SCIP_DIDNOTFIND;
@@ -222,7 +217,7 @@ BOOST_AUTO_TEST_CASE(UseHeuristic)
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
     // the heuristic is called first, so its solution is stored as there is no other solution yet
-    BOOST_TEST(heur->getNFound() == 1);
+    BOOST_TEST(heur->nFound == 1);
     BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1);
 }
 
@@ -282,9 +277,9 @@ BOOST_AUTO_TEST_CASE(UsePresolver)
  * Counts how often it is called for domain propagation.
  */
 class CountingProp : public scip::ObjProp {
-    int m_nCalls { 0 };
-
 public:
+    int nCalls { 0 };
+
     explicit CountingProp(SCIP* scip)
         : scip::ObjProp(
             scip,
@@ -299,14 +294,10 @@ public:
             SCIP_PRESOLTIMING_NONE)
     {
     }
-    [[nodiscard]] int getNCalls() const
-    {
-        return m_nCalls;
-    }
     SCIP_DECL_PROPEXEC(scip_exec)
     override
     {
-        ++m_nCalls;
+        ++nCalls;
         *result = SCIP_DIDNOTFIND;
         return SCIP_OKAY;
     }
@@ -325,7 +316,7 @@ BOOST_AUTO_TEST_CASE(UsePropagator)
     BOOST_REQUIRE(prop != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
-    BOOST_TEST(prop->getNCalls() > 0);
+    BOOST_TEST(prop->nCalls > 0);
 }
 
 /**
@@ -349,9 +340,10 @@ array<Var, 2> addFractionalProblem(Model& model)
  */
 class CapacitySepa : public scip::ObjSepa {
     array<SCIP_VAR*, 2> m_vars;
-    int m_nCuts { 0 };
 
 public:
+    int nCuts { 0 };
+
     CapacitySepa(SCIP* scip, SCIP_VAR* x1, SCIP_VAR* x2)
         : scip::ObjSepa(
             scip,
@@ -365,10 +357,6 @@ public:
         , m_vars { x1, x2 }
     {
     }
-    [[nodiscard]] int getNCuts() const
-    {
-        return m_nCuts;
-    }
     SCIP_DECL_SEPAEXECLP(scip_execlp)
     override
     {
@@ -381,7 +369,7 @@ public:
         if (SCIPisCutEfficacious(scip, nullptr, row)) {
             SCIP_Bool infeasible { FALSE };
             SCIP_CALL(SCIPaddRow(scip, row, FALSE, &infeasible));
-            ++m_nCuts;
+            ++nCuts;
             *result = infeasible ? SCIP_CUTOFF : SCIP_SEPARATED;
         }
         return SCIPreleaseRow(scip, &row);
@@ -396,16 +384,16 @@ BOOST_AUTO_TEST_CASE(UseSeparator)
     BOOST_REQUIRE(sepa != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
-    BOOST_TEST(sepa->getNCuts() > 0);
+    BOOST_TEST(sepa->nCuts > 0);
 }
 
 /**
  * Selects all cuts, up to the maximal number of cuts to select.
  */
 class AllCutsel : public scip::ObjCutsel {
-    int m_nCalls { 0 };
-
 public:
+    int nCalls { 0 };
+
     explicit AllCutsel(SCIP* scip)
         : scip::ObjCutsel(
             scip,
@@ -414,14 +402,10 @@ public:
             1000000) // priority, higher than the ones of the default cut selectors to be used
     {
     }
-    [[nodiscard]] int getNCalls() const
-    {
-        return m_nCalls;
-    }
     SCIP_DECL_CUTSELSELECT(scip_select)
     override
     {
-        ++m_nCalls;
+        ++nCalls;
         *nselectedcuts = min(ncuts, maxnselectedcuts);
         *result = SCIP_SUCCESS;
         return SCIP_OKAY;
@@ -437,16 +421,16 @@ BOOST_AUTO_TEST_CASE(UseCutSelector)
     BOOST_REQUIRE(cutsel != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
-    BOOST_TEST(cutsel->getNCalls() > 0);
+    BOOST_TEST(cutsel->nCalls > 0);
 }
 
 /**
  * Branches on the first fractional variable of the LP solution.
  */
 class FirstFracBranchrule : public scip::ObjBranchrule {
-    int m_nCalls { 0 };
-
 public:
+    int nCalls { 0 };
+
     explicit FirstFracBranchrule(SCIP* scip)
         : scip::ObjBranchrule(
             scip,
@@ -457,14 +441,10 @@ public:
             1.0) // maxbounddist
     {
     }
-    [[nodiscard]] int getNCalls() const
-    {
-        return m_nCalls;
-    }
     SCIP_DECL_BRANCHEXECLP(scip_execlp)
     override
     {
-        ++m_nCalls;
+        ++nCalls;
         SCIP_VAR** cands { nullptr };
         int nCands { 0 };
         SCIP_CALL(SCIPgetLPBranchCands(scip, &cands, nullptr, nullptr, &nCands, nullptr, nullptr));
@@ -489,16 +469,16 @@ BOOST_AUTO_TEST_CASE(UseBranchingRule)
     BOOST_REQUIRE(branchrule != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
-    BOOST_TEST(branchrule->getNCalls() > 0);
+    BOOST_TEST(branchrule->nCalls > 0);
 }
 
 /**
  * Selects nodes in depth-first order.
  */
 class DepthFirstNodesel : public scip::ObjNodesel {
-    int m_nCalls { 0 };
-
 public:
+    int nCalls { 0 };
+
     explicit DepthFirstNodesel(SCIP* scip)
         : scip::ObjNodesel(
             scip,
@@ -508,14 +488,10 @@ public:
             0) // memsavepriority
     {
     }
-    [[nodiscard]] int getNCalls() const
-    {
-        return m_nCalls;
-    }
     SCIP_DECL_NODESELSELECT(scip_select)
     override
     {
-        ++m_nCalls;
+        ++nCalls;
         *selnode = SCIPgetPrioChild(scip);
         if (*selnode == nullptr) {
             *selnode = SCIPgetPrioSibling(scip);
@@ -544,16 +520,16 @@ BOOST_AUTO_TEST_CASE(UseNodeSelector)
     BOOST_REQUIRE(nodesel != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
-    BOOST_TEST(nodesel->getNCalls() > 0);
+    BOOST_TEST(nodesel->nCalls > 0);
 }
 
 /**
  * Counts how often it is called before the LP relaxation is solved.
  */
 class CountingRelax : public scip::ObjRelax {
-    int m_nCalls { 0 };
-
 public:
+    int nCalls { 0 };
+
     explicit CountingRelax(SCIP* scip)
         : scip::ObjRelax(
             scip,
@@ -564,14 +540,10 @@ public:
             FALSE) // includeslp
     {
     }
-    [[nodiscard]] int getNCalls() const
-    {
-        return m_nCalls;
-    }
     SCIP_DECL_RELAXEXEC(scip_exec)
     override
     {
-        ++m_nCalls;
+        ++nCalls;
         *result = SCIP_DIDNOTRUN;
         return SCIP_OKAY;
     }
@@ -585,16 +557,16 @@ BOOST_AUTO_TEST_CASE(UseRelaxator)
     BOOST_REQUIRE(relax != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
-    BOOST_TEST(relax->getNCalls() > 0);
+    BOOST_TEST(relax->nCalls > 0);
 }
 
 /**
  * Displays how often it was displayed.
  */
 class CountingDisp : public scip::ObjDisp {
-    int m_nCalls { 0 };
-
 public:
+    int nCalls { 0 };
+
     explicit CountingDisp(SCIP* scip)
         : scip::ObjDisp(
             scip,
@@ -607,15 +579,11 @@ public:
             TRUE) // stripline
     {
     }
-    [[nodiscard]] int getNCalls() const
-    {
-        return m_nCalls;
-    }
     SCIP_DECL_DISPOUTPUT(scip_output)
     override
     {
-        ++m_nCalls;
-        SCIPinfoMessage(scip, file, "%5d", m_nCalls);
+        ++nCalls;
+        SCIPinfoMessage(scip, file, "%5d", nCalls);
         return SCIP_OKAY;
     }
 };
@@ -629,7 +597,7 @@ BOOST_AUTO_TEST_CASE(UseDisplayColumn)
     BOOST_REQUIRE(disp != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
-    BOOST_TEST(disp->getNCalls() > 0);
+    BOOST_TEST(disp->nCalls > 0);
 }
 
 /**
@@ -674,9 +642,9 @@ BOOST_AUTO_TEST_CASE(UseReader)
  * Counts how often it is called and leaves the work to the other %IIS finders.
  */
 class CountingIISfinder : public scip::ObjIISfinder {
-    int m_nCalls { 0 };
-
 public:
+    int nCalls { 0 };
+
     explicit CountingIISfinder(SCIP* scip)
         : scip::ObjIISfinder(
             scip,
@@ -685,14 +653,10 @@ public:
             1000000) // priority, higher than the ones of the default IIS finders to be called first
     {
     }
-    [[nodiscard]] int getNCalls() const
-    {
-        return m_nCalls;
-    }
     SCIP_DECL_IISFINDEREXEC(scip_exec)
     override
     {
-        ++m_nCalls;
+        ++nCalls;
         *result = SCIP_DIDNOTRUN;
         return SCIP_OKAY;
     }
@@ -712,16 +676,16 @@ BOOST_AUTO_TEST_CASE(UseIISFinder)
     BOOST_REQUIRE(model.getStatus() == SCIP_STATUS_INFEASIBLE);
     // the default IIS finder still computes the IIS
     BOOST_TEST(model.generateIIS().consIds.size() == 2);
-    BOOST_TEST(iisfinder->getNCalls() == 1);
+    BOOST_TEST(iisfinder->nCalls == 1);
 }
 
 /**
  * Counts how often it is called for pricing, but never adds a variable.
  */
 class CountingPricer : public scip::ObjPricer {
-    int m_nCalls { 0 };
-
 public:
+    int nCalls { 0 };
+
     explicit CountingPricer(SCIP* scip)
         : scip::ObjPricer(
             scip,
@@ -731,14 +695,10 @@ public:
             FALSE) // delay
     {
     }
-    [[nodiscard]] int getNCalls() const
-    {
-        return m_nCalls;
-    }
     SCIP_DECL_PRICERREDCOST(scip_redcost)
     override
     {
-        ++m_nCalls;
+        ++nCalls;
         *result = SCIP_SUCCESS;
         return SCIP_OKAY;
     }
@@ -756,7 +716,7 @@ BOOST_AUTO_TEST_CASE(UsePricer)
     BOOST_REQUIRE(pricer != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
-    BOOST_TEST(pricer->getNCalls() > 0);
+    BOOST_TEST(pricer->nCalls > 0);
     BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1);
 }
 
@@ -779,9 +739,10 @@ BOOST_AUTO_TEST_CASE(IncludePricerTwice)
 class DemandBenders : public scip::ObjBenders {
     SCIP_VAR* m_masterX;
     double m_coverage;
-    int m_nSolves { 0 };
 
 public:
+    int nSolves { 0 };
+
     DemandBenders(SCIP* scip, SCIP_VAR* masterX, double coverage)
         : scip::ObjBenders(
             scip,
@@ -796,10 +757,6 @@ public:
         , m_coverage(coverage)
     {
     }
-    [[nodiscard]] int getNSolves() const
-    {
-        return m_nSolves;
-    }
     SCIP_DECL_BENDERSCREATESUB(scip_createsub)
     override
     {
@@ -813,7 +770,7 @@ public:
     SCIP_DECL_BENDERSSOLVESUBCONVEX(scip_solvesubconvex)
     override
     {
-        ++m_nSolves;
+        ++nSolves;
         *objective = max(0.0, 2.0 - m_coverage * SCIPgetSolVal(scip, sol, m_masterX));
         *result = SCIP_FEASIBLE;
         return SCIP_OKAY;
@@ -837,7 +794,7 @@ BOOST_AUTO_TEST_CASE(UseBenders)
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
     BOOST_TEST(model.getStatus() == SCIP_STATUS_OPTIMAL);
-    BOOST_TEST(benders->getNSolves() > 0);
+    BOOST_TEST(benders->nSolves > 0);
     BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 2.0, boost::test_tools::tolerance(1e-6));
     BOOST_TEST(x.getSolValAsInt(model.getBestSol()) == 0);
 }
@@ -916,9 +873,10 @@ BOOST_AUTO_TEST_CASE(CopyBendersOnlyIfCloneable)
 class DemandBenderscut : public scip::ObjBenderscut {
     SCIP_VAR* m_masterX;
     double m_coverage;
-    int m_nCuts { 0 };
 
 public:
+    int nCuts { 0 };
+
     DemandBenderscut(SCIP* scip, SCIP_VAR* masterX, double coverage)
         : scip::ObjBenderscut(
             scip,
@@ -930,10 +888,6 @@ public:
         , m_coverage(coverage)
     {
     }
-    [[nodiscard]] int getNCuts() const
-    {
-        return m_nCuts;
-    }
     SCIP_DECL_BENDERSCUTEXEC(scip_exec)
     override
     {
@@ -943,7 +897,7 @@ public:
         SCIP_CALL(SCIPaddCoefLinear(scip, cons, SCIPvarGetTransVar(m_masterX), m_coverage));
         SCIP_CALL(SCIPaddCons(scip, cons));
         SCIP_CALL(SCIPreleaseCons(scip, &cons));
-        ++m_nCuts;
+        ++nCuts;
         *result = SCIP_CONSADDED;
         return SCIP_OKAY;
     }
@@ -961,7 +915,7 @@ BOOST_AUTO_TEST_CASE(UseBendersCut)
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
     model.solve();
     BOOST_TEST(model.getStatus() == SCIP_STATUS_OPTIMAL);
-    BOOST_TEST(cut->getNCuts() > 0);
+    BOOST_TEST(cut->nCuts > 0);
     BOOST_TEST(model.getSolvingStatistic(statistics::PRIMALBOUND) == 1.0, boost::test_tools::tolerance(1e-6));
     BOOST_TEST(x.getSolValAsInt(model.getBestSol()) == 1);
 }
