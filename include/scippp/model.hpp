@@ -101,6 +101,14 @@ class Model {
     /** @} */
 
     /**
+     * Adds a created variable to the problem and stores it.
+     *
+     * @param var created variable, %SCIP's reference to it is kept by this model.
+     * @return Reference to the stored variable.
+     */
+    Var& addCreatedVar(SCIP_VAR* var);
+
+    /**
      * Activates an included variable pricer, so that it is used when solving the model.
      *
      * @param pricer to activate.

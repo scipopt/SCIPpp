@@ -13,16 +13,23 @@ Var& Model::addVar(
     std::optional<SCIP_Real> lb,
     std::optional<SCIP_Real> ub)
 {
+    const auto LB { lb.value_or(-SCIPinfinity(m_scip)) };
+    const auto UB { ub.value_or(SCIPinfinity(m_scip)) };
     SCIP_VAR* var { nullptr };
     m_scipCallWrapper(SCIPcreateVarBasic(
         m_scip, /* SCIP environment */
         &var, /* reference to the variable */
         name.c_str(), /* name of the variable */
-        lb != std::nullopt ? lb.value() : -SCIPinfinity(m_scip), /* lower bound of the variable */
-        ub != std::nullopt ? ub.value() : SCIPinfinity(m_scip), /* upper bound of the variable */
+        LB, /* lower bound of the variable */
+        UB, /* upper bound of the variable */
         coeff, /* obj. coefficient. */
-        static_cast<SCIP_Vartype>(varType) /* variable is binary */
+        static_cast<SCIP_Vartype>(varType) /* variable type */
         ));
+    return addCreatedVar(var);
+}
+
+Var& Model::addCreatedVar(SCIP_VAR* var)
+{
     m_scipCallWrapper(SCIPaddVar(m_scip, var));
     m_vars.emplace_back(Var { var });
     return m_vars.back();
