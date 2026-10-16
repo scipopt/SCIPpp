@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <array>
-#include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 #include <fstream>
@@ -14,11 +13,32 @@
 #include "scippp/parameters.hpp"
 #include "scippp/solving_statistics.hpp"
 
-using namespace boost::algorithm;
 using namespace scippp;
 using namespace std;
 
 BOOST_AUTO_TEST_SUITE(ObjSCIP)
+
+/**
+ * Creates a path to a not yet existing file with the given extension in the temporary directory.
+ */
+filesystem::path uniqueTempPath(const string& extension)
+{
+    return filesystem::temp_directory_path()
+        / boost::filesystem::unique_path("%%%%-%%%%-%%%%-%%%%." + extension).string();
+}
+
+/**
+ * Reads the whole file and removes it.
+ */
+string readAndRemove(const filesystem::path& path)
+{
+    ifstream file(path);
+    ostringstream content;
+    content << file.rdbuf();
+    file.close();
+    filesystem::remove(path);
+    return content.str();
+}
 
 /**
  * Counts how often a new best solution is found.
@@ -626,16 +646,10 @@ BOOST_AUTO_TEST_CASE(UseReader)
     model.addConstr(x1 + x2 >= 1, "capacity");
     BOOST_TEST(model.include<CountReader>() != nullptr);
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
-    const auto FILE_NAME { filesystem::temp_directory_path()
-        / boost::filesystem::unique_path("%%%%-%%%%-%%%%-%%%%.cnt").string() };
+    const auto FILE_NAME { uniqueTempPath("cnt") };
     model.writeOrigProblem(filesystem::directory_entry(FILE_NAME));
     BOOST_TEST(model.getLastReturnCode() == SCIP_OKAY);
-    ifstream file(FILE_NAME);
-    ostringstream content;
-    content << file.rdbuf();
-    file.close();
-    filesystem::remove(FILE_NAME);
-    BOOST_TEST(content.str() == "2 1\n");
+    BOOST_TEST(readAndRemove(FILE_NAME) == "2 1\n");
 }
 
 /**
@@ -1048,8 +1062,7 @@ public:
 
 BOOST_AUTO_TEST_CASE(UseMessageHandler)
 {
-    const auto LOG_FILE { filesystem::temp_directory_path()
-        / boost::filesystem::unique_path("%%%%-%%%%-%%%%-%%%%.log").string() };
+    const auto LOG_FILE { uniqueTempPath("log") };
     { // SCIP deletes the handler, and thereby closes the file, when the model is destructed
         Model model("Simple");
         auto x1 = model.addVar("x_1", 1);
@@ -1060,13 +1073,9 @@ BOOST_AUTO_TEST_CASE(UseMessageHandler)
         model.solve();
         BOOST_TEST(model.getNSols() > 0);
     }
-    ifstream file(LOG_FILE);
-    ostringstream content;
-    content << file.rdbuf();
-    BOOST_TEST(contains(content.str(), "SCIP Status"));
-    BOOST_TEST(contains(content.str(), "optimal solution found"));
-    file.close();
-    filesystem::remove(LOG_FILE);
+    const auto LOG { readAndRemove(LOG_FILE) };
+    BOOST_TEST(LOG.find("SCIP Status") != string::npos);
+    BOOST_TEST(LOG.find("optimal solution found") != string::npos);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
