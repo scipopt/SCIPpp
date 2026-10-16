@@ -51,7 +51,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml,./cobertura.xml
           disable_search: true
-          verbose: true # optional (default = false)
+          verbose: true
           fail_ci_if_error: true
       # Codecov treats JUnit test results as a separate report type, so they need their own upload
       - name: Upload Test Results
@@ -62,7 +62,7 @@ jobs:
           files: ./boosttest.xml
           disable_search: true
           report_type: test_results
-          verbose: true # optional (default = false)
+          verbose: true
           fail_ci_if_error: true
   test_release_win:
     strategy:
