@@ -812,42 +812,20 @@ BOOST_AUTO_TEST_CASE(IncludeBendersTwice)
 }
 
 /**
- * Can be copied to sub-SCIPs. It is never solved, hence it creates no subproblems.
+ * Can be copied to sub-SCIPs. The copy is never solved, so it does not map the master variable.
  */
-class CloneableBenders : public scip::ObjBenders {
+class CloneableDemandBenders : public DemandBenders {
 public:
-    explicit CloneableBenders(SCIP* scip)
-        : scip::ObjBenders(
-            scip,
-            "cloneable",
-            "can be copied to sub-SCIPs",
-            1, // priority, positive to be higher than the one of the inactive default Benders' decomposition
-            TRUE, // cutlp
-            TRUE, // cutpseudo
-            TRUE, // cutrelax
-            FALSE) // shareauxvars
-    {
-    }
+    using DemandBenders::DemandBenders;
     SCIP_DECL_OBJCLONEABLECLONE(ObjCloneable* clone)
     override
     {
-        return new CloneableBenders(scip);
+        return new CloneableDemandBenders(scip, nullptr, 0.0);
     }
     SCIP_DECL_OBJCLONEABLEISCLONEABLE(iscloneable)
     override
     {
         return TRUE;
-    }
-    SCIP_DECL_BENDERSCREATESUB(scip_createsub)
-    override
-    {
-        return SCIP_OKAY;
-    }
-    SCIP_DECL_BENDERSGETVAR(scip_getvar)
-    override
-    {
-        *mappedvar = nullptr;
-        return SCIP_OKAY;
     }
 };
 
@@ -855,13 +833,14 @@ BOOST_AUTO_TEST_CASE(CopyBendersOnlyIfCloneable)
 {
     SCIP_Bool copyBenders { FALSE };
     Model cloneable("Master");
-    BOOST_REQUIRE(cloneable.includeBenders<CloneableBenders>(1) != nullptr);
+    auto x = cloneable.addVar("x", 1, VarType::BINARY);
+    BOOST_REQUIRE(cloneable.includeBenders<CloneableDemandBenders>(1, x.getVar(), 0.0) != nullptr);
     BOOST_TEST(SCIPgetBoolParam(cloneable.scip(), "benders/copybenders", &copyBenders) == SCIP_OKAY);
     BOOST_TEST(copyBenders);
 
     Model notCloneable("Master");
-    auto x = notCloneable.addVar("x", 1, VarType::BINARY);
-    BOOST_REQUIRE(notCloneable.includeBenders<DemandBenders>(1, x.getVar(), 0.0) != nullptr);
+    auto y = notCloneable.addVar("y", 1, VarType::BINARY);
+    BOOST_REQUIRE(notCloneable.includeBenders<DemandBenders>(1, y.getVar(), 0.0) != nullptr);
     BOOST_TEST(SCIPgetBoolParam(notCloneable.scip(), "benders/copybenders", &copyBenders) == SCIP_OKAY);
     BOOST_TEST(!copyBenders);
 }
