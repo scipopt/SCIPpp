@@ -78,6 +78,29 @@ class Model {
     }
 
     /**
+     * Maps an objscip base class to %SCIP's include function for it, so that include() can select it by overload
+     * resolution on a pointer to the plugin. A plugin deriving from several base classes is rejected as ambiguous.
+     * @{
+     */
+    static auto includeFunction(scip::ObjBranchrule*) { return &SCIPincludeObjBranchrule; }
+    static auto includeFunction(scip::ObjConshdlr*) { return &SCIPincludeObjConshdlr; }
+    static auto includeFunction(scip::ObjCutsel*) { return &SCIPincludeObjCutsel; }
+    static auto includeFunction(scip::ObjDisp*) { return &SCIPincludeObjDisp; }
+    static auto includeFunction(scip::ObjEventhdlr*) { return &SCIPincludeObjEventhdlr; }
+    static auto includeFunction(scip::ObjHeur*) { return &SCIPincludeObjHeur; }
+    static auto includeFunction(scip::ObjIISfinder*) { return &SCIPincludeObjIISfinder; }
+    static auto includeFunction(scip::ObjNodesel*) { return &SCIPincludeObjNodesel; }
+    static auto includeFunction(scip::ObjPresol*) { return &SCIPincludeObjPresol; }
+    static auto includeFunction(scip::ObjPricer*) { return &SCIPincludeObjPricer; }
+    static auto includeFunction(scip::ObjProp*) { return &SCIPincludeObjProp; }
+    static auto includeFunction(scip::ObjReader*) { return &SCIPincludeObjReader; }
+    static auto includeFunction(scip::ObjRelax*) { return &SCIPincludeObjRelax; }
+    static auto includeFunction(scip::ObjSepa*) { return &SCIPincludeObjSepa; }
+    static auto includeFunction(scip::ObjBenders*) = delete; // use includeBenders()
+    static auto includeFunction(scip::ObjBenderscut*) = delete; // use includeBenderscut()
+    /** @} */
+
+    /**
      * Activates an included variable pricer, so that it is used when solving the model.
      *
      * @param pricer to activate.
@@ -473,52 +496,15 @@ public:
     template <typename Plugin, typename... Args>
     Plugin* include(Args&&... args) const
     {
-        static_assert(!std::is_base_of_v<scip::ObjBenders, Plugin>, "Use includeBenders() for Benders' decompositions");
-        static_assert(!std::is_base_of_v<scip::ObjBenderscut, Plugin>, "Use includeBenderscut() for Benders' cuts");
-        // a plugin with several base classes would be included as only one of them, depending on the order below
-        constexpr int N_BASES { std::is_base_of_v<scip::ObjBranchrule, Plugin>
-            + std::is_base_of_v<scip::ObjConshdlr, Plugin>
-            + std::is_base_of_v<scip::ObjCutsel, Plugin> + std::is_base_of_v<scip::ObjDisp, Plugin>
-            + std::is_base_of_v<scip::ObjEventhdlr, Plugin> + std::is_base_of_v<scip::ObjHeur, Plugin>
-            + std::is_base_of_v<scip::ObjIISfinder, Plugin> + std::is_base_of_v<scip::ObjNodesel, Plugin>
-            + std::is_base_of_v<scip::ObjPresol, Plugin> + std::is_base_of_v<scip::ObjPricer, Plugin>
-            + std::is_base_of_v<scip::ObjProp, Plugin> + std::is_base_of_v<scip::ObjReader, Plugin>
-            + std::is_base_of_v<scip::ObjRelax, Plugin> + std::is_base_of_v<scip::ObjSepa, Plugin> };
-        static_assert(N_BASES == 1, "Plugin must derive from exactly one supported objscip base class");
-        if constexpr (std::is_base_of_v<scip::ObjBranchrule, Plugin>) {
-            return constructAndInclude<Plugin>(&SCIPincludeObjBranchrule, std::forward<Args>(args)...);
-        } else if constexpr (std::is_base_of_v<scip::ObjConshdlr, Plugin>) {
-            return constructAndInclude<Plugin>(&SCIPincludeObjConshdlr, std::forward<Args>(args)...);
-        } else if constexpr (std::is_base_of_v<scip::ObjCutsel, Plugin>) {
-            return constructAndInclude<Plugin>(&SCIPincludeObjCutsel, std::forward<Args>(args)...);
-        } else if constexpr (std::is_base_of_v<scip::ObjDisp, Plugin>) {
-            return constructAndInclude<Plugin>(&SCIPincludeObjDisp, std::forward<Args>(args)...);
-        } else if constexpr (std::is_base_of_v<scip::ObjEventhdlr, Plugin>) {
-            return constructAndInclude<Plugin>(&SCIPincludeObjEventhdlr, std::forward<Args>(args)...);
-        } else if constexpr (std::is_base_of_v<scip::ObjHeur, Plugin>) {
-            return constructAndInclude<Plugin>(&SCIPincludeObjHeur, std::forward<Args>(args)...);
-        } else if constexpr (std::is_base_of_v<scip::ObjIISfinder, Plugin>) {
-            return constructAndInclude<Plugin>(&SCIPincludeObjIISfinder, std::forward<Args>(args)...);
-        } else if constexpr (std::is_base_of_v<scip::ObjNodesel, Plugin>) {
-            return constructAndInclude<Plugin>(&SCIPincludeObjNodesel, std::forward<Args>(args)...);
-        } else if constexpr (std::is_base_of_v<scip::ObjPresol, Plugin>) {
-            return constructAndInclude<Plugin>(&SCIPincludeObjPresol, std::forward<Args>(args)...);
-        } else if constexpr (std::is_base_of_v<scip::ObjPricer, Plugin>) {
-            auto* pricer { constructAndInclude<Plugin>(&SCIPincludeObjPricer, std::forward<Args>(args)...) };
-            if (pricer != nullptr) {
-                activatePricer(*pricer);
+        // overload resolution picks the include function of the base class, see includeFunction
+        auto* plugin { constructAndInclude<Plugin>(
+            includeFunction(static_cast<Plugin*>(nullptr)), std::forward<Args>(args)...) };
+        if constexpr (std::is_base_of_v<scip::ObjPricer, Plugin>) {
+            if (plugin != nullptr) {
+                activatePricer(*plugin);
             }
-            return pricer;
-        } else if constexpr (std::is_base_of_v<scip::ObjProp, Plugin>) {
-            return constructAndInclude<Plugin>(&SCIPincludeObjProp, std::forward<Args>(args)...);
-        } else if constexpr (std::is_base_of_v<scip::ObjReader, Plugin>) {
-            return constructAndInclude<Plugin>(&SCIPincludeObjReader, std::forward<Args>(args)...);
-        } else if constexpr (std::is_base_of_v<scip::ObjRelax, Plugin>) {
-            return constructAndInclude<Plugin>(&SCIPincludeObjRelax, std::forward<Args>(args)...);
-        } else {
-            // the only remaining base class, constructAndInclude checks it
-            return constructAndInclude<Plugin>(&SCIPincludeObjSepa, std::forward<Args>(args)...);
         }
+        return plugin;
     }
 
     /**
