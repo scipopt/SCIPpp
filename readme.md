@@ -155,6 +155,52 @@ model.solve();
 auto pb { model.getSolvingStatistic(statistics::PRIMALBOUND) };
 ```
 
+### Custom Plugins (ObjSCIP)
+
+Plugins derived from SCIP's [ObjSCIP](https://www.scipopt.org/doc/html/OBJ.php) base classes are included via
+`Model::include`. The plugin is constructed by SCIP++, because the base classes need the SCIP data structure in their
+constructors. Its constructor gets the `SCIP*` as first argument, followed by the arguments passed to `include`. SCIP
+takes ownership of the plugin, `include` returns a non-owning pointer to it. Plugins have to be included before solving.
+
+```cpp
+class MyHeuristic : public scip::ObjHeur {
+public:
+    MyHeuristic(SCIP* scip, const std::vector<Var>& vars)
+        : ObjHeur(scip, "myheur", "my heuristic", 'x', 1000, 1, 0, -1, SCIP_HEURTIMING_AFTERNODE, FALSE)
+        , m_vars(vars)
+    {
+    }
+    SCIP_DECL_HEUREXEC(scip_exec) override;
+private:
+    std::vector<Var> m_vars;
+};
+
+auto vars = model.addVars("x_", 42);
+auto* heur = model.include<MyHeuristic>(vars);
+model.solve();
+```
+
+This works the same way for plugins derived from `ObjBranchrule`, `ObjConshdlr`, `ObjCutsel`, `ObjDisp`,
+`ObjEventhdlr`, `ObjHeur`, `ObjIISfinder`, `ObjNodesel`, `ObjPresol`, `ObjPricer`, `ObjProp`, `ObjReader`, `ObjRelax`,
+and `ObjSepa`, with the following exceptions:
+
+* `ObjConshdlr`: SCIP++ cannot create constraints of a custom constraint handler. Pass `needscons = FALSE` to the
+  constructor, so that the handler is called without constraints, and lock the variables in `scip_lock`, which is then
+  called with `cons = nullptr`.
+* `ObjPricer`: The pricer is activated after including it. Constraints added via `Model::addConstr` are not
+  modifiable, i.e., priced variables cannot be added to them.
+* `ObjBenders`: Use `model.includeBenders<MyBenders>(nSubproblems, args...)`. It activates the decomposition together
+  with SCIP's default Benders' cuts. The priority has to be positive, and `scip_solvesubconvex` or `scip_solvesub` has
+  to be implemented, as SCIP does not solve the subproblems itself.
+* `ObjBenderscut`: Use `model.includeBenderscut<MyBendersCut>(*benders, args...)` with the pointer returned by
+  `includeBenders`.
+* `ObjMessagehdlr`: Is not constructed by SCIP++, install it via
+  `model.setMessagehdlr(std::make_unique<MyMessageHandler>())`. Error messages are not passed to it.
+* `ObjProbData`: Pass it to the constructor, `Model model("name", std::make_unique<MyProblemData>())`.
+* `ObjVardata`: Pass it when adding a variable, `model.addVar("x", std::make_unique<MyVariableData>(), 1.0)`.
+* `ObjTable`: Is not supported, as SCIP does not export it from its shared library, see
+  [SCIP issue 222](https://github.com/scipopt/scip/issues/222).
+
 ### Features Not Yet Supported
 
 For features not yet supported by SCIP++, one can access the underlying raw SCIP object via
